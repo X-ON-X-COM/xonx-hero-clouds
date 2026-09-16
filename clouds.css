@@ -1,0 +1,65 @@
+/* ── X-ON-X hero: flying-through-clouds sky (prototype) ──────────────────
+   Three textured layers on the compositor: transform + opacity only.
+   Each layer holds two copies half a period apart, so one is always
+   growing towards the viewer while the other fades in behind it.        */
+
+.xx-page::before { display: none !important; }        /* the old gradient sky */
+
+.xx-sky {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 45% at 82% 80%, rgba(255, 214, 166, 0.50) 0%, rgba(255, 230, 200, 0.20) 45%, transparent 72%),
+    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255, 247, 234, 0.9) 0%, transparent 70%),
+    linear-gradient(180deg, #e6ecf2 0%, #eef0f0 30%, #f7f3ea 58%, #fbf8ef 100%);
+}
+.xx-sky--near { z-index: 2; background: none; }
+
+.xx-cloud {
+  position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
+  background-repeat: no-repeat; background-position: 50% 50%; background-size: 100% 100%;
+  will-change: transform, opacity; backface-visibility: hidden;
+  transform-origin: 50% 58%;
+  animation: xxFly var(--dur) linear infinite;
+  opacity: 0;
+}
+.xx-cloud--b { animation-delay: calc(var(--dur) / -2); }
+
+.xx-layer--far  { --dur: 120s; --s0: 1.00; --s1: 1.28; --o: 0.85; --dx: -2%; --dy: 1%; }
+.xx-layer--mid  { --dur: 80s;  --s0: 0.96; --s1: 1.55; --o: 0.95; --dx:  3%; --dy: 3%; }
+.xx-layer--near { --dur: 54s;  --s0: 1.00; --s1: 1.85; --o: 0.48; --dx: -3%; --dy: 8%; }
+.xx-layer--near .xx-cloud { transform-origin: 50% 78%; }
+
+.xx-layer--far  .xx-cloud { background-image: url(clouds/far.webp); }
+.xx-layer--mid  .xx-cloud { background-image: url(clouds/mid.webp); }
+.xx-layer--near .xx-cloud { background-image: url(clouds/near.webp); filter: blur(2px); }
+
+/* the second copy is mirrored so the same texture never reads as a repeat */
+.xx-cloud--b { --flip: -1; }
+.xx-cloud--a { --flip: 1; }
+
+@keyframes xxFly {
+  0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
+  14%  { opacity: var(--o); }
+  78%  { opacity: var(--o); }
+  100% { transform: translate3d(var(--dx), var(--dy), 0) scale(var(--s1)) scaleX(var(--flip)); opacity: 0; }
+}
+
+/* the prototype is one screen: nav + hero fill the viewport */
+.xx-page { min-height: 100vh; }
+@media (max-width: 768px) { .xx-hero { min-height: calc(100vh - 72px) !important; } }
+
+/* phones: half-size textures, no blur filter, everything else the same */
+@media (max-width: 768px) {
+  .xx-layer--far  .xx-cloud { background-image: url(clouds/far-m.webp); }
+  .xx-layer--mid  .xx-cloud { background-image: url(clouds/mid-m.webp); }
+  .xx-layer--near .xx-cloud { background-image: url(clouds/near-m.webp); filter: none; }
+  .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; background-size: auto 100%; }
+}
+
+/* motion switched off: one still frame, mid-flight */
+@media (prefers-reduced-motion: reduce) {
+  .xx-cloud { animation: none; opacity: var(--o); transform: scale(calc((var(--s0) + var(--s1)) / 2)); }
+  .xx-cloud--b { display: none; }
+}
+html.xx-still .xx-cloud { animation-play-state: paused; }
