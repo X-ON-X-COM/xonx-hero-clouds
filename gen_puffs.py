@@ -1,29 +1,38 @@
-"""Single cloud puffs with alpha, for the halo demo: a cloud you fly into and tear apart.
+"""Cumulus puffs with alpha, for the halo demo: a cloud you fly into and tear apart.
 
-Same look as gen_clouds.py (fBm + gaussian blobs, sun low upper-right), but each file
-holds one isolated cumulus on transparency, so several of them can drift apart on screen.
+Not thresholded noise — each puff is a union of spheres rendered as a height field and
+lit like a solid: that is what gives round cauliflower lobes, a shaded belly and a bright
+sunward crown instead of a grey smudge. The same renderer builds the far/mid bands in
+gen_sky.py, so every cloud on the page comes from one model.
     python gen_puffs.py clouds
 """
 import numpy as np, sys, os
 from PIL import Image, ImageFilter
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'clouds'
-N = 6                                   # puff1 … puff6
-SIZE = 1024
+SIZE = 1280
+
+SUN = np.array([0.42, -0.58, 0.70], np.float32)     # x right, y down, z toward the viewer
+SUN /= np.linalg.norm(SUN)
+LIT = np.array([255, 253, 250], np.float32)         # crown in full sun
+SHADE = np.array([178, 192, 212], np.float32)       # belly, lit by the blue sky only
+WARM = np.array([255, 226, 188], np.float32)        # sun coming through the thin edges
 
 
-def value_noise(w, h, cells_x, cells_y, seed):
+def value_noise(w, h, cells_x, cells_y, seed, tile_x=False):
     r = np.random.default_rng(seed)
     g = r.random((cells_y + 1, cells_x + 1)).astype(np.float32)
+    if tile_x:
+        g[:, -1] = g[:, 0]
     img = Image.fromarray((g * 255).astype(np.uint8), 'L').resize((w, h), Image.BICUBIC)
     return np.asarray(img, dtype=np.float32) / 255.0
 
 
-def fbm(w, h, base_cells, octaves, seed, gain=0.5, lac=2.0):
-    total = np.zeros((h, w), np.float32); amp = 1.0; c = base_cells; norm = 0.0
+def fbm(w, h, cells, octaves, seed, tile_x=False):
+    total = np.zeros((h, w), np.float32); amp = 1.0; c = cells; norm = 0.0
     for o in range(octaves):
-        total += amp * value_noise(w, h, int(c), int(c), seed + o * 101)
-        norm += amp; amp *= gain; c *= lac
+        total += amp * value_noise(w, h, max(2, int(c)), max(2, int(c * h / w)), seed + o * 101, tile_x)
+        norm += amp; amp *= 0.5; c *= 2
     return total / norm
 
 
@@ -31,86 +40,104 @@ def smoothstep(e0, e1, x):
     t = np.clip((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t)
 
 
-def shift(a, dy, dx):
-    return np.roll(np.roll(a, dy, axis=0), dx, axis=1)
-
-
-def warp(a, wx, wy, amt):
-    """Domain-warp a field by two noise maps (pixel shifts via coordinate remap)."""
-    h, w = a.shape
-    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-    sx = np.clip(xx + (wx - 0.5) * amt, 0, w - 1)
-    sy = np.clip(yy + (wy - 0.5) * amt, 0, h - 1)
-    return a[sy.astype(np.int32), sx.astype(np.int32)]
-
-
-def puff(seed, size=SIZE, lobes=9, flat=1.0):
-    """A cauliflower cluster: fat lobes low and wide, smaller ones stacked on top."""
-    r = np.random.default_rng(seed)
-    yy, xx = np.mgrid[0:size, 0:size].astype(np.float32) / size
-    field = np.zeros((size, size), np.float32)
-    for i in range(lobes):
-        t = i / max(1, lobes - 1)
-        cx = 0.5 + r.uniform(-0.30, 0.30) * (0.55 + 0.45 * t)
-        cy = 0.66 - t * r.uniform(0.10, 0.34)
-        rx = r.uniform(0.16, 0.30) * (1.0 - 0.45 * t)
-        ry = rx * r.uniform(0.60, 0.95) / flat
-        d = ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2
-        field += np.exp(-d * 1.3) * r.uniform(0.7, 1.0)
-    return field
-
-
 def soften(a, r):
-    return np.asarray(Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8), 'L')
-                      .filter(ImageFilter.GaussianBlur(r)), dtype=np.float32) / 255.0
+    lo, hi = float(a.min()), float(a.max())
+    if hi - lo < 1e-6:
+        return a.copy()
+    q = (a - lo) / (hi - lo)
+    q = np.asarray(Image.fromarray((q * 255).astype(np.uint8), 'L')
+                   .filter(ImageFilter.GaussianBlur(r)), dtype=np.float32) / 255.0
+    return q * (hi - lo) + lo
 
 
-def make(name, seed, lobes, flat, blur):
-    base = puff(seed, lobes=lobes, flat=flat)
-    n1 = fbm(SIZE, SIZE, 4, 7, seed)
-    n2 = fbm(SIZE, SIZE, 10, 6, seed + 500)
-    n3 = fbm(SIZE, SIZE, 22, 5, seed + 700)
-    wx = fbm(SIZE, SIZE, 3, 4, seed + 900)
-    wy = fbm(SIZE, SIZE, 3, 4, seed + 1300)
-    base = warp(base, wx, wy, SIZE * 0.12)              # lumpy silhouette, not a pancake
+def lobes_cumulus(rng, n, spread, flat):
+    """Cluster of spheres: a wide flat base with smaller lobes piled on top."""
+    out = []
+    for i in range(n):
+        t = i / max(1, n - 1)                       # 0 = base, 1 = crown
+        cx = 0.5 + rng.uniform(-spread[0], spread[0]) * (1.0 - 0.45 * t)
+        cy = 0.64 - t * rng.uniform(0.10, 0.40) * spread[1] / 0.30
+        rad = rng.uniform(0.11, 0.21) * (1.0 - 0.42 * t) * flat
+        out.append((cx, cy, rad))
+    return out
 
-    dens = base * 0.66 + n1 * 0.42 + n2 * 0.26 + n3 * 0.12 - 0.34
+
+def height_field(size, lobes, seed, warp=0.15, tile_x=False):
+    """Union of spheres (p-norm, so the seams stay round), silhouette bitten by noise."""
+    yy, xx = np.mgrid[0:size[1], 0:size[0]].astype(np.float32)
+    xx /= size[0]; yy /= size[1]
+    aspect = size[0] / size[1]
+    bump = (fbm(size[0], size[1], 7, 5, seed + 3001, tile_x) - 0.5) * 2
+    fine = (fbm(size[0], size[1], 19, 4, seed + 4001, tile_x) - 0.5) * 2
+    acc = np.zeros((size[1], size[0]), np.float32)
+    for cx, cy, rad in lobes:
+        shifts = (-1.0, 0.0, 1.0) if tile_x else (0.0,)
+        for sh in shifts:
+            dx = (xx - cx - sh) * aspect
+            dy = yy - cy
+            d = np.sqrt(dx * dx + dy * dy)
+            d = d * (1.0 + warp * bump + 0.22 * warp * fine)  # cauliflower, not a ball
+            inside = np.clip(rad * rad - d * d, 0, None)
+            acc += np.sqrt(inside) ** 3
+    return acc ** (1.0 / 3.0)
+
+
+def shade(h, hmax, seed, size, tile_x=False, relief=0.62):
+    """Light the height field like a solid: crown in sun, belly in sky-blue shadow."""
+    # normals read the big lobes only: micro-noise on the surface makes it look like rock
+    hs = soften(h, max(3.0, size[0] * 0.016))
+    gy, gx = np.gradient(hs * size[0])         # height in pixels, so the slopes are real slopes
+    nx, ny, nz = -gx * relief, -gy * relief, np.ones_like(h)
+    inv = 1.0 / np.sqrt(nx * nx + ny * ny + nz * nz)
+    nx, ny, nz = nx * inv, ny * inv, nz * inv
+
+    lam = nx * SUN[0] + ny * SUN[1] + nz * SUN[2]
+    light = np.clip((lam + 0.42) / 1.42, 0, 1) ** 0.85          # wrap light, no hard terminator
+    sky = np.clip(0.5 - ny * 0.5, 0, 1)                         # faces up = more sky light
+    light = np.clip(light * 0.82 + sky * 0.26, 0, 1)
+
+    crease = np.clip(soften(h, max(6.0, size[0] * 0.05)) - h, 0, None)
+    crease = crease / max(float(crease.max()), 1e-6)
+    light = np.clip(light * (1 - crease * 0.30), 0, 1)          # shadow where lobes meet
+
+    hn = np.clip(h / max(hmax, 1e-6), 0, 1)
+    thin = (1 - hn) ** 1.6                                      # sun through the thin edges
+    col = SHADE[None, None] * (1 - light[..., None]) + LIT[None, None] * light[..., None]
+    col = col + WARM[None, None] * (thin * light * 0.42)[..., None]
+
+    fringe = fbm(size[0], size[1], 22, 4, seed + 5001, tile_x)
+    alpha = smoothstep(0.010, 0.30, hn * (0.68 + 0.60 * fringe))   # wide band = soft, vapoury rim
+    alpha = soften(alpha, max(2.0, size[0] * 0.004))
+    return col, alpha
+
+
+def render(size, lobes, seed, tile_x=False, blur=1.0, relief=0.62):
+    h = height_field(size, lobes, seed, tile_x=tile_x)
+    col, alpha = shade(h, float(h.max()), seed, size, tile_x, relief)
+    rgba = np.dstack([col, alpha * 255]).clip(0, 255).astype(np.uint8)
+    img = Image.fromarray(rgba, 'RGBA')
+    return img.filter(ImageFilter.GaussianBlur(blur)) if blur else img
+
+
+def make(name, seed, n, spread, flat, blur):
+    rng = np.random.default_rng(seed)
+    img = render((SIZE, SIZE), lobes_cumulus(rng, n, spread, flat), seed, blur=blur)
+    # nothing may touch the border: feather the last few per cent of the canvas
     yy, xx = np.mgrid[0:SIZE, 0:SIZE].astype(np.float32) / SIZE
-    rad = np.sqrt((xx - 0.5) ** 2 + ((yy - 0.55) * 1.10) ** 2)
-    dens *= smoothstep(0.52, 0.26, rad)                 # nothing touches the border
-
-    alpha_f = smoothstep(0.03, 0.34, dens)              # wide, noisy band = fractal edge
-
-    # shading reads the big lobes, not the fringe: blur first, then look toward the sun
-    form = soften(dens, 18)
-    detail = soften(dens, 6)
-    fine = soften(dens, 2)
-    grad = ((form - shift(form, 16, 13)) + (detail - shift(detail, 7, 6)) * 0.9
-            + (fine - shift(fine, 3, 2)) * 0.5)
-    vert = smoothstep(0.92, 0.10, yy)                   # tops catch the light, bellies do not
-    light = np.clip(0.70 + grad * 3.0 + vert * 0.22 - 0.10, 0.12, 1.0)
-    edge = np.clip(alpha_f * (1 - alpha_f) * 4.0, 0, 1)
-    rim = edge * np.clip(grad * 5.0, 0, 1)              # only the sunward fringe glows
-
-    lit = np.array([255, 253, 249], np.float32)
-    shade = np.array([176, 189, 210], np.float32)
-    warm = np.array([255, 224, 182], np.float32)
-    col = shade[None, None] * (1 - light[..., None]) + lit[None, None] * light[..., None]
-    col = col * (1 - rim[..., None] * 0.32) + warm[None, None] * rim[..., None] * 0.32
-
-    alpha = (alpha_f ** 0.85) * 255
-    img = Image.fromarray(np.dstack([col, alpha]).clip(0, 255).astype(np.uint8), 'RGBA')
-    img = img.filter(ImageFilter.GaussianBlur(blur))
+    rad = np.sqrt((xx - 0.5) ** 2 + ((yy - 0.55) * 1.05) ** 2)
+    a = np.asarray(img, np.float32)
+    a[..., 3] *= smoothstep(0.50, 0.40, rad)
+    img = Image.fromarray(a.clip(0, 255).astype(np.uint8), 'RGBA')
     p = os.path.join(OUT, f'{name}.webp')
-    img.save(p, 'WEBP', quality=82, method=6)
+    img.save(p, 'WEBP', quality=84, method=6)
     img.resize((SIZE // 2, SIZE // 2), Image.LANCZOS).save(
-        os.path.join(OUT, f'{name}-m.webp'), 'WEBP', quality=78, method=6)
+        os.path.join(OUT, f'{name}-m.webp'), 'WEBP', quality=80, method=6)
     print(name, os.path.getsize(p) // 1024, 'KB')
 
 
 if __name__ == '__main__':
-    # a mix of fat cumulus and flatter shreds, so a torn cloud has pieces of both
-    specs = [(1, 41, 10, 1.00, 1.6), (2, 57, 8, 1.15, 1.4), (3, 73, 11, 0.90, 1.8),
-             (4, 89, 7, 1.30, 1.3), (5, 97, 9, 1.05, 1.6), (6, 113, 6, 1.40, 1.2)]
-    for i, seed, lobes, flat, blur in specs[:N]:
-        make(f'puff{i}', seed, lobes, flat, blur)
+    specs = [(1, 41, 15, (0.26, 0.30), 1.00, 1.0), (2, 57, 12, (0.30, 0.24), 1.05, 0.9),
+             (3, 73, 17, (0.24, 0.34), 0.95, 1.1), (4, 89, 10, (0.32, 0.20), 1.10, 0.8),
+             (5, 97, 14, (0.28, 0.28), 1.00, 1.0), (6, 113, 9, (0.34, 0.18), 1.15, 0.8)]
+    for i, seed, n, spread, flat, blur in specs:
+        make(f'puff{i}', seed, n, spread, flat, blur)

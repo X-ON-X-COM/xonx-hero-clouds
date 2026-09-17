@@ -27,7 +27,8 @@
     radial-gradient(ellipse 110% 55% at 50% 100%, rgba(255, 247, 234, 0.40) 0%, transparent 68%),
     linear-gradient(180deg, #dfe7ef 0%, #e9edf1 32%, #f4f1ea 60%, #faf7ef 100%);
 }
-.xx-sky--near { z-index: 2; background: none; }
+/* everything in the sky stays behind the hero text: nothing crawls over the words */
+.xx-sky--near { z-index: 0; background: none; }
 
 /* ── far and mid: the layers that only drift, as before but slower ──────── */
 .xx-cloud {
@@ -41,11 +42,11 @@
 .xx-cloud--a { --flip: 1; }
 .xx-cloud--b { --flip: -1; animation-delay: calc(var(--dur) * var(--xx-tempo) / -2); }
 
-.xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 0.90; --dx: -2%; --dy: 1%; }
-.xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 0.98; --dx:  3%; --dy: 3%; }
+.xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 0.80; --dx: -2%; --dy: 1%; }
+.xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 0.82; --dx:  3%; --dy: 3%; }
 
-.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp); background-size: auto 15%; background-position: 50% 42%; }
-.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp); background-size: auto 30%; background-position: 50% 62%; }
+.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp); background-size: auto 30%; background-position: 50% 46%; }
+.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp); background-size: auto 62%; background-position: 50% 72%; }
 
 @keyframes xxFly {
   0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
@@ -59,7 +60,7 @@
    in multiply (a glory shows as tinted rings on the cloud, not as white).  */
 .xx-halo {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: 1; pointer-events: none; overflow: hidden;
+  z-index: 0; pointer-events: none; overflow: hidden;
   opacity: var(--xx-halo); transition: opacity .4s ease;
 }
 .xx-halo > * {
@@ -201,8 +202,8 @@ html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
   .xx-layer--far .xx-cloud { background-image: url(clouds/far2-m.webp); }
   .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp); }
   .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; }
-  .xx-layer--far .xx-cloud { background-size: auto 13%; }
-  .xx-layer--mid .xx-cloud { background-size: auto 26%; }
+  .xx-layer--far .xx-cloud { background-size: auto 26%; }
+  .xx-layer--mid .xx-cloud { background-size: auto 54%; }
   .xx-burst .xx-shard:nth-child(1) { background-image: url(clouds/puff1-m.webp); }
   .xx-burst .xx-shard:nth-child(2) { background-image: url(clouds/puff2-m.webp); }
   .xx-burst .xx-shard:nth-child(3) { background-image: url(clouds/puff3-m.webp); }
