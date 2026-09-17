@@ -45,8 +45,8 @@
 .xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 0.80; --dx: -2%; --dy: 1%; }
 .xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 0.82; --dx:  3%; --dy: 3%; }
 
-.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp?v=20260917b); background-size: auto 30%; background-position: 50% 46%; }
-.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp?v=20260917b); background-size: auto 62%; background-position: 50% 72%; }
+.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp?v=20260917c); background-size: auto 30%; background-position: 50% 46%; }
+.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp?v=20260917c); background-size: auto 62%; background-position: 50% 72%; }
 
 @keyframes xxFly {
   0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
@@ -123,14 +123,14 @@
   animation-delay: calc((var(--delay) + var(--lag)) * var(--xx-tempo));
 }
 /* start clustered, end far apart: that spread is what reads as the tear */
-.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .58; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp?v=20260917b); }
-.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .54; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp?v=20260917b); }
-.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .50; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp?v=20260917b); }
-.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .44; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp?v=20260917b); }
-.xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5.webp?v=20260917b); }
-.xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6.webp?v=20260917b); }
-.xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6.webp?v=20260917b); }
-.xx-burst:nth-child(3) .xx-shard:nth-child(4) { background-image: url(clouds/puff5.webp?v=20260917b); }
+.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .42; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .38; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .34; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .28; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp?v=20260917c); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5.webp?v=20260917c); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6.webp?v=20260917c); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6.webp?v=20260917c); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(4) { background-image: url(clouds/puff5.webp?v=20260917c); }
 
 /* The approach is deliberately uneven: almost nothing happens for the first
    half (a cloud far ahead), then it swells, and in the last quarter the four
@@ -188,8 +188,8 @@ html.xx-soft .xx-sky {
     radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255, 247, 234, 0.9) 0%, transparent 70%),
     linear-gradient(180deg, #e6ecf2 0%, #eef0f0 30%, #f7f3ea 58%, #fbf8ef 100%);
 }
-html.xx-soft .xx-layer--far .xx-cloud { background-image: url(clouds/far.webp?v=20260917b); }
-html.xx-soft .xx-layer--mid .xx-cloud { background-image: url(clouds/mid.webp?v=20260917b); }
+html.xx-soft .xx-layer--far .xx-cloud { background-image: url(clouds/far.webp?v=20260917c); }
+html.xx-soft .xx-layer--mid .xx-cloud { background-image: url(clouds/mid.webp?v=20260917c); }
 html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
 
 /* the prototype is one screen: nav + hero fill the viewport */
@@ -199,18 +199,18 @@ html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
 /* phones: half-size textures, fewer shards, the nimbus a little tighter */
 @media (max-width: 768px) {
   :root { --cx: 50%; --cy: 48%; }
-  .xx-layer--far .xx-cloud { background-image: url(clouds/far2-m.webp?v=20260917b); }
-  .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp?v=20260917b); }
+  .xx-layer--far .xx-cloud { background-image: url(clouds/far2-m.webp?v=20260917c); }
+  .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp?v=20260917c); }
   .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; }
   .xx-layer--far .xx-cloud { background-size: auto 26%; }
   .xx-layer--mid .xx-cloud { background-size: auto 54%; }
-  .xx-burst .xx-shard:nth-child(1) { background-image: url(clouds/puff1-m.webp?v=20260917b); }
-  .xx-burst .xx-shard:nth-child(2) { background-image: url(clouds/puff2-m.webp?v=20260917b); }
-  .xx-burst .xx-shard:nth-child(3) { background-image: url(clouds/puff3-m.webp?v=20260917b); }
+  .xx-burst .xx-shard:nth-child(1) { background-image: url(clouds/puff1-m.webp?v=20260917c); }
+  .xx-burst .xx-shard:nth-child(2) { background-image: url(clouds/puff2-m.webp?v=20260917c); }
+  .xx-burst .xx-shard:nth-child(3) { background-image: url(clouds/puff3-m.webp?v=20260917c); }
   .xx-burst .xx-shard:nth-child(4) { display: none; }
-  .xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5-m.webp?v=20260917b); }
-  .xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6-m.webp?v=20260917b); }
-  .xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6-m.webp?v=20260917b); }
+  .xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5-m.webp?v=20260917c); }
+  .xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6-m.webp?v=20260917c); }
+  .xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6-m.webp?v=20260917c); }
   .xx-shard { width: 58vmax; height: 58vmax; margin: -29vmax 0 0 -29vmax; }
   .xx-halo__glow { width: 90vmax; height: 90vmax; margin: -45vmax 0 0 -45vmax; }
   .xx-sky--near { opacity: .8; }

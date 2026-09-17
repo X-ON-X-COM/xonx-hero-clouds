@@ -14,11 +14,13 @@ and cross-link to each other from the corner panel.
 
 - **slower** — far layer 190s, mid 130s, one cloud reaching you every ~17s; the `tempo` button
   in the corner switches calm / normal / quick (`--xx-tempo` in `halo.css`).
-- **less gradient, real cumulus** — the warm glow on `.xx-sky` is roughly half of demo 1, and every
-  cloud is re-rendered: `gen_puffs.py` builds a puff as a union of spheres, lit as a solid (sunlit
-  crown, sky-blue belly, sun through the thin edges), and `gen_sky.py` composites those puffs into
-  the `far2` / `mid2` bands with aerial perspective. The `clouds` button flips back to demo 1's soft
-  textures to compare.
+- **less gradient, believable cumulus** — the warm glow on `.xx-sky` is roughly half of demo 1, and
+  every cloud is re-rendered. `gen_puffs.py` builds a density field (union of spheres, turbulence at
+  two scales, fractal erosion, filaments at the rim, a soft flat base) and shades it by marching
+  toward the sun through that density: self-shadowing, sky light from above, forward scattering at
+  the thin edges. `gen_sky.py` composites the same puffs into the `far2` / `mid2` bands with aerial
+  perspective. Reference for the look: the cloud on the Awwwards annual page. The `clouds` button
+  flips back to demo 1's soft textures to compare.
 - **the nimbus** — `.xx-halo`: a bright core plus two faint rings (warm inside, a whisper of brand
   lime outside) sitting at the vanishing point, brightening each time a cloud passes through it.
 - **breaking apart** — each near cloud is four puffs that hold together while the cloud is far away

@@ -57,12 +57,14 @@ def lobes_cumulus(rng, n, spread, flat):
         t = i / max(1, n - 1)                       # 0 = base, 1 = crown
         cx = 0.5 + rng.uniform(-spread[0], spread[0]) * (1.0 - 0.45 * t)
         cy = 0.64 - t * rng.uniform(0.10, 0.40) * spread[1] / 0.30
-        rad = rng.uniform(0.11, 0.21) * (1.0 - 0.42 * t) * flat
+        big = rng.random() < 0.28                      # a couple of domes carry the silhouette
+        rad = rng.uniform(0.17, 0.26) if big else rng.uniform(0.07, 0.15)
+        rad *= (1.0 - 0.38 * t) * flat
         out.append((cx, cy, rad))
     return out
 
 
-def height_field(size, lobes, seed, warp=0.15, tile_x=False):
+def height_field(size, lobes, seed, warp=0.13, tile_x=False):
     """Union of spheres (p-norm, so the seams stay round), silhouette bitten by noise."""
     yy, xx = np.mgrid[0:size[1], 0:size[0]].astype(np.float32)
     xx /= size[0]; yy /= size[1]
@@ -82,38 +84,83 @@ def height_field(size, lobes, seed, warp=0.15, tile_x=False):
     return acc ** (1.0 / 3.0)
 
 
-def shade(h, hmax, seed, size, tile_x=False, relief=0.62):
-    """Light the height field like a solid: crown in sun, belly in sky-blue shadow."""
-    # normals read the big lobes only: micro-noise on the surface makes it look like rock
-    hs = soften(h, max(3.0, size[0] * 0.016))
-    gy, gx = np.gradient(hs * size[0])         # height in pixels, so the slopes are real slopes
-    nx, ny, nz = -gx * relief, -gy * relief, np.ones_like(h)
-    inv = 1.0 / np.sqrt(nx * nx + ny * ny + nz * nz)
-    nx, ny, nz = nx * inv, ny * inv, nz * inv
-
-    lam = nx * SUN[0] + ny * SUN[1] + nz * SUN[2]
-    light = np.clip((lam + 0.42) / 1.42, 0, 1) ** 0.85          # wrap light, no hard terminator
-    sky = np.clip(0.5 - ny * 0.5, 0, 1)                         # faces up = more sky light
-    light = np.clip(light * 0.82 + sky * 0.26, 0, 1)
-
-    crease = np.clip(soften(h, max(6.0, size[0] * 0.05)) - h, 0, None)
-    crease = crease / max(float(crease.max()), 1e-6)
-    light = np.clip(light * (1 - crease * 0.30), 0, 1)          # shadow where lobes meet
-
-    hn = np.clip(h / max(hmax, 1e-6), 0, 1)
-    thin = (1 - hn) ** 1.6                                      # sun through the thin edges
-    col = SHADE[None, None] * (1 - light[..., None]) + LIT[None, None] * light[..., None]
-    col = col + WARM[None, None] * (thin * light * 0.42)[..., None]
-
-    fringe = fbm(size[0], size[1], 22, 4, seed + 5001, tile_x)
-    alpha = smoothstep(0.010, 0.30, hn * (0.68 + 0.60 * fringe))   # wide band = soft, vapoury rim
-    alpha = soften(alpha, max(2.0, size[0] * 0.004))
-    return col, alpha
+def warp_field(a, seed, size, amp, cells, tile_x=False):
+    """Remap the field through two noise offsets: turbulence, not a row of balls."""
+    h, w = a.shape
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    ox = (fbm(w, h, cells, 4, seed + 7001, tile_x) - 0.5) * 2 * amp
+    oy = (fbm(w, h, cells, 4, seed + 7301, tile_x) - 0.5) * 2 * amp
+    sx = (xx + ox) % w if tile_x else np.clip(xx + ox, 0, w - 1)
+    sy = np.clip(yy + oy, 0, h - 1)
+    return a[sy.astype(np.int32), sx.astype(np.int32)]
 
 
-def render(size, lobes, seed, tile_x=False, blur=1.0, relief=0.62):
+def erode(dens, seed, size, tile_x=False):
+    """Bite fractal detail out of the silhouette: cores stay solid, edges break into wisps."""
+    det = np.zeros_like(dens)
+    amp, cells, norm = 1.0, 9, 0.0
+    for o in range(5):
+        det += amp * (fbm(size[0], size[1], cells, 2, seed + 6100 + o * 37, tile_x) - 0.5) * 2
+        norm += amp; amp *= 0.55; cells = int(cells * 2.1)
+    det /= norm
+    out = np.clip(dens - (1 - dens) * 0.72 * np.clip(det, -1, 1) - 0.03, 0, 1)
+    # erosion may only nibble at the cloud, never scatter crumbs across the sky
+    near = smoothstep(0.03, 0.22, soften(dens, max(8.0, size[0] * 0.03)))
+    return out * near
+
+
+def shade(dens, seed, size, tile_x=False, sun_steps=26, sun_step_px=9.0):
+    """2D approximation of a volumetric render: march toward the sun through the density.
+
+    Transmittance along the sun ray gives the self-shadow — bright sunward crowns, deep
+    shade underneath, and the bright fringe where the cloud is thin enough to shine through.
+    """
+    sx, sy = SUN[0], SUN[1]                       # y is down, so the sun is up-right
+    n = np.sqrt(sx * sx + sy * sy)
+    sx, sy = sx / n, sy / n
+    scale = size[0] / 1024.0
+    opt = np.zeros_like(dens)
+    for i in range(1, sun_steps + 1):
+        dx = int(round(sx * sun_step_px * scale * i))
+        dy = int(round(sy * sun_step_px * scale * i))
+        opt += np.roll(np.roll(dens, -dy, axis=0), -dx, axis=1)
+    opt *= sun_step_px * scale / 40.0
+    trans = np.exp(-0.78 * opt)                   # how much sun reaches this point
+
+    up = np.zeros_like(dens)                      # sky light comes straight down
+    for i in range(1, 9):
+        up += np.roll(dens, int(round(6 * scale * i)), axis=0)
+    sky = np.exp(-0.55 * up * 6 * scale / 40.0)
+
+    powder = 1 - np.exp(-3.2 * dens)              # thin edges scatter forward and glow
+    lit = np.clip(0.60 + 0.45 * trans, 0, 1)      # even the shaded side is a bright cloud
+    col = (LIT[None, None] * lit[..., None]
+           + SHADE[None, None] * ((1 - lit) * (0.55 + 0.45 * sky))[..., None]
+           + WARM[None, None] * (trans * (1 - powder) * 0.18)[..., None])
+    alpha = 1 - np.exp(-2.0 * dens)
+    alpha = soften(alpha, max(2.0, size[0] * 0.011))
+    return col, np.clip(alpha, 0, 1)
+
+
+def render(size, lobes, seed, tile_x=False, blur=1.0, base_y=0.72):
     h = height_field(size, lobes, seed, tile_x=tile_x)
-    col, alpha = shade(h, float(h.max()), seed, size, tile_x, relief)
+    dens = h / max(float(h.max()), 1e-6)
+    # turbulence at two scales: big swirls in the body, filaments at the rim
+    dens = warp_field(dens, seed, size, size[0] * 0.055, 5, tile_x)
+    dens = warp_field(dens, seed + 91, size, size[0] * 0.018, 13, tile_x)
+    dens = erode(dens, seed, size, tile_x)
+
+    wisp = (fbm(size[0], size[1], 30, 4, seed + 8101, tile_x) - 0.5) * 2
+    edge = np.clip(dens * (1 - dens) * 4.0, 0, 1)
+    top = smoothstep(0.85, 0.35, np.linspace(0, 1, size[1], dtype=np.float32)[:, None])
+    dens = np.clip(dens + edge * wisp * 0.42 * (0.35 + 0.65 * top), 0, 1)   # tendrils on top
+
+    yy = np.linspace(0, 1, size[1], dtype=np.float32)[:, None]
+    flat = fbm(size[0], size[1], 5, 4, seed + 8601, tile_x) * 0.13
+    dens *= smoothstep(base_y + 0.30, base_y - 0.22, yy - flat)   # cumulus sits on a soft flat base
+    dens = soften(dens, max(2.0, size[0] * 0.006))
+
+    col, alpha = shade(dens, seed, size, tile_x)
     rgba = np.dstack([col, alpha * 255]).clip(0, 255).astype(np.uint8)
     img = Image.fromarray(rgba, 'RGBA')
     return img.filter(ImageFilter.GaussianBlur(blur)) if blur else img
@@ -136,8 +183,8 @@ def make(name, seed, n, spread, flat, blur):
 
 
 if __name__ == '__main__':
-    specs = [(1, 41, 15, (0.26, 0.30), 1.00, 1.0), (2, 57, 12, (0.30, 0.24), 1.05, 0.9),
-             (3, 73, 17, (0.24, 0.34), 0.95, 1.1), (4, 89, 10, (0.32, 0.20), 1.10, 0.8),
-             (5, 97, 14, (0.28, 0.28), 1.00, 1.0), (6, 113, 9, (0.34, 0.18), 1.15, 0.8)]
+    specs = [(1, 41, 18, (0.40, 0.20), 1.30, 1.2), (2, 57, 15, (0.44, 0.16), 1.40, 1.1),
+             (3, 73, 20, (0.38, 0.24), 1.25, 1.3), (4, 89, 13, (0.46, 0.14), 1.50, 1.0),
+             (5, 97, 17, (0.42, 0.18), 1.35, 1.2), (6, 113, 12, (0.48, 0.13), 1.55, 1.0)]
     for i, seed, n, spread, flat, blur in specs:
         make(f'puff{i}', seed, n, spread, flat, blur)
