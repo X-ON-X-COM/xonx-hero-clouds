@@ -48,7 +48,8 @@ html.xx-demo1 { --tfar: url(clouds/far.webp); --tmid: url(clouds/mid.webp); }
   background:
     radial-gradient(ellipse 60% 40% at 80% 84%, rgba(255, 214, 166, 0.18) 0%, rgba(255, 230, 200, 0.06) 45%, transparent 70%),
     radial-gradient(ellipse 110% 45% at 50% 100%, rgba(255, 247, 234, 0.34) 0%, transparent 66%),
-    linear-gradient(180deg, #b0cbe8 0%, #bed6ec 30%, #cfdfec 58%, #e4e7e7 82%, #f6f3ec 100%);
+    linear-gradient(180deg, rgba(250, 245, 233, 0.62) 0%, rgba(250, 245, 233, 0.28) 22%, transparent 46%),
+    linear-gradient(180deg, #b6cfe8 0%, #c4d8ea 30%, #d4e0ea 58%, #e6e8e5 82%, #f6f3ec 100%);
 }
 /* everything in the sky stays behind the hero text: nothing crawls over the words */
 .xx-sky--near { z-index: 0; background: none; }
