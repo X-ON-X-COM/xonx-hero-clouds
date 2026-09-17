@@ -23,9 +23,9 @@
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: 0; pointer-events: none; overflow: hidden;
   background:
-    radial-gradient(ellipse 60% 40% at 80% 82%, rgba(255, 214, 166, 0.22) 0%, rgba(255, 230, 200, 0.08) 45%, transparent 70%),
-    radial-gradient(ellipse 110% 55% at 50% 100%, rgba(255, 247, 234, 0.40) 0%, transparent 68%),
-    linear-gradient(180deg, #dfe7ef 0%, #e9edf1 32%, #f4f1ea 60%, #faf7ef 100%);
+    radial-gradient(ellipse 60% 40% at 80% 84%, rgba(255, 214, 166, 0.18) 0%, rgba(255, 230, 200, 0.06) 45%, transparent 70%),
+    radial-gradient(ellipse 110% 45% at 50% 100%, rgba(255, 247, 234, 0.34) 0%, transparent 66%),
+    linear-gradient(180deg, #b0cbe8 0%, #bed6ec 30%, #cfdfec 58%, #e4e7e7 82%, #f6f3ec 100%);
 }
 /* everything in the sky stays behind the hero text: nothing crawls over the words */
 .xx-sky--near { z-index: 0; background: none; }
@@ -42,11 +42,11 @@
 .xx-cloud--a { --flip: 1; }
 .xx-cloud--b { --flip: -1; animation-delay: calc(var(--dur) * var(--xx-tempo) / -2); }
 
-.xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 0.80; --dx: -2%; --dy: 1%; }
-.xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 0.82; --dx:  3%; --dy: 3%; }
+.xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 1.00; --dx: -2%; --dy: 1%; }
+.xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 1.00; --dx:  3%; --dy: 3%; }
 
 .xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp?v=20260917c); background-size: auto 30%; background-position: 50% 46%; }
-.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp?v=20260917c); background-size: auto 62%; background-position: 50% 72%; }
+.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp?v=20260917c); background-size: auto 62%; background-position: 50% 64%; }
 
 @keyframes xxFly {
   0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
@@ -123,10 +123,10 @@
   animation-delay: calc((var(--delay) + var(--lag)) * var(--xx-tempo));
 }
 /* start clustered, end far apart: that spread is what reads as the tear */
-.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .42; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .38; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .34; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .28; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .78; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .72; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .66; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .56; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp?v=20260917c); }
 .xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5.webp?v=20260917c); }
 .xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6.webp?v=20260917c); }
 .xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6.webp?v=20260917c); }
