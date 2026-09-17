@@ -37,7 +37,7 @@ html.xx-demo1 { --tfar: url(clouds/far.webp); --tmid: url(clouds/mid.webp); }
 
 /* The site's paper grain (the embossed feel of the hero) stays on, but at half
    strength: it should texture the sky, not lie on top of the clouds. */
-.xx-page::after { opacity: 0.20; }
+.xx-page::after { opacity: 0.30; }
 
 /* ── sky ──────────────────────────────────────────────────────────────────
    Half the warm glow of the first demo: the clouds carry the light now,
