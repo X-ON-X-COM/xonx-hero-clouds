@@ -1,0 +1,231 @@
+/* ── X-ON-X hero, demo 2: halo + clouds that tear apart ─────────────────────
+   Same idea as clouds.css (transform + opacity only, nothing else animates),
+   with three changes Iryna asked for on 17.09:
+     · the flight is slower                       → --xx-tempo, bigger = calmer
+     · less gradient washing the clouds out       → weaker sky glows + crisper textures
+     · a nimbus around the aircraft and clouds
+       that break apart as you fly through them   → .xx-halo + .xx-burst
+   Tuning knobs live in :root and in the --cycle / --o lines below.          */
+
+:root {
+  --xx-tempo: 1;          /* duration multiplier: 1.6 = calm, 0.7 = quick        */
+  --xx-halo: 1;           /* nimbus opacity, 0 turns it off                      */
+  --cx: 57%;              /* where the flight is heading: the vanishing point    */
+  --cy: 52%;              /* the nimbus sits here too                            */
+}
+
+.xx-page::before { display: none !important; }        /* the old gradient sky */
+
+/* ── sky ──────────────────────────────────────────────────────────────────
+   Half the warm glow of the first demo: the clouds carry the light now,
+   the background only sets the temperature.                               */
+.xx-sky {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 40% at 80% 82%, rgba(255, 214, 166, 0.22) 0%, rgba(255, 230, 200, 0.08) 45%, transparent 70%),
+    radial-gradient(ellipse 110% 55% at 50% 100%, rgba(255, 247, 234, 0.40) 0%, transparent 68%),
+    linear-gradient(180deg, #dfe7ef 0%, #e9edf1 32%, #f4f1ea 60%, #faf7ef 100%);
+}
+.xx-sky--near { z-index: 2; background: none; }
+
+/* ── far and mid: the layers that only drift, as before but slower ──────── */
+.xx-cloud {
+  position: absolute; top: -20%; left: -20%; width: 140%; height: 140%;
+  background-repeat: repeat-x;             /* the textures tile in x: many small clouds, not one blob */
+  will-change: transform, opacity; backface-visibility: hidden;
+  transform-origin: var(--cx) 58%;
+  animation: xxFly calc(var(--dur) * var(--xx-tempo)) linear infinite;
+  opacity: 0;
+}
+.xx-cloud--a { --flip: 1; }
+.xx-cloud--b { --flip: -1; animation-delay: calc(var(--dur) * var(--xx-tempo) / -2); }
+
+.xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 0.90; --dx: -2%; --dy: 1%; }
+.xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 0.98; --dx:  3%; --dy: 3%; }
+
+.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp); background-size: auto 15%; background-position: 50% 42%; }
+.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp); background-size: auto 30%; background-position: 50% 62%; }
+
+@keyframes xxFly {
+  0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
+  14%  { opacity: var(--o); }
+  78%  { opacity: var(--o); }
+  100% { transform: translate3d(var(--dx), var(--dy), 0) scale(var(--s1)) scaleX(var(--flip)); opacity: 0; }
+}
+
+/* ── the nimbus: a glory around the aircraft, dead ahead ──────────────────
+   A bright core in normal blend (it brightens a light sky), two faint rings
+   in multiply (a glory shows as tinted rings on the cloud, not as white).  */
+.xx-halo {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 1; pointer-events: none; overflow: hidden;
+  opacity: var(--xx-halo); transition: opacity .4s ease;
+}
+.xx-halo > * {
+  position: absolute; left: var(--cx); top: var(--cy); border-radius: 50%;
+  will-change: transform, opacity; backface-visibility: hidden;
+}
+.xx-halo__glow {
+  width: 58vmax; height: 58vmax; margin: -29vmax 0 0 -29vmax;
+  background: radial-gradient(circle,
+      rgba(255, 253, 247, 0.42) 0%, rgba(255, 248, 232, 0.24) 14%,
+      rgba(255, 241, 214, 0.11) 27%, rgba(255, 235, 200, 0.04) 42%, transparent 62%);
+  animation: xxFlare calc(var(--cycle) / 3 * var(--xx-tempo)) ease-in-out infinite;
+}
+.xx-halo__ring {
+  mix-blend-mode: multiply; filter: blur(2px);
+  animation: xxRing calc(var(--cycle) / 3 * var(--xx-tempo)) ease-in-out infinite;
+}
+.xx-halo__ring--in {
+  width: 30vmax; height: 30vmax; margin: -15vmax 0 0 -15vmax;
+  background: radial-gradient(circle, transparent 0 40%,
+      rgba(255, 233, 192, 0.17) 47%, rgba(255, 246, 220, 0.09) 54%, transparent 62%);
+}
+.xx-halo__ring--out {
+  width: 52vmax; height: 52vmax; margin: -26vmax 0 0 -26vmax;
+  background: radial-gradient(circle, transparent 0 42%,
+      rgba(234, 244, 206, 0.09) 49%, rgba(201, 255, 51, 0.035) 54%, transparent 64%);
+  animation-delay: calc(var(--cycle) / -14 * var(--xx-tempo));
+}
+@keyframes xxFlare {
+  0%, 46% { transform: scale(1);    opacity: .72; }
+  78%     { transform: scale(1.16); opacity: 1;   }
+  100%    { transform: scale(1);    opacity: .72; }
+}
+@keyframes xxRing {
+  0%, 46% { transform: scale(0.98); opacity: .55; }
+  78%     { transform: scale(1.10); opacity: 1;   }
+  100%    { transform: scale(0.98); opacity: .55; }
+}
+
+/* ── the clouds you fly into ──────────────────────────────────────────────
+   One burst = one cloud, four shards of it. They travel out of a single
+   point on an ease-in curve, so the cloud holds together while it is far
+   away and tears apart in the last seconds, when it passes the cockpit.   */
+.xx-sky--near { --cycle: 51s; }               /* one cloud every --cycle / 3 */
+
+.xx-burst { position: absolute; inset: 0; }
+.xx-burst:nth-child(1) { --delay: 0s;                     --bx:   0vmax; --by: 0vmax;   }
+.xx-burst:nth-child(2) { --delay: calc(var(--cycle) / -3); --bx:  -7vmax; --by: 2.5vmax; }
+.xx-burst:nth-child(3) { --delay: calc(var(--cycle) / -3 * 2); --bx: 6vmax; --by: -2vmax; }
+
+.xx-shard {
+  position: absolute; left: var(--cx); top: var(--cy);
+  width: 34vmax; height: 34vmax; margin: -17vmax 0 0 -17vmax;
+  background-repeat: no-repeat; background-position: 50% 50%; background-size: contain;
+  opacity: 0; will-change: transform, opacity; backface-visibility: hidden;
+  --dxx: calc(var(--x1) - var(--x0));   /* how far this piece ends up from its neighbours */
+  --dyy: calc(var(--y1) - var(--y0));
+  --ds:  calc(var(--s1) - var(--s0));
+  animation: xxBurst calc(var(--cycle) * var(--xx-tempo)) linear infinite;
+  animation-delay: calc((var(--delay) + var(--lag)) * var(--xx-tempo));
+}
+/* start clustered, end far apart: that spread is what reads as the tear */
+.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .58; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp); }
+.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .54; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp); }
+.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .50; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp); }
+.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .44; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5.webp); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6.webp); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6.webp); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(4) { background-image: url(clouds/puff5.webp); }
+
+/* The approach is deliberately uneven: almost nothing happens for the first
+   half (a cloud far ahead), then it swells, and in the last quarter the four
+   pieces pull apart along their own vectors while they fade. */
+@keyframes xxBurst {
+  0%   { opacity: 0;
+         transform: translate(-50%, -50%)
+           translate(calc(var(--x0) + var(--bx)), calc(var(--y0) + var(--by)))
+           scale(var(--s0)); }
+  14%  { opacity: var(--o); }
+  40%  { transform: translate(-50%, -50%)
+           translate(calc(var(--x0) + var(--bx) + var(--dxx) * .06), calc(var(--y0) + var(--by) + var(--dyy) * .06))
+           scale(calc(var(--s0) + var(--ds) * .12)) rotate(calc(var(--r1) * .08)); }
+  66%  { opacity: var(--o);
+         transform: translate(-50%, -50%)
+           translate(calc(var(--x0) + var(--bx) + var(--dxx) * .22), calc(var(--y0) + var(--by) + var(--dyy) * .22))
+           scale(calc(var(--s0) + var(--ds) * .34)) rotate(calc(var(--r1) * .26)); }
+  84%  { opacity: calc(var(--o) * .70);         /* the cloud is at the cockpit: it starts to tear */
+         transform: translate(-50%, -50%)
+           translate(calc(var(--x0) + var(--bx) + var(--dxx) * .52), calc(var(--y0) + var(--by) + var(--dyy) * .52))
+           scale(calc(var(--s0) + var(--ds) * .62)) rotate(calc(var(--r1) * .58)); }
+  94%  { opacity: calc(var(--o) * .30);
+         transform: translate(-50%, -50%)
+           translate(calc(var(--x0) + var(--bx) + var(--dxx) * .80), calc(var(--y0) + var(--by) + var(--dyy) * .80))
+           scale(calc(var(--s0) + var(--ds) * .85)) rotate(calc(var(--r1) * .84)); }
+  100% { opacity: 0;
+         transform: translate(-50%, -50%)
+           translate(calc(var(--x1) + var(--bx)), calc(var(--y1) + var(--by)))
+           scale(var(--s1)) rotate(var(--r1)); }
+}
+
+/* the second of being inside the cloud: everything goes pale for a moment */
+.xx-veil {
+  position: absolute; inset: 0; opacity: 0; will-change: opacity;
+  background: radial-gradient(ellipse 80% 70% at var(--cx) var(--cy),
+      rgba(255, 255, 252, 0.55) 0%, rgba(255, 253, 246, 0.26) 40%, transparent 72%);
+  animation: xxVeil calc(var(--cycle) * var(--xx-tempo)) ease-in-out infinite;
+  animation-delay: calc(var(--delay) * var(--xx-tempo));
+}
+@keyframes xxVeil {
+  0%, 62% { opacity: 0; }
+  76%     { opacity: .34; }
+  92%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+
+/* ── demo controls ─────────────────────────────────────────────────────── */
+html.xx-tempo-calm  { --xx-tempo: 1.6; }
+html.xx-tempo-quick { --xx-tempo: 0.7; }
+html.xx-nohalo      { --xx-halo: 0; }
+/* side by side with demo 1: the old washed-out gradient and softer clouds */
+html.xx-soft .xx-sky {
+  background:
+    radial-gradient(ellipse 70% 45% at 82% 80%, rgba(255, 214, 166, 0.50) 0%, rgba(255, 230, 200, 0.20) 45%, transparent 72%),
+    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255, 247, 234, 0.9) 0%, transparent 70%),
+    linear-gradient(180deg, #e6ecf2 0%, #eef0f0 30%, #f7f3ea 58%, #fbf8ef 100%);
+}
+html.xx-soft .xx-layer--far .xx-cloud { background-image: url(clouds/far.webp); }
+html.xx-soft .xx-layer--mid .xx-cloud { background-image: url(clouds/mid.webp); }
+html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
+
+/* the prototype is one screen: nav + hero fill the viewport */
+.xx-page { min-height: 100vh; }
+@media (max-width: 768px) { .xx-hero { min-height: calc(100vh - 72px) !important; } }
+
+/* phones: half-size textures, fewer shards, the nimbus a little tighter */
+@media (max-width: 768px) {
+  :root { --cx: 50%; --cy: 48%; }
+  .xx-layer--far .xx-cloud { background-image: url(clouds/far2-m.webp); }
+  .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp); }
+  .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; }
+  .xx-layer--far .xx-cloud { background-size: auto 13%; }
+  .xx-layer--mid .xx-cloud { background-size: auto 26%; }
+  .xx-burst .xx-shard:nth-child(1) { background-image: url(clouds/puff1-m.webp); }
+  .xx-burst .xx-shard:nth-child(2) { background-image: url(clouds/puff2-m.webp); }
+  .xx-burst .xx-shard:nth-child(3) { background-image: url(clouds/puff3-m.webp); }
+  .xx-burst .xx-shard:nth-child(4) { display: none; }
+  .xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5-m.webp); }
+  .xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6-m.webp); }
+  .xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6-m.webp); }
+  .xx-shard { width: 58vmax; height: 58vmax; margin: -29vmax 0 0 -29vmax; }
+  .xx-halo__glow { width: 90vmax; height: 90vmax; margin: -45vmax 0 0 -45vmax; }
+  .xx-sky--near { opacity: .8; }
+}
+
+/* motion switched off: one still frame, a cloud just before it breaks up */
+@media (prefers-reduced-motion: reduce) {
+  .xx-cloud, .xx-shard, .xx-veil, .xx-halo > * { animation: none !important; }
+  .xx-cloud { opacity: var(--o); transform: scale(calc((var(--s0) + var(--s1)) / 2)); }
+  .xx-cloud--b { display: none; }
+  .xx-shard { opacity: var(--o);
+    transform: translate(-50%, -50%) translate(calc(var(--x1) / 2 + var(--bx)), calc(var(--y1) / 2 + var(--by))) scale(calc(var(--s1) / 2.2)); }
+  .xx-burst:nth-child(2), .xx-burst:nth-child(3) { display: none; }
+  .xx-veil { opacity: 0; }
+}
+html.xx-still .xx-cloud,
+html.xx-still .xx-shard,
+html.xx-still .xx-veil,
+html.xx-still .xx-halo > * { animation-play-state: paused; }

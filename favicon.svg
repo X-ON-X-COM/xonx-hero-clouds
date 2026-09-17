@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="40 40 80 80">
+  <!-- The brand mark exactly as in portal/public/brand/logo.png: graphite strokes and
+       the lime dot, no plate. Rays (44,44)–(116,116) from the 160 field, cropped to the
+       rays plus 4 units so the mark fills the tab icon; weight is the standard's own
+       16px row (stroke 4, dot r 7), nothing heavier. Cream strokes on dark UI. -->
+  <style>.x{stroke:#111116}@media (prefers-color-scheme:dark){.x{stroke:#F5F7EE}}</style>
+  <g class="x" stroke-width="4" stroke-linecap="round">
+    <line x1="44" y1="44" x2="116" y2="116"/><line x1="116" y1="44" x2="44" y2="116"/>
+  </g>
+  <circle cx="80" cy="80" r="7" fill="#C9FF33"/>
+</svg>

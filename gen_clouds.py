@@ -2,6 +2,7 @@ import numpy as np, sys, os
 from PIL import Image, ImageFilter
 
 OUT = sys.argv[1]
+CRISP = len(sys.argv) > 2 and sys.argv[2] == 'crisp'   # halo demo: denser, better shaded, less blur
 rng = np.random.default_rng(7)
 
 def value_noise(w, h, cells_x, cells_y, seed):
@@ -64,17 +65,23 @@ def make_layer(name, w, h, kind, seed):
     lit = np.array([255, 251, 243], np.float32)
     shade = np.array([203, 208, 222], np.float32)
     warm = np.array([255, 224, 186], np.float32)
+    if CRISP:                                  # deeper undersides, so the shape reads at low opacity
+        shade = np.array([174, 186, 207], np.float32)
+        light = np.clip((light - 0.5) * 1.35 + 0.52, 0, 1)
     col = shade[None, None] * (1 - light[..., None]) + lit[None, None] * light[..., None]
     col = col * (1 - rim[..., None] * 0.55) + warm[None, None] * rim[..., None] * 0.55
-    alpha = (d ** 0.85) * 255
+    alpha = (d ** (0.62 if CRISP else 0.85)) * 255
     rgba = np.dstack([col, alpha]).clip(0, 255).astype(np.uint8)
     img = Image.fromarray(rgba, 'RGBA')
-    img = img.filter(ImageFilter.GaussianBlur({'far':1.2,'mid':2.2,'near':3.0}[kind]))
+    blur = {'far': 0.8, 'mid': 1.3, 'near': 1.8} if CRISP else {'far': 1.2, 'mid': 2.2, 'near': 3.0}
+    img = img.filter(ImageFilter.GaussianBlur(blur[kind]))
     img.save(os.path.join(OUT, f'{name}.webp'), 'WEBP', quality=80, method=6)
     img.resize((w // 2, h // 2), Image.LANCZOS).save(os.path.join(OUT, f'{name}-m.webp'), 'WEBP', quality=78, method=6)
     print(name, img.size, os.path.getsize(os.path.join(OUT, f'{name}.webp')) // 1024, 'KB /',
           os.path.getsize(os.path.join(OUT, f'{name}-m.webp')) // 1024, 'KB')
 
-make_layer('far', 2048, 1024, 'far', 11)
-make_layer('mid', 2048, 1024, 'mid', 23)
-make_layer('near', 2048, 1024, 'near', 37)
+suffix = '2' if CRISP else ''
+make_layer('far' + suffix, 2048, 1024, 'far', 11)
+make_layer('mid' + suffix, 2048, 1024, 'mid', 23)
+if not CRISP:
+    make_layer('near', 2048, 1024, 'near', 37)

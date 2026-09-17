@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
 /* Viewport switch. Must stay below the viewport meta above: until that meta is
@@ -10,34 +12,34 @@
    the honest number. ?full forces desktop, ?m forces mobile. */
 (function () {
   try {
-    if (new URLSearchParams(location.search).has('m')) return;
+    if (new URLSearchParams(location.search).has('full')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w >  768) location.replace('index.html?v=20260916a' + location.hash);
+    if (w <= 768) location.replace('halo-m.html?v=20260917a' + location.hash);
   } catch (e) {}
 })();
 </script>
-<script>
-/* Flexbox `gap` landed in Safari 14.5, five years after grid gap, and no CSS
-   feature query can tell the two apart: `@supports (gap: 1px)` is already true
-   on Safari 12 because the property parses for grid. So measure it once — a
-   column flex box with two empty children is exactly as tall as its row-gap —
-   and mark the document for the margin fallbacks at the end of the stylesheet. */
-(function () {
-  try {
-    var d = document.createElement('div');
-    d.style.cssText = 'display:flex;flex-direction:column;row-gap:10px;position:absolute;visibility:hidden;height:auto';
-    d.appendChild(document.createElement('i'));
-    d.appendChild(document.createElement('i'));
-    var root = document.documentElement;
-    root.appendChild(d);
-    var supported = d.scrollHeight >= 10;
-    root.removeChild(d);
-    if (!supported) root.className += ' xx-no-flexgap';
-  } catch (e) {}
-})();
-</script>
-<title>X-ON-X – Sky prototype</title>
+<title>X-ON-X | New market launch</title>
+<meta name="description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<link rel="canonical" href="https://www.x-on-x.com/">
+<link rel="alternate" media="only screen and (max-width: 768px)" href="https://www.x-on-x.com/m.html">
+<link rel="icon" href="/favicon.ico?v=20260917a" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=20260917a" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260917a">
+<meta name="theme-color" content="#FAFAF5">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="X-ON-X">
+<meta property="og:url" content="https://www.x-on-x.com/">
+<meta property="og:title" content="X-ON-X | New market launch">
+<meta property="og:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260917a">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="X-ON-X | New market launch">
+<meta name="twitter:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260917a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -139,7 +141,7 @@ body {
 body::before {
   content: '';
   position: fixed;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 9999;
   opacity: var(--grain-opacity);
@@ -192,7 +194,7 @@ body {
 .xx-page::before {
   content: '';
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
   background:
@@ -289,7 +291,7 @@ body {
 .xx-page::after {
   content: '';
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
   background-image:
@@ -331,7 +333,7 @@ body {
   -webkit-backdrop-filter: blur(20px) saturate(140%);
   border: 1px solid rgba(255,255,255,0.6);
   border-radius: 999px;
-  position: -webkit-sticky; position: sticky; top: 16px; z-index: 50;
+  position: sticky; top: 16px; z-index: 50;
   width: calc(100% - 32px); max-width: 1240px;
   margin: 16px auto 0;
   box-shadow: 0 0 0 1px rgba(255,255,255,0.7) inset, 0 12px 36px rgba(60,40,20,0.10), 0 2px 6px rgba(60,40,20,0.06);
@@ -339,9 +341,6 @@ body {
 .xx-nav__brand { display: flex; align-items: center; gap: 12px; }
 .xx-nav__brand svg { display: block; flex-shrink: 0; }
 .xx-nav__wordmark { font: var(--t-wordmark); letter-spacing: 5px; text-transform: uppercase; color: var(--fg1); }
-.xx-nav__burger { display: none; }
-.xx-nav__mobile-menu { display: none; }
-.xx-trigger-btn__expand-icon { display: none; }
 .xx-nav__links { display: flex; align-items: center; gap: 28px; }
 .xx-nav__link { font: var(--t-mono-sm); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--fg2); text-decoration: none; cursor: pointer; transition: color 200ms ease; }
 .xx-nav__link:hover { color: var(--fg1); }
@@ -401,7 +400,7 @@ body {
   display: flex; flex-direction: column;
 }
 .xx-hero::before { display: none; }
-.xx-hero::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none; z-index: 0; display: none; }
+.xx-hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0; display: none; }
 .xx-hero__watermark { position: absolute; right: 56px; top: 64px; width: 88px; height: 88px; opacity: 1; pointer-events: none; z-index: 0; }
 .xx-hero__watermark svg { width: 100%; height: 100%; }
 .xx-hero__inner { position: relative; z-index: 1; max-width: 1304px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; }
@@ -583,26 +582,26 @@ body {
 .xx-section--warm { background: transparent !important; }
 .xx-closing { background: transparent !important; }
 
-/* v7: Deep cloud sky hero — seamless single layer, no tiling */
+/* v7: Deep cloud sky hero */
 .xx-page::before {
   background:
-    radial-gradient(ellipse 65% 25% at 60% 15%, rgba(195, 218, 240, 0.4) 0%, rgba(200, 220, 240, 0.15) 50%, transparent 75%),
-    radial-gradient(ellipse 40% 20% at 15% 55%, rgba(190, 215, 238, 0.35) 0%, rgba(200, 222, 242, 0.1) 55%, transparent 78%),
-    radial-gradient(ellipse 55% 18% at 75% 75%, rgba(195, 220, 242, 0.38) 0%, rgba(205, 225, 240, 0.12) 50%, transparent 72%),
-    radial-gradient(ellipse 35% 16% at 40% 90%, rgba(188, 212, 235, 0.3) 0%, transparent 70%),
-    radial-gradient(ellipse 70% 22% at 50% 20%, rgba(255, 253, 245, 1) 0%, rgba(250, 246, 236, 0.75) 28%, transparent 62%),
-    radial-gradient(ellipse 50% 18% at 85% 35%, rgba(255, 252, 242, 0.95) 0%, rgba(248, 244, 232, 0.6) 30%, transparent 65%),
-    radial-gradient(ellipse 55% 19% at 12% 30%, rgba(254, 250, 240, 0.95) 0%, rgba(248, 244, 232, 0.55) 32%, transparent 68%),
-    radial-gradient(ellipse 45% 15% at 30% 8%, rgba(255, 252, 244, 0.9) 0%, rgba(248, 244, 234, 0.5) 35%, transparent 68%),
-    radial-gradient(ellipse 60% 17% at 65% 60%, rgba(255, 252, 242, 0.92) 0%, rgba(250, 246, 234, 0.6) 30%, transparent 66%),
-    radial-gradient(ellipse 50% 16% at 20% 75%, rgba(255, 253, 245, 0.9) 0%, rgba(250, 246, 236, 0.5) 32%, transparent 65%),
-    radial-gradient(ellipse 40% 14% at 90% 10%, rgba(252, 250, 242, 0.85) 0%, rgba(248, 244, 234, 0.4) 38%, transparent 65%),
-    radial-gradient(ellipse 55% 15% at 45% 48%, rgba(255, 252, 244, 0.88) 0%, rgba(250, 246, 234, 0.5) 30%, transparent 64%),
-    radial-gradient(ellipse 45% 12% at 55% 43%, rgba(180, 200, 222, 0.28) 0%, transparent 60%),
-    radial-gradient(ellipse 35% 10% at 35% 25%, rgba(175, 198, 220, 0.22) 0%, transparent 55%);
-  background-size: 100% 100% !important;
-  background-repeat: no-repeat !important;
-  filter: blur(clamp(9px, 1vw + 5px, 15px));
+    radial-gradient(ellipse 65% 250px at 60% 150px, rgba(195, 218, 240, 0.4) 0%, rgba(200, 220, 240, 0.15) 50%, transparent 75%),
+    radial-gradient(ellipse 40% 200px at 15% 550px, rgba(190, 215, 238, 0.35) 0%, rgba(200, 222, 242, 0.1) 55%, transparent 78%),
+    radial-gradient(ellipse 55% 180px at 75% 750px, rgba(195, 220, 242, 0.38) 0%, rgba(205, 225, 240, 0.12) 50%, transparent 72%),
+    radial-gradient(ellipse 35% 160px at 40% 900px, rgba(188, 212, 235, 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 220px at 50% 200px, rgba(255, 253, 245, 1) 0%, rgba(250, 246, 236, 0.75) 28%, transparent 62%),
+    radial-gradient(ellipse 50% 180px at 85% 350px, rgba(255, 252, 242, 0.95) 0%, rgba(248, 244, 232, 0.6) 30%, transparent 65%),
+    radial-gradient(ellipse 55% 190px at 12% 300px, rgba(254, 250, 240, 0.95) 0%, rgba(248, 244, 232, 0.55) 32%, transparent 68%),
+    radial-gradient(ellipse 45% 150px at 30% 80px, rgba(255, 252, 244, 0.9) 0%, rgba(248, 244, 234, 0.5) 35%, transparent 68%),
+    radial-gradient(ellipse 60% 170px at 65% 600px, rgba(255, 252, 242, 0.92) 0%, rgba(250, 246, 234, 0.6) 30%, transparent 66%),
+    radial-gradient(ellipse 50% 160px at 20% 750px, rgba(255, 253, 245, 0.9) 0%, rgba(250, 246, 236, 0.5) 32%, transparent 65%),
+    radial-gradient(ellipse 40% 140px at 90% 100px, rgba(252, 250, 242, 0.85) 0%, rgba(248, 244, 234, 0.4) 38%, transparent 65%),
+    radial-gradient(ellipse 55% 150px at 45% 480px, rgba(255, 252, 244, 0.88) 0%, rgba(250, 246, 234, 0.5) 30%, transparent 64%),
+    radial-gradient(ellipse 45% 120px at 55% 430px, rgba(180, 200, 222, 0.28) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 100px at 35% 250px, rgba(175, 198, 220, 0.22) 0%, transparent 55%);
+  background-size: 100% 1000px !important;
+  background-repeat: repeat-y !important;
+  filter: blur(15px);
   -webkit-mask-image: none !important;
   mask-image: none !important;
 }
@@ -640,7 +639,7 @@ body {
 .xx-section--how-stats { background: #FDFCFA !important; max-width: none !important; padding: 100px 0 !important; }
 .xx-section--how-stats > .xx-section__inner { max-width: 1440px; margin: 0 auto; padding: 0; }
 .xx-how-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-.xx-how-stats__left { position: -webkit-sticky; position: sticky; top: 120px; }
+.xx-how-stats__left { position: sticky; top: 120px; }
 .xx-how-stats__heading { font: var(--t-h1) !important; letter-spacing: -1.5px; margin-top: 18px !important; margin-bottom: 24px !important; }
 .xx-how-stats__body { font: var(--t-body); color: var(--fg2); max-width: 420px; }
 .xx-how-stats__right { display: flex; flex-direction: column; }
@@ -656,9 +655,13 @@ body {
 /* v18: No imprint on insight titles */
 .xx-insight-card__title { text-shadow: none !important; }
 
-/* v20: the Evidence rules that stood here were keyed on .xx-section:has(.xx-evidence).
-   That class never appears in this page's markup, so they matched nothing, while :has()
-   forced iOS 15.4 on the whole build. Removed. */
+/* v20: Evidence – near-white background, full width */
+.xx-section:has(.xx-evidence) {
+  background: #FFFEFA !important; margin-left: calc(-50vw + 50%) !important; margin-right: calc(-50vw + 50%) !important;
+  padding-left: calc(50vw - 50% + 48px) !important; padding-right: calc(50vw - 50% + 48px) !important;
+  width: 100vw !important; max-width: 100vw !important; box-sizing: border-box !important;
+}
+.xx-section:has(.xx-evidence) :where(p, span, div, a, em, strong) { text-shadow: none !important; }
 .xx-case :where(h1, h2, h3, h4, h5, h6, p, span, div, a) { text-shadow: none !important; }
 .xx-evidence::-webkit-scrollbar { display: none !important; }
 .xx-evidence { scrollbar-width: none !important; -ms-overflow-style: none !important; }
@@ -674,10 +677,27 @@ body { background: var(--cream) !important; }
 .xx-section--graphite > .xx-section__inner,
 .xx-closing__inner, .xx-footer__inner { max-width: 1440px !important; }
 
+/* v24: the side gutter the full-bleed layout forgot. The tinted bands drop their
+   own horizontal padding on purpose, so the band colour runs edge to edge, and
+   their inner column was left with padding 0. Above 1440px nobody noticed: the
+   max-width kept the text off the edge. At exactly 1440, and on every laptop
+   narrower than that, the headings sat flush against the window. 48 is the
+   figure .xx-section itself uses, so the bands now line up with the sections
+   that never lost their padding. */
+.xx-section--warm > .xx-section__inner,
+.xx-section--graphite > .xx-section__inner,
+.xx-section--how-stats > .xx-section__inner,
+.xx-closing__inner,
+.xx-footer__inner,
+.xx-footer__bot { padding-left: 48px; padding-right: 48px; box-sizing: border-box; }
+
 /* ── SHOWCASE (Legora-style auto-cycling tabs) ── */
 .xx-showcase { max-width: 1440px; margin: 0 auto; padding: 72px 0 96px; position: relative; }
 .xx-showcase--band { max-width: none; padding: 72px 0 96px; background: #FFFEFA; }
 .xx-showcase--band > * { max-width: 1440px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; box-sizing: border-box; }
+/* v24, continued: same 48px gutter. This has to sit after the rule above,
+   which zeroes the padding at the same specificity. */
+.xx-showcase, .xx-showcase--band > * { padding-left: 48px; padding-right: 48px; }
 .xx-showcase__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 4px; }
 .xx-showcase__label { font: var(--t-mono-sm); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg3); display: flex; align-items: center; gap: 10px; }
 .xx-showcase__label::before { content: ''; width: 8px; height: 8px; background: var(--lime); border-radius: 50%; box-shadow: 0 0 0 4px rgba(201,255,51,0.18); }
@@ -695,7 +715,7 @@ body { background: var(--cream) !important; }
 @keyframes xxProgress { from { width: 0; } to { width: 100%; } }
 .xx-showcase__panels { position: relative; min-height: 460px; }
 .xx-showcase__panel {
-  position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+  position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
   opacity: 0; visibility: hidden; transform: translateY(10px);
   transition: opacity 520ms ease, transform 520ms ease, visibility 0s linear 520ms;
 }
@@ -731,7 +751,7 @@ body { background: var(--cream) !important; }
   filter: grayscale(0.5) contrast(1.04) brightness(1.02); transition: filter 600ms ease; }
 .xx-pcard.active .xx-pcard__media img, .xx-pcard:hover .xx-pcard__media img {
   filter: grayscale(0.12) contrast(1.05) brightness(1.02); }
-.xx-pcard__media::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none;
+.xx-pcard__media::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(135deg, rgba(0, 238, 255, 0.22) 0%, rgba(201, 255, 51, 0.14) 52%, rgba(201, 51, 255, 0.16) 100%);
   mix-blend-mode: soft-light; opacity: 0.85; transition: opacity 550ms ease; }
 .xx-pcard.active .xx-pcard__media::after { opacity: 0.5; }
@@ -755,6 +775,11 @@ body { background: var(--cream) !important; }
 
 /* v25: Hero fills screen */
 .xx-hero { min-height: calc(100vh - 72px) !important; justify-content: center; }
+/* 16.09.2026: the hero dock («What brings you here?») is absolute at bottom: 32px and
+   stands about 140px tall, but the hero kept only 100px of bottom padding, so on a
+   short window (about 720px and less) the centred CTA row landed under the dock's
+   label. Desktop only: below 920px the dock is static and in flow. */
+@media (min-width: 921px) { .xx-hero { padding-bottom: 196px !important; } }
 
 /* v25: How We Work dividers grey */
 .xx-how-stat { border-top-color: var(--gray) !important; }
@@ -764,7 +789,7 @@ body { background: var(--cream) !important; }
 .xx-showcase__track { display: flex; gap: 7px; width: 100%; overflow: visible; }
 .xx-pcard { flex: 1 1 0 !important; min-width: 0; flex-grow: 1; opacity: 0.68; will-change: flex-grow, opacity; transition: flex-grow 800ms cubic-bezier(.25,.1,.25,1), opacity 600ms ease; }
 .xx-pcard.active { flex-grow: 4; opacity: 1; }
-.xx-pcard__media { position: relative; width: 100%; height: auto; max-height: none; min-height: 0; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 0; }
+.xx-pcard__media { position: relative; width: 100%; height: 64vh; max-height: 600px; min-height: 380px; aspect-ratio: auto; overflow: hidden; border-radius: 0; }
 .xx-pcard__media img { object-position: center center; }
 .xx-pcard__cap {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 22px 22px 24px;
@@ -777,7 +802,7 @@ body { background: var(--cream) !important; }
 .xx-pcard__cap .xx-pcard__stat { margin-top: 12px; }
 .xx-pcard__cap .xx-pcard__num { color: var(--lime); }
 .xx-pcard__cap .xx-pcard__unit { color: rgba(255,255,255,0.78); }
-@media (max-width: 920px) { .xx-pcard.active { flex-grow: 4; } .xx-pcard__media { aspect-ratio: 3 / 4; } }
+@media (max-width: 920px) { .xx-pcard.active { flex-grow: 4; } .xx-pcard__media { height: 52vh; } }
 
 /* v26: Hero composition */
 .xx-hero__inner { flex: 0 0 auto !important; }
@@ -946,6 +971,7 @@ body { background: var(--cream) !important; }
   transition: flex-grow 800ms cubic-bezier(.25,.1,.25,1), color 300ms ease !important;
 }
 .xx-showcase--v35 .xx-showcase__tab.active { flex-grow: 4 !important; }
+.xx-showcase--v35 .xx-showcase__tab.active { color: var(--fg1) !important; font-weight: 600 !important; border-top-color: var(--lime) !important; }
 
 /* Cards – accordion flex: 8 cards (7 collapsed + 1 active) */
 .xx-showcase--v35 .xx-pcard {
@@ -968,10 +994,10 @@ body { background: var(--cream) !important; }
 .xx-showcase--v35 .xx-pcard__media {
   position: relative !important;
   width: 100% !important;
-  height: auto !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  aspect-ratio: 3 / 4 !important;
+  height: 64vh !important;
+  max-height: 600px !important;
+  min-height: 380px !important;
+  aspect-ratio: auto !important;
   overflow: hidden !important;
   border-radius: 0 !important;
 }
@@ -996,7 +1022,7 @@ body { background: var(--cream) !important; }
 .xx-showcase--v35 .xx-pcard__media::after {
   content: '' !important;
   position: absolute !important;
-  top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
+  inset: 0 !important;
   pointer-events: none !important;
   background: linear-gradient(135deg,
     rgba(0,238,255,0.32) 0%,
@@ -1030,6 +1056,8 @@ body { background: var(--cream) !important; }
 }
 .xx-showcase--v35 .xx-pcard__cap .xx-pcard__cat { color: var(--lime) !important; margin: 0 0 8px !important; }
 .xx-showcase--v35 .xx-pcard__cap .xx-pcard__title { color: #fff !important; font-family: var(--font-sans) !important; font-size: 15px !important; font-weight: 400 !important; line-height: 1.5 !important; }
+/* Full contrast plaque behind caption — insights only */
+[data-showcase="insights"] .xx-pcard.active .xx-pcard__cap, [data-showcase="insights"] .xx-pcard:hover .xx-pcard__cap { background: rgba(17,17,22,0.78) !important; backdrop-filter: blur(6px) !important; -webkit-backdrop-filter: blur(6px) !important; }
 .xx-showcase--v35 .xx-pcard__cap .xx-pcard__stat { margin-top: 12px !important; }
 .xx-showcase--v35 .xx-pcard__cap .xx-pcard__num { color: var(--lime) !important; font-family: var(--font-mono) !important; font-size: 22px !important; font-weight: 700 !important; }
 .xx-showcase--v35 .xx-pcard__cap .xx-pcard__unit { color: rgba(255,255,255,0.78) !important; font: var(--t-mono-xs) !important; letter-spacing: 1px !important; }
@@ -1041,503 +1069,15 @@ body { background: var(--cream) !important; }
 
 @media (max-width: 920px) {
   .xx-showcase--v35 .xx-pcard.active { flex-grow: 4 !important; }
-  .xx-showcase--v35 .xx-pcard__media { aspect-ratio: 3 / 4 !important; height: auto !important; }
+  .xx-showcase--v35 .xx-pcard__media { height: 52vh !important; }
   .xx-showcase--v35 .xx-showcase__tab.active { flex-grow: 4 !important; }
-}
-
-/* ============================================================
-   MOBILE RESPONSIVE — max-width: 768px
-   ============================================================ */
-@media (max-width: 768px) {
-
-  /* ── Global container padding ── */
-  .xx-section--warm > .xx-section__inner,
-  .xx-section--graphite > .xx-section__inner,
-  .xx-section--how-stats > .xx-section__inner,
-  .xx-closing__inner,
-  .xx-footer__inner,
-  .xx-footer__bot { padding-left: 20px !important; padding-right: 20px !important; }
-  .xx-showcase--band > * { padding-left: 20px !important; padding-right: 20px !important; }
-
-  /* ── Nav with burger menu ── */
-  .xx-nav {
-    width: calc(100% - 24px) !important;
-    padding: 0 16px !important;
-    height: 48px !important;
-    top: 8px !important;
-    margin-top: 8px !important;
-  }
-  .xx-nav__links { display: none !important; }
-  .xx-nav__right .xx-lang { display: none !important; }
-  .xx-nav__right > .xx-btn { display: none !important; }
-  /* Burger icon — X-ON-X style: two hairlines + small lime dot */
-  .xx-nav__burger {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    /* Whole pixels only. With a 0.5px hairline and a 2.5px gap the two lines
-       landed on different sub-pixel boundaries, so a phone rounded one of them
-       to a single device pixel and the other to two: they looked like lines of
-       different weight. */
-    gap: 3px !important;
-    cursor: pointer !important;
-    padding: 10px 6px !important;
-    margin-left: 4px !important;
-  }
-  .xx-nav__burger span {
-    display: block !important;
-    width: 16px !important;
-    height: 1px !important;
-    background: var(--fg1) !important;
-    border-radius: 0 !important;
-    transition: transform 300ms ease, opacity 200ms ease !important;
-  }
-  .xx-nav__burger span:nth-child(2) {
-    width: 3px !important;
-    height: 3px !important;
-    border-radius: 50% !important;
-    background: var(--lime) !important;
-  }
-  /* Mobile menu overlay */
-  .xx-nav__mobile-menu {
-    display: none;
-    position: fixed !important;
-    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-    background: rgba(250, 250, 245, 0.97) !important;
-    backdrop-filter: blur(24px) !important;
-    -webkit-backdrop-filter: blur(24px) !important;
-    z-index: 100 !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    padding: 80px 32px 40px !important;
-    gap: 0 !important;
-  }
-  .xx-nav__mobile-menu.open { display: flex !important; }
-  .xx-nav__mobile-menu a {
-    font-family: var(--font-serif) !important;
-    font-size: 32px !important;
-    font-weight: 400 !important;
-    color: var(--fg1) !important;
-    text-decoration: none !important;
-    padding: 14px 0 !important;
-    letter-spacing: -0.5px !important;
-    display: block !important;
-    width: 100% !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-  .xx-nav__mobile-menu a:last-of-type { border-bottom: none !important; }
-  .xx-nav__mobile-menu .xx-nav__mobile-cta {
-    margin-top: 32px !important;
-    border-radius: 999px !important;
-    font-size: 10px !important;
-    padding: 12px 24px !important;
-    align-self: flex-start !important;
-    letter-spacing: 0.5px !important;
-  }
-  .xx-nav__mobile-close {
-    position: absolute !important;
-    top: 20px !important; right: 24px !important;
-    font-size: 28px !important;
-    cursor: pointer !important;
-    color: var(--fg1) !important;
-    background: none !important;
-    border: none !important;
-    padding: 8px !important;
-    font-family: var(--font-sans) !important;
-    font-weight: 300 !important;
-  }
-
-  /* ── Hero ── */
-  .xx-hero {
-    padding: 48px 20px 80px !important;
-    min-height: auto !important;
-  }
-  .xx-hero__inner { max-width: none !important; }
-  .xx-hero__inner--split {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 40px !important;
-    align-items: flex-start !important;
-  }
-  .xx-hero h1 {
-    font-size: 48px !important;
-    line-height: 1 !important;
-    letter-spacing: -1.5px !important;
-  }
-  .xx-hero__lede { font-size: 16px !important; margin-bottom: 24px !important; }
-  .xx-hero__right {
-    padding-top: 0 !important;
-    max-width: none !important;
-  }
-  .xx-hero__mono { font-size: 14px !important; }
-  .xx-hero__monoblock { display: none !important; }
-  .xx-hero__logo-word { font-size: 18px !important; letter-spacing: 4px !important; }
-
-  /* ── Hero CTAs: inline compact, placed after chips via order ── */
-  .xx-cta-dock { height: auto !important; flex-wrap: nowrap !important; }
-  .xx-cta-dock--home {
-    flex-direction: row !important;
-    align-items: stretch !important;
-    gap: 8px !important;
-    order: 10 !important;
-    padding: 0 !important;
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    margin-top: 24px !important;
-    width: auto !important;
-    display: flex !important;
-  }
-  .xx-cta-dock--home {
-    width: 100% !important;
-  }
-  .xx-cta-dock--home .xx-btn {
-    /* Was `flex: 0 0 auto` with 56px of side padding, which made the pair
-       379px wide against the 350px of usable width on a 390px phone: the hero
-       clips its overflow, so the right end of "What we do" was cut off on
-       every screen narrower than about 418px. The two now share the row and
-       fit from 320px up. */
-    flex: 1 1 0 !important;
-    font-size: 10px !important;
-    padding: 12px 14px !important;
-    justify-content: center !important;
-    min-width: 0 !important;
-    border-radius: 999px !important;
-  }
-  /* Move CTAs after the chips (London · Kyiv) by reordering */
-  .xx-hero__inner--split { display: flex !important; flex-direction: column !important; gap: 24px !important; align-items: flex-start !important; }
-  .xx-hero__left { display: contents !important; }
-  .xx-hero__logo { order: 1 !important; }
-  .xx-hero__eyebrow { order: 2 !important; }
-  .xx-hero h1 { order: 3 !important; }
-  .xx-hero__leftlede { order: 4 !important; }
-  .xx-hero__right { order: 5 !important; display: contents !important; }
-  .xx-hero__monoblock { order: 6 !important; }
-  .xx-hero__chips {
-    order: 7 !important;
-    margin-top: 0 !important;
-    border-top: none !important;
-    padding-top: 0 !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: baseline !important;
-    gap: 0 !important;
-    column-gap: 28px !important;
-  }
-  .xx-hero__chips > span {
-    border-top: 1px solid #fff !important;
-    padding-top: 6px !important;
-    display: inline-block !important;
-  }
-  /* Hide eyebrow on mobile */
-  .xx-hero__eyebrow { display: none !important; }
-  /* Break lede into two lines */
-  .xx-hero__lede br.mobile-break { display: inline !important; }
-  /* Remove blue tap highlight on trigger buttons */
-  .xx-trigger-btn,
-  .xx-lanes .xx-trigger-dock .xx-trigger-btn {
-    -webkit-tap-highlight-color: transparent !important;
-    outline: none !important;
-  }
-  .xx-cta-dock--home { order: 8 !important; }
-
-  /* ── Hero dock: hidden on mobile ── */
-  .xx-hero-dock {
-    display: none !important;
-  }
-  .xx-hero-dock__rail {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    padding: 0 !important;
-    border-radius: 0 !important;
-  }
-  .xx-hero-tile {
-    flex: 0 0 auto !important;
-    min-width: 0 !important;
-    padding: 8px 16px !important;
-    border-radius: 999px !important;
-    border: 1px solid var(--border) !important;
-    background: rgba(255,255,255,0.6) !important;
-    text-align: left !important;
-    align-items: flex-start !important;
-  }
-  .xx-hero-tile:hover {
-    background: rgba(255,255,255,0.9) !important;
-  }
-  .xx-hero-tile__name {
-    font-size: 10px !important;
-    line-height: 1.2 !important;
-  }
-  .xx-hero-tile__name::after { display: none !important; }
-
-  /* ── Carousels: switch to horizontal scroll ── */
-  .xx-showcase--v35 .xx-showcase__track {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory !important;
-  }
-  .xx-showcase--v35 .xx-pcard {
-    flex: 0 0 82% !important;
-    scroll-snap-align: start !important;
-    opacity: 1 !important;
-  }
-  .xx-showcase--v35 .xx-pcard.active { flex-grow: 0 !important; }
-  .xx-showcase--v35 .xx-pcard__media { height: auto !important; min-height: 0 !important; aspect-ratio: 3 / 4 !important; }
-  .xx-showcase--v35 .xx-pcard__cap {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  /* Hide tab bar on mobile — topic shown on picture instead */
-  .xx-showcase--v35 .xx-showcase__tabs {
-    display: none !important;
-  }
-
-  /* ── Showcase band padding ── */
-  .xx-showcase--band {
-    padding: 48px 0 64px !important;
-  }
-
-  /* ── What We Do section ── */
-  .xx-section--warm { padding-top: 72px !important; padding-bottom: 72px !important; }
-  .xx-section__head { margin-bottom: 36px !important; }
-  .xx-section__lead { font-size: 14px !important; margin-bottom: 36px !important; }
-  /* ── Collapsible trigger plaques — mobile rebuild ── */
-  .xx-lanes .xx-trigger-dock {
-    all: unset !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
-    width: 100% !important;
-  }
-  .xx-lanes .xx-trigger-dock .xx-trigger-btn {
-    all: unset !important;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    padding: 12px 16px !important;
-    background: rgba(255,255,255,0.7) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
-    cursor: pointer !important;
-    text-decoration: none !important;
-    color: inherit !important;
-    box-sizing: border-box !important;
-    -webkit-tap-highlight-color: transparent !important;
-    outline: none !important;
-  }
-  .xx-lanes .xx-trigger-btn__num {
-    display: none !important;
-  }
-  .xx-lanes .xx-trigger-btn__title {
-    all: unset !important;
-    display: block !important;
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-    font-family: var(--font-mono) !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    letter-spacing: 1px !important;
-    text-transform: uppercase !important;
-    color: var(--fg1) !important;
-    cursor: pointer !important;
-  }
-  .xx-lanes .xx-trigger-btn__title::after {
-    all: unset !important;
-    display: none !important;
-  }
-  .xx-lanes .xx-trigger-btn__desc,
-  .xx-lanes .xx-trigger-btn__tags,
-  .xx-lanes .xx-trigger-btn__arrow {
-    display: none !important;
-  }
-  /* Expanded state */
-  .xx-lanes .xx-trigger-btn.expanded {
-    background: rgba(255,255,255,0.92) !important;
-    border-color: rgba(201,255,51,0.3) !important;
-  }
-  .xx-lanes .xx-trigger-btn.expanded .xx-trigger-btn__desc {
-    display: block !important;
-    flex-basis: 100% !important;
-    font-family: var(--font-sans) !important;
-    font-size: 12px !important;
-    line-height: 1.5 !important;
-    color: var(--fg2) !important;
-    margin: 10px 0 8px !important;
-  }
-  .xx-lanes .xx-trigger-btn.expanded .xx-trigger-btn__tags {
-    display: flex !important;
-    flex-basis: 100% !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 0 !important;
-    align-items: center !important;
-    margin-bottom: 4px !important;
-  }
-  .xx-lanes .xx-trigger-btn__tag {
-    display: inline !important;
-    font: var(--t-mono-xs) !important;
-    font-size: 9px !important;
-    letter-spacing: 1.2px !important;
-    text-transform: uppercase !important;
-    color: var(--fg3) !important;
-  }
-  .xx-lanes .xx-trigger-btn__tag + .xx-trigger-btn__tag::before {
-    content: ' · ' !important;
-    color: var(--fg3) !important;
-  }
-  .xx-lanes .xx-trigger-btn.expanded .xx-trigger-btn__arrow {
-    display: inline-flex !important;
-    width: 28px !important; height: 28px !important;
-    align-self: flex-start !important;
-    margin-top: 4px !important;
-  }
-  /* +/− icon at right edge — direct child of btn */
-  .xx-lanes .xx-trigger-btn__expand-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 50% !important;
-    border: 1px solid var(--border) !important;
-    font-family: var(--font-sans) !important;
-    font-weight: 300 !important;
-    font-size: 14px !important;
-    color: var(--fg3) !important;
-    line-height: 1 !important;
-    flex-shrink: 0 !important;
-    margin-left: 12px !important;
-    transition: background 200ms ease, color 200ms ease, border-color 200ms ease !important;
-  }
-  .xx-lanes .xx-trigger-btn.expanded .xx-trigger-btn__expand-icon {
-    background: var(--lime) !important;
-    color: var(--fg1) !important;
-    border-color: var(--lime) !important;
-  }
-  .xx-lane__head { flex-direction: column !important; gap: 8px !important; }
-  .xx-lane__name { font-size: 24px !important; }
-
-  /* ── How We Work ── */
-  .xx-section--how-stats { padding: 64px 0 !important; }
-  .xx-how-stats {
-    grid-template-columns: 1fr !important;
-    gap: 40px !important;
-  }
-  .xx-how-stats__left {
-    position: static !important;
-  }
-  .xx-how-stats__heading {
-    font-size: 40px !important;
-    line-height: 1.05 !important;
-  }
-  .xx-how-stat__number { font-size: 40px !important; }
-
-  /* ── Closing CTA ── */
-  .xx-closing { padding: 72px 0 !important; }
-  .xx-closing__inner {
-    grid-template-columns: 1fr !important;
-    gap: 48px !important;
-  }
-  .xx-closing h2 { font-size: 40px !important; }
-  .xx-closing__body { font-size: 15px !important; }
-  .xx-closing__side {
-    border-left: none !important;
-    border-top: 1px solid var(--border) !important;
-    padding-left: 0 !important;
-    padding-top: 32px !important;
-  }
-
-  /* ── All CTA buttons: consistent lime pill style ── */
-  .xx-btn--primary {
-    border-radius: 999px !important;
-    font-size: 10px !important;
-    letter-spacing: 0.5px !important;
-    padding: 12px 56px !important;
-  }
-  .xx-closing .xx-cta-dock {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    padding: 0 !important;
-    height: auto !important;
-  }
-  .xx-closing .xx-cta-dock .xx-btn {
-    height: auto !important;
-    width: auto !important;
-    padding: 12px 56px !important;
-    font-size: 10px !important;
-    justify-content: center !important;
-    border-radius: 999px !important;
-    min-width: 0 !important;
-  }
-  .xx-footer .xx-cta-dock {
-    background: none !important;
-    border: none !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    padding: 0 !important;
-  }
-  .xx-footer .xx-cta-dock .xx-btn {
-    height: auto !important;
-    min-width: 0 !important;
-    width: auto !important;
-    padding: 12px 56px !important;
-    font-size: 10px !important;
-    justify-content: center !important;
-    border-radius: 999px !important;
-  }
-
-  /* ── Footer ── */
-  .xx-footer { padding: 48px 0 24px !important; }
-  .xx-footer__inner {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 32px !important;
-  }
-  .xx-footer__brand { grid-column: 1 / -1 !important; }
-  .xx-footer__brand h3 { font-size: 24px !important; }
-  .xx-footer__bot {
-    flex-direction: column !important;
-    gap: 8px !important;
-    text-align: center !important;
-    margin-top: 32px !important;
-  }
-}
-
-/* ============================================================
-   SMALL MOBILE — max-width: 480px
-   ============================================================ */
-@media (max-width: 480px) {
-  .xx-hero h1 { font-size: 36px !important; }
-  .xx-hero__logo-word { font-size: 16px !important; }
-  .xx-trigger-dock { grid-template-columns: 1fr !important; }
-  .xx-hero-tile {
-    flex: 1 1 100% !important;
-    min-width: 100% !important;
-  }
-  .xx-showcase--v35 .xx-pcard { flex: 0 0 90% !important; }
-  .xx-footer__inner { grid-template-columns: 1fr !important; }
-  .xx-closing h2 { font-size: 32px !important; }
-  .xx-how-stats__heading { font-size: 32px !important; }
 }
 
 /* ════════════════════════════════════════════
    WIP POPUP – "Content coming soon" modal
    ════════════════════════════════════════════ */
 .xx-wip-overlay {
-  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 10001;
+  position: fixed; inset: 0; z-index: 10001;
   background: rgba(17, 17, 22, 0.45);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   display: flex; align-items: center; justify-content: center;
@@ -1592,66 +1132,32 @@ body { background: var(--cream) !important; }
   padding: 4px 10px; border-radius: var(--radius-sm);
 }
 
-/* ── Mobile popup tweaks ── */
-@media (max-width: 768px) {
-  .xx-wip-overlay { align-items: flex-end; padding: 0; }
-  .xx-wip-modal {
-    max-width: none; width: 100%;
-    border-radius: 20px 20px 0 0;
-    padding: 36px 28px 40px;
-    margin: 0;
-    transform: translateY(100%);
-    box-shadow: 0 -12px 48px rgba(17, 17, 22, 0.25);
-  }
-  .xx-wip-overlay.active .xx-wip-modal { transform: translateY(0); }
-  .xx-wip-modal__title { font-size: 22px; }
-  .xx-wip-modal__body { font-size: 14px; margin-bottom: 24px; }
-  .xx-wip-modal__close { top: 14px; right: 14px; width: 36px; height: 36px; font-size: 18px; }
-}
-/* Matter caption — cat at top, title+stat grouped at bottom */
-[data-showcase="evidence"] .xx-pcard__cap {
-  top: 0 !important;
-  bottom: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  background: linear-gradient(to bottom, rgba(17,17,22,0.45) 0%, rgba(17,17,22,0) 25%, rgba(17,17,22,0) 55%, rgba(17,17,22,0.77) 100%) !important;
-}
-[data-showcase="evidence"] .xx-pcard__cat {
-  flex: 0 0 auto !important;
-}
-[data-showcase="evidence"] .xx-pcard__title {
-  margin-top: auto !important;
-}
-[data-showcase="evidence"] .xx-pcard__stat {
-  flex: 0 0 auto !important;
+.demo-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 200; padding: 10px 16px; background: var(--graphite); border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
+.demo-bar button { font: var(--t-mono-md); letter-spacing: 0.5px; text-transform: uppercase; padding: 10px 20px; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; background: transparent; color: rgba(255,255,255,0.7); cursor: pointer; transition: all 200ms; }
+.demo-bar button:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.3); }
+.demo-bar button.on { background: var(--lime); color: var(--graphite); border-color: var(--lime); }
+
+@media (max-width: 920px) {
+  .demo-bar { flex-wrap: wrap; gap: 8px; bottom: 16px; left: 16px; right: 16px; transform: none; justify-content: center; }
+  .demo-bar button { font-size: 10px; padding: 10px 14px; flex: 1 1 auto; }
 }
 
-/* ── Cloud sky: one skyful per screen, not one stretched over the page ──────
-   The layer is `position: absolute; inset: 0` inside .xx-page, so with
-   `background-size: 100% 100%` the fourteen gradients were stretched over the
-   whole 5173px document: every cloud came out five times too tall and the
-   blur turned them into grey smears below the hero. Pinned to the viewport
-   instead, each cloud keeps the size it has in the hero, the sky never tiles
-   and the blurred layer is one screen tall rather than a whole document.     */
-.xx-page::before {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  /* Sized in viewport units and set to tile, so the clouds keep their scale
-     even in a webview that ignores `position: fixed` and leaves the layer as
-     tall as the document: it then repeats one skyful per screen instead of
-     stretching one over the whole page. While fixed works, the element is
-     exactly one screen tall, so nothing ever repeats. */
-  background-size: 100% 100vh !important;
-  background-repeat: repeat-y !important;
-  /* Plain pixel blur rather than blur(clamp(...)): an engine that does not
-     take a clamp() inside filter drops the whole declaration, and the clouds
-     then render unblurred. */
-  filter: blur(11px) !important;
+</style>
+<style>
+/* No-name matters: gentle blur on expanded card to shift focus to text */
+.xx-showcase--v35 .xx-pcard[data-matter="uhnwi"].active .xx-pcard__media img,
+.xx-showcase--v35 .xx-pcard[data-matter="uhnwi"]:hover .xx-pcard__media img,
+.xx-showcase--v35 .xx-pcard[data-matter="defencetech"].active .xx-pcard__media img,
+.xx-showcase--v35 .xx-pcard[data-matter="defencetech"]:hover .xx-pcard__media img,
+.xx-showcase--v35 .xx-pcard[data-matter="vc"].active .xx-pcard__media img,
+.xx-showcase--v35 .xx-pcard[data-matter="vc"]:hover .xx-pcard__media img {
+  filter: grayscale(0.35) contrast(1.04) brightness(0.92) blur(2px) !important;
+  transform: scale(1.03) !important;
+}
+.xx-showcase--v35 .xx-pcard[data-matter="uhnwi"] .xx-pcard__media,
+.xx-showcase--v35 .xx-pcard[data-matter="defencetech"] .xx-pcard__media,
+.xx-showcase--v35 .xx-pcard[data-matter="vc"] .xx-pcard__media {
+  overflow: hidden !important;
 }
 
 /* ── Mail addresses are links ───────────────────────────────────────────────
@@ -1667,98 +1173,96 @@ body { background: var(--cream) !important; }
 }
 .xx-closing__partner-mail a:hover { border-bottom-color: currentColor; }
 
-/* ── Older iOS: fallbacks for the two layout features this page leans on ─────
-   Everything below is inert on a current phone: the @supports block only
-   applies where aspect-ratio is missing (before iOS 15), and the .xx-no-flexgap
-   rules only apply when the probe in <head> found no flexbox gap (before
-   iOS 14.5). Grid gap is not affected, it has worked since iOS 10.3.        */
-
-@supports not (aspect-ratio: 1 / 1) {
-  /* The classic padding box: a percentage padding resolves against the width,
-     so it reproduces a fixed ratio, and the image is taken out of flow because
-     `height: 100%` would resolve against a zero content box. */
-  .xx-pcard__media,
-  .xx-showcase--v35 .xx-pcard__media {
-    height: 0 !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    padding-top: 133.3333% !important;   /* 3 / 4 */
-    position: relative !important;
-  }
-  .xx-pcard__media > img {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
-  .xx-showcase__media {
-    height: 0 !important;
-    padding-top: 75% !important;          /* 4 / 3 */
-    position: relative !important;
-  }
-  .xx-showcase__media > img {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
-}
-
-/* Flexbox gap, replaced with margins on the sibling. Row directions get a left
-   margin, column directions a top margin, and the values match the gaps the
-   page actually uses at phone width. */
-.xx-no-flexgap .xx-nav__brand      > * + * { margin-left: 12px !important; }
-.xx-no-flexgap .xx-nav__right      > * + * { margin-left: 20px !important; }
-.xx-no-flexgap .xx-nav__links      > * + * { margin-left: 28px !important; }
-.xx-no-flexgap .xx-hero__logo      > * + * { margin-left: 16px !important; }
-.xx-no-flexgap .xx-hero__chips     > * + * { margin-left: 28px !important; }
-.xx-no-flexgap .xx-cta-dock        > * + * { margin-left: 6px !important; }
-.xx-no-flexgap .xx-cta-dock--home  > * + * { margin-left: 8px !important; }
-.xx-no-flexgap .xx-showcase__head  > * + * { margin-left: 16px !important; }
-.xx-no-flexgap .xx-showcase__track > * + * { margin-left: 7px !important; }
-.xx-no-flexgap .xx-pcard__stat     > * + * { margin-left: 8px !important; }
-/* The lime dot in front of the section labels is a ::before, and it is a flex
-   item like any other, so it needs the same treatment. */
-.xx-no-flexgap .xx-showcase__label::before,
-.xx-no-flexgap .xx-section__num::before { margin-right: 10px !important; }
-
-.xx-no-flexgap .xx-nav__burger        > * + * { margin-top: 3px !important; }
-.xx-no-flexgap .xx-hero__inner--split > * + * { margin-top: 24px !important; }
-.xx-no-flexgap .xx-section__head      > * + * { margin-top: 18px !important; }
-.xx-no-flexgap .xx-lanes              > * + * { margin-top: 64px !important; }
-.xx-no-flexgap .xx-lane__head         > * + * { margin-top: 8px !important; }
-/* The plaques reset themselves with `all: unset !important`, which outranks a
-   two-class selector, so this one is spelled out to carry more specificity. */
-.xx-no-flexgap .xx-lanes .xx-trigger-dock > .xx-trigger-btn + .xx-trigger-btn { margin-top: 6px !important; }
-/* The hero's left column is `display: contents`, so its own margin would do
-   nothing: the flex items are its children plus the right column. */
-.xx-no-flexgap .xx-hero__inner--split > .xx-hero__left > * + *,
-.xx-no-flexgap .xx-hero__inner--split > .xx-hero__right { margin-top: 24px !important; }
-.xx-no-flexgap .xx-closing__side      > * + * { margin-top: 20px !important; }
-.xx-no-flexgap .xx-footer__bot        > * + * { margin-top: 8px !important; }
-
 /* ── The nav's "What We Do" jumps to its section ────────────────────────────
    The other nav items have no page to go to yet and stay on href="#", which
    the capture-phase handler turns into the "coming soon" modal. This one has
    a section, so it carries the same target as the hero's ghost button, and the
    section reserves room for the sticky nav bar so the landing is not tucked
    underneath it.                                                            */
-#what-we-do { scroll-margin-top: 72px; }
+#what-we-do { scroll-margin-top: 88px; }
 </style>
-<link rel="stylesheet" href="clouds.css?v=20260916a">
+<!-- Who we are, in the one format machines read without guessing. Every value
+     here is already visible on the page or in a public ranking profile; nothing
+     is asserted that a reader cannot check. -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://www.x-on-x.com/#org",
+   "name": "X-ON-X",
+   "url": "https://www.x-on-x.com/",
+   "description": "X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://www.x-on-x.com/img/apple-touch-icon.png",
+    "width": 180,
+    "height": 180
+   },
+   "image": "https://www.x-on-x.com/img/og.jpg",
+   "email": "ok@x-on-x.com",
+   "areaServed": [
+    {
+     "@type": "City",
+     "name": "London"
+    },
+    {
+     "@type": "City",
+     "name": "Kyiv"
+    },
+    {
+     "@type": "City",
+     "name": "Warsaw"
+    }
+   ],
+   "founder": [
+    {
+     "@type": "Person",
+     "name": "Oleg Kotliar"
+    },
+    {
+     "@type": "Person",
+     "name": "Viktoriia Kotliar"
+    }
+   ],
+   "sameAs": [
+    "https://www.legal500.com/rankings/ranking/c-ukraine/tax/243355-x-on-x",
+    "https://t.me/yourxsolution"
+   ]
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://www.x-on-x.com/#site",
+   "url": "https://www.x-on-x.com/",
+   "name": "X-ON-X",
+   "inLanguage": "en",
+   "publisher": {
+    "@id": "https://www.x-on-x.com/#org"
+   }
+  }
+ ]
+}
+</script>
+<link rel="stylesheet" href="halo.css?v=20260917a">
 </head>
 <body>
 
-<div class="xx-page">
-  <!-- ──── SKY (prototype) ──── -->
+<div class="xx-page" id="homePage">
+  <!-- ──── SKY (demo 2: halo + bursting clouds) ──── -->
   <div class="xx-sky" aria-hidden="true">
     <div class="xx-layer xx-layer--far"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
     <div class="xx-layer xx-layer--mid"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
   </div>
+  <div class="xx-halo" aria-hidden="true">
+    <div class="xx-halo__glow"></div>
+    <div class="xx-halo__ring xx-halo__ring--in"></div>
+    <div class="xx-halo__ring xx-halo__ring--out"></div>
+  </div>
   <div class="xx-sky xx-sky--near" aria-hidden="true">
-    <div class="xx-layer xx-layer--near"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
+    <div class="xx-burst"><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-veil"></span></div>
+    <div class="xx-burst"><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-veil"></span></div>
+    <div class="xx-burst"><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-shard"></span><span class="xx-veil"></span></div>
   </div>
 
 
@@ -1777,27 +1281,15 @@ body { background: var(--cream) !important; }
       <a class="xx-nav__link" href="#">Fashion</a>
       <a class="xx-nav__link" href="#">Investments</a>
       <a class="xx-nav__link" href="#">Miltech</a>
+      <a class="xx-nav__link" href="#">Insights</a>
       <a class="xx-nav__link" href="#">About</a>
       <a class="xx-nav__link" href="#">Contacts</a>
     </nav>
     <div class="xx-nav__right">
       <span class="xx-lang"><strong>EN</strong> &middot; UA</span>
       <a class="xx-btn xx-btn--primary xx-btn--sm" href="https://t.me/yourxsolution" target="_blank" rel="noopener noreferrer">Come on in &rarr;</a>
-      <div class="xx-nav__burger" onclick="document.querySelector('.xx-nav__mobile-menu').classList.add('open')" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </div>
     </div>
   </header>
-  <div class="xx-nav__mobile-menu">
-    <button class="xx-nav__mobile-close" onclick="this.parentElement.classList.remove('open')" aria-label="Close">&times;</button>
-    <a href="#what-we-do" onclick="this.parentElement.classList.remove('open')">What We Do</a>
-    <a href="#" onclick="this.parentElement.classList.remove('open')">Fashion</a>
-    <a href="#" onclick="this.parentElement.classList.remove('open')">Investments</a>
-    <a href="#" onclick="this.parentElement.classList.remove('open')">Miltech</a>
-    <a href="#" onclick="this.parentElement.classList.remove('open')">About</a>
-    <a href="#" onclick="this.parentElement.classList.remove('open')">Contacts</a>
-    <a class="xx-btn xx-btn--primary xx-nav__mobile-cta" href="https://t.me/yourxsolution" target="_blank" rel="noopener noreferrer" onclick="this.parentElement.classList.remove('open')">Come on in &rarr;</a>
-  </div>
 
   <!-- ──── HERO ──── -->
   <section class="xx-hero">
@@ -1818,7 +1310,7 @@ body { background: var(--cream) !important; }
         <h1>Beyond Borders.<br><em>Beyond Advisory.</em></h1>
         <div class="xx-hero__leftlede">
           <p class="xx-hero__lede">
-            We take charge<br class="mobile-break" style="display:none;"> of your cross-border complexity.
+            We take charge of your cross-border complexity.
           </p>
         </div>
         <div class="xx-cta-dock xx-cta-dock--home">
@@ -1851,9 +1343,9 @@ body { background: var(--cream) !important; }
         <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">B/02</span><span class="xx-hero-tile__name">Fundraising</span></a>
         <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">B/03</span><span class="xx-hero-tile__name">Buying or Selling Assets</span></a>
         <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">B/04</span><span class="xx-hero-tile__name">Forming Partnerships</span></a>
-        <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/01</span><span class="xx-hero-tile__name">Business Interests</span></a>
+        <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/01</span><span class="xx-hero-tile__name">Business Ownership</span></a>
         <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/02</span><span class="xx-hero-tile__name">Relocation</span></a>
-        <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/03</span><span class="xx-hero-tile__name">Private Portfolio</span></a>
+        <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/03</span><span class="xx-hero-tile__name">Investment Portfolio</span></a>
         <a class="xx-hero-tile" href="#what-we-do"><span class="xx-hero-tile__num">I/04</span><span class="xx-hero-tile__name">Succession</span></a>
       </div>
     </div>
@@ -1861,9 +1353,47 @@ body { background: var(--cream) !important; }
 
   </div><!-- /.xx-page -->
 
-<button class="xx-proto-toggle" type="button" onclick="document.documentElement.classList.toggle('xx-still');this.textContent=document.documentElement.classList.contains('xx-still')?'motion: off':'motion: on'">motion: on</button>
-<a class="xx-proto-toggle xx-proto-link" href="halo-m.html">demo 2 &rarr;</a>
-<style>.xx-proto-link{bottom:52px !important;text-decoration:none}.xx-proto-toggle{position:fixed;right:14px;bottom:14px;z-index:60;font:11px/1 "JetBrains Mono",monospace;letter-spacing:1px;text-transform:uppercase;padding:8px 12px;border-radius:999px;border:1px solid rgba(17,17,17,.18);background:rgba(255,254,248,.8);color:#111;cursor:pointer;backdrop-filter:blur(8px)}</style>
+<div class="xx-proto" role="group" aria-label="sky controls">
+  <button type="button" data-xx="motion">motion: on</button>
+  <button type="button" data-xx="tempo">tempo: normal</button>
+  <button type="button" data-xx="halo">nimbus: on</button>
+  <button type="button" data-xx="soft">clouds: crisp</button>
+  <a href="index.html">demo 1 &rarr;</a>
+</div>
+<style>
+.xx-proto{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.xx-proto button,.xx-proto a{font:11px/1 "JetBrains Mono",monospace;letter-spacing:1px;text-transform:uppercase;
+ padding:8px 12px;border-radius:999px;border:1px solid rgba(17,17,17,.18);background:rgba(255,254,248,.8);
+ color:#111;cursor:pointer;backdrop-filter:blur(8px);text-decoration:none}
+.xx-proto button:hover,.xx-proto a:hover{background:rgba(255,254,248,.98)}
+@media (max-width:768px){.xx-proto{right:10px;bottom:10px;gap:4px}.xx-proto button,.xx-proto a{padding:7px 10px;font-size:10px}}
+</style>
+<script>
+(function () {
+  var root = document.documentElement, tempos = ['normal', 'calm', 'quick'], t = 0;
+  function label(el, text) { el.textContent = text; }
+  document.querySelectorAll('.xx-proto button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.xx;
+      if (k === 'motion') {
+        root.classList.toggle('xx-still');
+        label(b, 'motion: ' + (root.classList.contains('xx-still') ? 'off' : 'on'));
+      } else if (k === 'tempo') {
+        t = (t + 1) % tempos.length;
+        root.classList.remove('xx-tempo-calm', 'xx-tempo-quick');
+        if (tempos[t] !== 'normal') root.classList.add('xx-tempo-' + tempos[t]);
+        label(b, 'tempo: ' + tempos[t]);
+      } else if (k === 'halo') {
+        root.classList.toggle('xx-nohalo');
+        label(b, 'nimbus: ' + (root.classList.contains('xx-nohalo') ? 'off' : 'on'));
+      } else {
+        root.classList.toggle('xx-soft');
+        label(b, 'clouds: ' + (root.classList.contains('xx-soft') ? 'soft' : 'crisp'));
+      }
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
