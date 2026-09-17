@@ -7,7 +7,7 @@ panel carries the knobs Oleg will want to try (tempo, nimbus, old look).
 import re, pathlib
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260917e'
+V = '20260917f'
 
 SKY = '''
   <!-- ──── SKY (demo 2: halo + bursting clouds) ──── -->
