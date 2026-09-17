@@ -15,7 +15,7 @@
     if (new URLSearchParams(location.search).has('m')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w >  768) location.replace('halo.html?v=20260917e' + location.hash);
+    if (w >  768) location.replace('halo.html?v=20260918a' + location.hash);
   } catch (e) {}
 })();
 </script>
@@ -42,23 +42,23 @@
 <title>X-ON-X | New market launch</title>
 <meta name="description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
 <link rel="canonical" href="https://www.x-on-x.com/">
-<link rel="icon" href="/favicon.ico?v=20260917e" sizes="32x32">
-<link rel="icon" href="/favicon.svg?v=20260917e" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260917e">
+<link rel="icon" href="/favicon.ico?v=20260918a" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=20260918a" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260918a">
 <meta name="theme-color" content="#FAFAF5">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="X-ON-X">
 <meta property="og:url" content="https://www.x-on-x.com/">
 <meta property="og:title" content="X-ON-X | New market launch">
 <meta property="og:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260917e">
+<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260918a">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="X-ON-X | New market launch">
 <meta name="twitter:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260917e">
+<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260918a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -1834,7 +1834,7 @@ body { background: var(--cream) !important; }
  ]
 }
 </script>
-<link rel="stylesheet" href="halo.css?v=20260917h">
+<link rel="stylesheet" href="halo.css?v=20260918a">
 </head>
 <body>
 
@@ -1957,9 +1957,9 @@ body { background: var(--cream) !important; }
 
 <div class="xx-proto" role="group" aria-label="sky controls">
   <button type="button" data-xx="motion">motion: on</button>
-  <button type="button" data-xx="tempo">tempo: normal</button>
+  <button type="button" data-xx="tempo">tempo: fast</button>
   <button type="button" data-xx="halo">nimbus: on</button>
-  <button type="button" data-xx="tex">texture: soft</button>
+  <button type="button" data-xx="tex">texture: volumetric</button>
   <a href="index.html">demo 1 &rarr;</a>
 </div>
 <style>
@@ -1972,8 +1972,8 @@ body { background: var(--cream) !important; }
 </style>
 <script>
 (function () {
-  var root = document.documentElement, tempos = ['normal', 'calm', 'quick'], t = 0;
-  var texes = ['soft', 'volumetric', 'demo 1 bands'], x = 0;
+  var root = document.documentElement, tempos = ['fast', 'rush', 'normal', 'calm'], t = 0;
+  var texes = ['volumetric', 'soft', 'demo 1 bands'], x = 0;
   function label(el, text) { el.textContent = text; }
   document.querySelectorAll('.xx-proto button').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -1983,16 +1983,17 @@ body { background: var(--cream) !important; }
         label(b, 'motion: ' + (root.classList.contains('xx-still') ? 'off' : 'on'));
       } else if (k === 'tempo') {
         t = (t + 1) % tempos.length;
-        root.classList.remove('xx-tempo-calm', 'xx-tempo-quick');
-        if (tempos[t] !== 'normal') root.classList.add('xx-tempo-' + tempos[t]);
+        root.classList.remove('xx-tempo-rush', 'xx-tempo-normal', 'xx-tempo-calm');
+        if (tempos[t] !== 'fast') root.classList.add('xx-tempo-' + tempos[t]);
         label(b, 'tempo: ' + tempos[t]);
       } else if (k === 'halo') {
         root.classList.toggle('xx-nohalo');
         label(b, 'nimbus: ' + (root.classList.contains('xx-nohalo') ? 'off' : 'on'));
       } else {
         x = (x + 1) % texes.length;
-        root.classList.remove('xx-vol', 'xx-demo1');
-        if (texes[x] !== 'soft') root.classList.add('xx-' + (texes[x] === 'volumetric' ? 'vol' : 'demo1'));
+        root.classList.remove('xx-soft-tex', 'xx-demo1');
+        if (texes[x] === 'soft') root.classList.add('xx-soft-tex');
+        if (texes[x] !== 'volumetric' && texes[x] !== 'soft') root.classList.add('xx-demo1');
         label(b, 'texture: ' + texes[x]);
       }
     });

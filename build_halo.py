@@ -7,7 +7,7 @@ panel carries the knobs Oleg will want to try (tempo, nimbus, old look).
 import re, pathlib
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260917h'
+V = '20260918a'
 
 SKY = '''
   <!-- ──── SKY (demo 2: halo + bursting clouds) ──── -->
@@ -27,9 +27,9 @@ SKY = '''
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="sky controls">
   <button type="button" data-xx="motion">motion: on</button>
-  <button type="button" data-xx="tempo">tempo: normal</button>
+  <button type="button" data-xx="tempo">tempo: fast</button>
   <button type="button" data-xx="halo">nimbus: on</button>
-  <button type="button" data-xx="tex">texture: soft</button>
+  <button type="button" data-xx="tex">texture: volumetric</button>
   <a href="index.html">demo 1 &rarr;</a>
 </div>
 <style>
@@ -42,8 +42,8 @@ PANEL = '''
 </style>
 <script>
 (function () {
-  var root = document.documentElement, tempos = ['normal', 'calm', 'quick'], t = 0;
-  var texes = ['soft', 'volumetric', 'demo 1 bands'], x = 0;
+  var root = document.documentElement, tempos = ['fast', 'rush', 'normal', 'calm'], t = 0;
+  var texes = ['volumetric', 'soft', 'demo 1 bands'], x = 0;
   function label(el, text) { el.textContent = text; }
   document.querySelectorAll('.xx-proto button').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -53,16 +53,17 @@ PANEL = '''
         label(b, 'motion: ' + (root.classList.contains('xx-still') ? 'off' : 'on'));
       } else if (k === 'tempo') {
         t = (t + 1) % tempos.length;
-        root.classList.remove('xx-tempo-calm', 'xx-tempo-quick');
-        if (tempos[t] !== 'normal') root.classList.add('xx-tempo-' + tempos[t]);
+        root.classList.remove('xx-tempo-rush', 'xx-tempo-normal', 'xx-tempo-calm');
+        if (tempos[t] !== 'fast') root.classList.add('xx-tempo-' + tempos[t]);
         label(b, 'tempo: ' + tempos[t]);
       } else if (k === 'halo') {
         root.classList.toggle('xx-nohalo');
         label(b, 'nimbus: ' + (root.classList.contains('xx-nohalo') ? 'off' : 'on'));
       } else {
         x = (x + 1) % texes.length;
-        root.classList.remove('xx-vol', 'xx-demo1');
-        if (texes[x] !== 'soft') root.classList.add('xx-' + (texes[x] === 'volumetric' ? 'vol' : 'demo1'));
+        root.classList.remove('xx-soft-tex', 'xx-demo1');
+        if (texes[x] === 'soft') root.classList.add('xx-soft-tex');
+        if (texes[x] !== 'volumetric' && texes[x] !== 'soft') root.classList.add('xx-demo1');
         label(b, 'texture: ' + texes[x]);
       }
     });

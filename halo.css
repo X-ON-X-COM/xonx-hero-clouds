@@ -8,7 +8,7 @@
    Tuning knobs live in :root and in the --cycle / --o lines below.          */
 
 :root {
-  --xx-tempo: 1;          /* duration multiplier: 1.6 = calm, 0.7 = quick        */
+  --xx-tempo: 0.48;       /* duration multiplier: smaller = faster flight         */
   --xx-halo: 1;           /* nimbus opacity, 0 turns it off                      */
   --cx: 57%;              /* where the flight is heading: the vanishing point    */
   --cy: 52%;              /* the nimbus sits here too                            */
@@ -21,16 +21,16 @@
    default = the soft cumulus of the 17.09 morning build (Iryna's pick),
    html.xx-vol = the volumetric render, html.xx-demo1 = demo 1's textures.  */
 :root {
-  --t1: url(clouds/p_puff1.webp?v=20260917e); --t2: url(clouds/p_puff2.webp?v=20260917e);
-  --t3: url(clouds/p_puff3.webp?v=20260917e); --t4: url(clouds/p_puff4.webp?v=20260917e);
-  --t5: url(clouds/p_puff5.webp?v=20260917e); --t6: url(clouds/p_puff6.webp?v=20260917e);
-  --tfar: url(clouds/p_far2.webp?v=20260917e); --tmid: url(clouds/p_mid2.webp?v=20260917e);
-}
-html.xx-vol {
   --t1: url(clouds/puff1.webp?v=20260917e); --t2: url(clouds/puff2.webp?v=20260917e);
   --t3: url(clouds/puff3.webp?v=20260917e); --t4: url(clouds/puff4.webp?v=20260917e);
   --t5: url(clouds/puff5.webp?v=20260917e); --t6: url(clouds/puff6.webp?v=20260917e);
   --tfar: url(clouds/far2.webp?v=20260917e); --tmid: url(clouds/mid2.webp?v=20260917e);
+}
+html.xx-soft-tex {
+  --t1: url(clouds/p_puff1.webp?v=20260917e); --t2: url(clouds/p_puff2.webp?v=20260917e);
+  --t3: url(clouds/p_puff3.webp?v=20260917e); --t4: url(clouds/p_puff4.webp?v=20260917e);
+  --t5: url(clouds/p_puff5.webp?v=20260917e); --t6: url(clouds/p_puff6.webp?v=20260917e);
+  --tfar: url(clouds/p_far2.webp?v=20260917e); --tmid: url(clouds/p_mid2.webp?v=20260917e);
 }
 html.xx-demo1 { --tfar: url(clouds/far.webp); --tmid: url(clouds/mid.webp); }
 
@@ -202,8 +202,9 @@ html.xx-demo1 { --tfar: url(clouds/far.webp); --tmid: url(clouds/mid.webp); }
 }
 
 /* ── demo controls ─────────────────────────────────────────────────────── */
-html.xx-tempo-calm  { --xx-tempo: 1.6; }
-html.xx-tempo-quick { --xx-tempo: 0.7; }
+html.xx-tempo-rush   { --xx-tempo: 0.32; }
+html.xx-tempo-normal { --xx-tempo: 0.80; }
+html.xx-tempo-calm   { --xx-tempo: 1.40; }
 html.xx-nohalo      { --xx-halo: 0; }
 
 /* the prototype is one screen: nav + hero fill the viewport */
@@ -217,16 +218,16 @@ html.xx-nohalo      { --xx-halo: 0; }
   .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp?v=20260917c); }
   .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; }
   :root {
-    --t1: url(clouds/p_puff1-m.webp?v=20260917e); --t2: url(clouds/p_puff2-m.webp?v=20260917e);
-    --t3: url(clouds/p_puff3-m.webp?v=20260917e); --t4: url(clouds/p_puff4-m.webp?v=20260917e);
-    --t5: url(clouds/p_puff5-m.webp?v=20260917e); --t6: url(clouds/p_puff6-m.webp?v=20260917e);
-    --tfar: url(clouds/p_far2-m.webp?v=20260917e); --tmid: url(clouds/p_mid2-m.webp?v=20260917e);
-  }
-  html.xx-vol {
     --t1: url(clouds/puff1-m.webp?v=20260917e); --t2: url(clouds/puff2-m.webp?v=20260917e);
     --t3: url(clouds/puff3-m.webp?v=20260917e); --t4: url(clouds/puff4-m.webp?v=20260917e);
     --t5: url(clouds/puff5-m.webp?v=20260917e); --t6: url(clouds/puff6-m.webp?v=20260917e);
     --tfar: url(clouds/far2-m.webp?v=20260917e); --tmid: url(clouds/mid2-m.webp?v=20260917e);
+  }
+  html.xx-soft-tex {
+    --t1: url(clouds/p_puff1-m.webp?v=20260917e); --t2: url(clouds/p_puff2-m.webp?v=20260917e);
+    --t3: url(clouds/p_puff3-m.webp?v=20260917e); --t4: url(clouds/p_puff4-m.webp?v=20260917e);
+    --t5: url(clouds/p_puff5-m.webp?v=20260917e); --t6: url(clouds/p_puff6-m.webp?v=20260917e);
+    --tfar: url(clouds/p_far2-m.webp?v=20260917e); --tmid: url(clouds/p_mid2-m.webp?v=20260917e);
   }
   html.xx-demo1 { --tfar: url(clouds/far-m.webp); --tmid: url(clouds/mid-m.webp); }
   .xx-layer--far .xx-cloud { background-size: auto 26%; }
