@@ -7,7 +7,7 @@ panel carries the knobs Oleg will want to try (tempo, nimbus, old look).
 import re, pathlib
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260917d'
+V = '20260917e'
 
 SKY = '''
   <!-- ──── SKY (demo 2: halo + bursting clouds) ──── -->
@@ -29,7 +29,7 @@ PANEL = '''
   <button type="button" data-xx="motion">motion: on</button>
   <button type="button" data-xx="tempo">tempo: normal</button>
   <button type="button" data-xx="halo">nimbus: on</button>
-  <button type="button" data-xx="soft">clouds: crisp</button>
+  <button type="button" data-xx="tex">texture: soft</button>
   <a href="index.html">demo 1 &rarr;</a>
 </div>
 <style>
@@ -43,6 +43,7 @@ PANEL = '''
 <script>
 (function () {
   var root = document.documentElement, tempos = ['normal', 'calm', 'quick'], t = 0;
+  var texes = ['soft', 'volumetric', 'demo 1 bands'], x = 0;
   function label(el, text) { el.textContent = text; }
   document.querySelectorAll('.xx-proto button').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -59,8 +60,10 @@ PANEL = '''
         root.classList.toggle('xx-nohalo');
         label(b, 'nimbus: ' + (root.classList.contains('xx-nohalo') ? 'off' : 'on'));
       } else {
-        root.classList.toggle('xx-soft');
-        label(b, 'clouds: ' + (root.classList.contains('xx-soft') ? 'soft' : 'crisp'));
+        x = (x + 1) % texes.length;
+        root.classList.remove('xx-vol', 'xx-demo1');
+        if (texes[x] !== 'soft') root.classList.add('xx-' + (texes[x] === 'volumetric' ? 'vol' : 'demo1'));
+        label(b, 'texture: ' + texes[x]);
       }
     });
   });

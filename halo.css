@@ -16,6 +16,24 @@
 
 .xx-page::before { display: none !important; }        /* the old gradient sky */
 
+
+/* ── texture sets ─────────────────────────────────────────────────────────
+   default = the soft cumulus of the 17.09 morning build (Iryna's pick),
+   html.xx-vol = the volumetric render, html.xx-demo1 = demo 1's textures.  */
+:root {
+  --t1: url(clouds/p_puff1.webp?v=20260917e); --t2: url(clouds/p_puff2.webp?v=20260917e);
+  --t3: url(clouds/p_puff3.webp?v=20260917e); --t4: url(clouds/p_puff4.webp?v=20260917e);
+  --t5: url(clouds/p_puff5.webp?v=20260917e); --t6: url(clouds/p_puff6.webp?v=20260917e);
+  --tfar: url(clouds/p_far2.webp?v=20260917e); --tmid: url(clouds/p_mid2.webp?v=20260917e);
+}
+html.xx-vol {
+  --t1: url(clouds/puff1.webp?v=20260917e); --t2: url(clouds/puff2.webp?v=20260917e);
+  --t3: url(clouds/puff3.webp?v=20260917e); --t4: url(clouds/puff4.webp?v=20260917e);
+  --t5: url(clouds/puff5.webp?v=20260917e); --t6: url(clouds/puff6.webp?v=20260917e);
+  --tfar: url(clouds/far2.webp?v=20260917e); --tmid: url(clouds/mid2.webp?v=20260917e);
+}
+html.xx-demo1 { --tfar: url(clouds/far.webp); --tmid: url(clouds/mid.webp); }
+
 /* ── sky ──────────────────────────────────────────────────────────────────
    Half the warm glow of the first demo: the clouds carry the light now,
    the background only sets the temperature.                               */
@@ -45,8 +63,8 @@
 .xx-layer--far { --dur: 190s; --s0: 1.00; --s1: 1.22; --o: 1.00; --dx: -2%; --dy: 1%; }
 .xx-layer--mid { --dur: 130s; --s0: 0.96; --s1: 1.46; --o: 1.00; --dx:  3%; --dy: 3%; }
 
-.xx-layer--far .xx-cloud { background-image: url(clouds/far2.webp?v=20260917c); background-size: auto 30%; background-position: 50% 46%; }
-.xx-layer--mid .xx-cloud { background-image: url(clouds/mid2.webp?v=20260917c); background-size: auto 62%; background-position: 50% 64%; }
+.xx-layer--far .xx-cloud { background-image: var(--tfar); background-size: auto 30%; background-position: 50% 46%; }
+.xx-layer--mid .xx-cloud { background-image: var(--tmid); background-size: auto 62%; background-position: 50% 64%; }
 
 @keyframes xxFly {
   0%   { transform: translate3d(0, 0, 0) scale(var(--s0)) scaleX(var(--flip)); opacity: 0; }
@@ -123,14 +141,14 @@
   animation-delay: calc((var(--delay) + var(--lag)) * var(--xx-tempo));
 }
 /* start clustered, end far apart: that spread is what reads as the tear */
-.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .78; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: url(clouds/puff1.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .72; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: url(clouds/puff2.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .66; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: url(clouds/puff3.webp?v=20260917c); }
-.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .56; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: url(clouds/puff4.webp?v=20260917c); }
-.xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5.webp?v=20260917c); }
-.xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6.webp?v=20260917c); }
-.xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6.webp?v=20260917c); }
-.xx-burst:nth-child(3) .xx-shard:nth-child(4) { background-image: url(clouds/puff5.webp?v=20260917c); }
+.xx-burst .xx-shard:nth-child(1) { --lag: 0s;   --o: .78; --x0: -2.0vmax; --y0: -1.2vmax; --x1: -58vmax; --y1:  26vmax; --s0: .26; --s1: 3.0; --r1:  -9deg; background-image: var(--t1); }
+.xx-burst .xx-shard:nth-child(2) { --lag: .5s;  --o: .72; --x0:  1.6vmax; --y0: -2.0vmax; --x1:  52vmax; --y1:  34vmax; --s0: .23; --s1: 2.7; --r1:   8deg; background-image: var(--t2); }
+.xx-burst .xx-shard:nth-child(3) { --lag: .9s;  --o: .66; --x0: -0.8vmax; --y0:  1.8vmax; --x1: -18vmax; --y1:  64vmax; --s0: .20; --s1: 3.3; --r1:   5deg; background-image: var(--t3); }
+.xx-burst .xx-shard:nth-child(4) { --lag: 1.4s; --o: .56; --x0:  2.4vmax; --y0:  0.6vmax; --x1:  30vmax; --y1: -30vmax; --s0: .18; --s1: 2.4; --r1:  -6deg; background-image: var(--t4); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: var(--t5); }
+.xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: var(--t6); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: var(--t6); }
+.xx-burst:nth-child(3) .xx-shard:nth-child(4) { background-image: var(--t5); }
 
 /* The approach is deliberately uneven: almost nothing happens for the first
    half (a cloud far ahead), then it swells, and in the last quarter the four
@@ -181,16 +199,6 @@
 html.xx-tempo-calm  { --xx-tempo: 1.6; }
 html.xx-tempo-quick { --xx-tempo: 0.7; }
 html.xx-nohalo      { --xx-halo: 0; }
-/* side by side with demo 1: the old washed-out gradient and softer clouds */
-html.xx-soft .xx-sky {
-  background:
-    radial-gradient(ellipse 70% 45% at 82% 80%, rgba(255, 214, 166, 0.50) 0%, rgba(255, 230, 200, 0.20) 45%, transparent 72%),
-    radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255, 247, 234, 0.9) 0%, transparent 70%),
-    linear-gradient(180deg, #e6ecf2 0%, #eef0f0 30%, #f7f3ea 58%, #fbf8ef 100%);
-}
-html.xx-soft .xx-layer--far .xx-cloud { background-image: url(clouds/far.webp?v=20260917c); }
-html.xx-soft .xx-layer--mid .xx-cloud { background-image: url(clouds/mid.webp?v=20260917c); }
-html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
 
 /* the prototype is one screen: nav + hero fill the viewport */
 .xx-page { min-height: 100vh; }
@@ -202,15 +210,22 @@ html.xx-soft .xx-shard { filter: blur(2px) opacity(.7); }
   .xx-layer--far .xx-cloud { background-image: url(clouds/far2-m.webp?v=20260917c); }
   .xx-layer--mid .xx-cloud { background-image: url(clouds/mid2-m.webp?v=20260917c); }
   .xx-cloud { top: -30%; left: -30%; width: 160%; height: 160%; }
+  :root {
+    --t1: url(clouds/p_puff1-m.webp?v=20260917e); --t2: url(clouds/p_puff2-m.webp?v=20260917e);
+    --t3: url(clouds/p_puff3-m.webp?v=20260917e); --t4: url(clouds/p_puff4-m.webp?v=20260917e);
+    --t5: url(clouds/p_puff5-m.webp?v=20260917e); --t6: url(clouds/p_puff6-m.webp?v=20260917e);
+    --tfar: url(clouds/p_far2-m.webp?v=20260917e); --tmid: url(clouds/p_mid2-m.webp?v=20260917e);
+  }
+  html.xx-vol {
+    --t1: url(clouds/puff1-m.webp?v=20260917e); --t2: url(clouds/puff2-m.webp?v=20260917e);
+    --t3: url(clouds/puff3-m.webp?v=20260917e); --t4: url(clouds/puff4-m.webp?v=20260917e);
+    --t5: url(clouds/puff5-m.webp?v=20260917e); --t6: url(clouds/puff6-m.webp?v=20260917e);
+    --tfar: url(clouds/far2-m.webp?v=20260917e); --tmid: url(clouds/mid2-m.webp?v=20260917e);
+  }
+  html.xx-demo1 { --tfar: url(clouds/far-m.webp); --tmid: url(clouds/mid-m.webp); }
   .xx-layer--far .xx-cloud { background-size: auto 26%; }
   .xx-layer--mid .xx-cloud { background-size: auto 54%; }
-  .xx-burst .xx-shard:nth-child(1) { background-image: url(clouds/puff1-m.webp?v=20260917c); }
-  .xx-burst .xx-shard:nth-child(2) { background-image: url(clouds/puff2-m.webp?v=20260917c); }
-  .xx-burst .xx-shard:nth-child(3) { background-image: url(clouds/puff3-m.webp?v=20260917c); }
   .xx-burst .xx-shard:nth-child(4) { display: none; }
-  .xx-burst:nth-child(2) .xx-shard:nth-child(1) { background-image: url(clouds/puff5-m.webp?v=20260917c); }
-  .xx-burst:nth-child(2) .xx-shard:nth-child(3) { background-image: url(clouds/puff6-m.webp?v=20260917c); }
-  .xx-burst:nth-child(3) .xx-shard:nth-child(2) { background-image: url(clouds/puff6-m.webp?v=20260917c); }
   .xx-shard { width: 58vmax; height: 58vmax; margin: -29vmax 0 0 -29vmax; }
   .xx-halo__glow { width: 90vmax; height: 90vmax; margin: -45vmax 0 0 -45vmax; }
   .xx-sky--near { opacity: .8; }
