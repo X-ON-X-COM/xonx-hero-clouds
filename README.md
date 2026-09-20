@@ -38,12 +38,15 @@ and cross-link to each other from the corner panel.
    you, which is why they read as stuck on ("наліплені ... they look bad"). Demo 3 is 24 individual
    cloud sprites, each with its own vector, radius, scale, duration and phase, laid out by
    `build_flight.py` and written into the markup as CSS custom properties.
-2. **golden hour, measured.** `gen_palette.py` pulls eight freely licensed cumulus-at-sunset
-   photographs off Wikimedia Commons, drops the land, k-means the sky, and finds the two hue
-   families every one of those frames contains: **warm 22.3°** and **cool 213.0°**. Those hues are
-   what we keep; saturation and lightness are ours, because the references are late golden hour and
-   genuinely dark while the hero has to stay light. Result in `palette.json` / `palette.png`:
-   lit crown `#FFEDE3`, rim `#FFCFB2`, shadow `#AFC4DE`, sky `#9BBAE0` → `#FCF3ED` → site cream.
+2. **golden hour, measured, then pulled onto the brand.** `gen_palette.py` pulls eight freely
+   licensed cumulus-at-sunset photographs off Wikimedia Commons, drops the land, k-means the sky,
+   and finds the two hue families every one of those frames contains: **warm 22.3°** and
+   **cool 213.0°**. Measured golden hour is salmon on a screen, and Oleg's note on 20.09 was that
+   it has to sit in the company's colours and must not go pink. So the families are dragged toward
+   the brand — `--warm #F0EDE6` at 40° and `--graphite #111116` at 240° — by 66% and 34%, giving
+   working hues of **34°** and **222°**, with saturation cut hard. Result in `palette.json` /
+   `palette.png`: lit `#F0EAE3`, rim `#FFF1DE`, shadow `#898F9E`, core `#5E6473`, sky `#AAB9DB`
+   → `#D1D9ED` → `#FAF2E8` → `--cream #FAFAF5`.
 3. **perspective.** Clouds leave the vanishing point and diverge outward along their own radial
    vector, the way a straight street opens up as you walk down it. The radius fractions in
    `@keyframes xxFlight` are shaped by hand rather than left to a timing function, so a cloud
@@ -61,10 +64,35 @@ and cross-link to each other from the corner panel.
 The clouds themselves are the **lit-surface** renderer of the 17.09 morning build, not the
 volumetric one that replaced it. Compositing all three sets over the new sky settles it: the
 volumetric clouds come out as translucent grey smudges the sky shows straight through, while the
-lit-surface ones read as solid cumulus with a crown, a flank and a belly. A cloud you are about to
-fly into needs a lit side and a dark side. `gen_golden.py` holds that renderer with a sun a few
-degrees above the horizon instead of high up, wider contrast, and much more light through the
-thin edges.
+lit-surface ones read as solid cumulus with a crown, a flank and a belly. `gen_golden.py` holds
+that renderer.
+
+## Making the clouds believable, 20.09
+
+First pass still read as cotton wool. Rather than keep guessing, the reference is now
+**24 aerial photographs of clouds taken from a flight window** (Wikimedia Commons, free licences,
+cached in `refs/`), and four things came out of measuring against them:
+
+- **Contrast, fitted not chosen.** A real sunlit cumulus has a luminance profile of
+  p5 112 / p25 124 / p50 170 / p75 213 / p95 235: a spread of 123, with the median well down in
+  the midtones. The first pass rendered a spread of 62 with a median of 234 — almost the whole
+  cloud sat near white, which is exactly what reads as fake. The knobs in `GOLD` come out of a
+  grid search against that profile and land at [102, 124, 164, 198, 229]. Note also that a real
+  cloud tops out near 235 and is never blown to pure white, so rim light now **blends** into the
+  lit colour instead of adding to it.
+- **A crisp, ragged silhouette.** The first pass ramped alpha across a third of the height field,
+  which fogs the whole outline. Photographed against sky, a sunlit cumulus has an almost cut edge
+  that is ragged rather than soft, so the noise now moves the cut-off threshold and the ramp
+  across it is narrow (`edge` / `ragged` / `ramp`), with a thin vapour fringe outside it (`wisp`).
+- **Separate heads, not one mass.** Two things did it: a second, much denser population of small
+  bubbles sitting on the shell of each large lobe, weighted to the sunward top; and a sharper
+  union between spheres (`p=7` instead of `3`), so neighbouring lobes stop melting together and
+  the seam between them stays as a crevice.
+- **A blur bug that was making it look carved.** `gen_puffs.soften()` normalises to 8 bits before
+  handing the array to PIL. For an alpha mask that is fine; for a height field it bands a smooth
+  dome into terraces, and the gradient of a terrace is a ridge — which is where the moire squiggle
+  all over the surface came from. Normals are gradients, so `gen_golden.blur_f()` does the blur in
+  float (by hand: PIL will not blur an `F` image and scipy is not installed).
 
 ## Files
 

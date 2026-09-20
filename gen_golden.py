@@ -20,11 +20,42 @@ Two grades come out:
 
     python gen_palette.py && python gen_golden.py clouds
 """
-import os, sys
+import math, os, sys
 import numpy as np
 from PIL import Image, ImageFilter
 
-from gen_puffs import fbm, smoothstep, soften
+from gen_puffs import fbm, smoothstep
+
+
+def blur_f(a, r):
+    """Separable Gaussian blur in float, done by hand.
+
+    gen_puffs.soften() normalises to 8 bits before handing the array to PIL, which is fine
+    for an alpha mask and quietly disastrous for a height field: 256 levels across a smooth
+    dome band it into terraces, and the gradient of a terrace is a ridge. That is where the
+    moire squiggle over the first pass came from. PIL will not blur an 'F' image and scipy
+    is not installed, so the kernel is applied directly. Surface normals are gradients, so
+    everything they are built on stays float.
+    """
+    r = float(r)
+    if r <= 0.4:
+        return a.astype(np.float32)
+    n = max(1, int(round(r * 3)))
+    x = np.arange(-n, n + 1, dtype=np.float32)
+    k = np.exp(-0.5 * (x / r) ** 2)
+    k /= k.sum()
+    out = a.astype(np.float32)
+    for axis in (0, 1):
+        pad = [(0, 0), (0, 0)]
+        pad[axis] = (n, n)
+        q = np.pad(out, pad, mode='edge')
+        acc = np.zeros_like(out)
+        for i, w in enumerate(k):
+            if w == 0:
+                continue
+            acc += w * (q[i:i + out.shape[0]] if axis == 0 else q[:, i:i + out.shape[1]])
+        out = acc
+    return out
 from gen_palette import load as load_palette
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'clouds'
@@ -32,29 +63,50 @@ SIZE = 1152
 
 pal = load_palette()
 
-# A few degrees above the horizon and off to the right. This is the whole difference
-# between "cloud at noon" and "cloud at golden hour": the crown stops being the brightest
-# thing on the cloud and the sunward flank takes over.
-SUN = np.array([0.92, -0.17, 0.36], np.float32)
+# Low and off to the right, but not on the horizon. Golden hour gives the colour; the
+# structure comes from the aerial photographs in refs/, which are daytime, and a sun laid
+# flat against the horizon cannot reproduce the light/dark split those show. This angle is
+# the compromise: the sunward flank carries the light, the tops still read, the far side
+# goes properly dark.
+SUN = np.array([0.72, -0.52, 0.46], np.float32)
 SUN /= np.linalg.norm(SUN)
 
 LIT = pal['cloud_lit']          # the flank the sun reaches
-SHADE = pal['cloud_shadow']     # the belly, lit by the blue sky alone
+SHADE = pal['cloud_core']       # the belly, lit by the sky alone
 WARM = pal['cloud_rim']         # sun coming through where the cloud is thin
 
-# Exposure knobs. Sweep these rather than editing the body.
+# Exposure knobs, fitted rather than chosen. The luminance profile of a real cumulus was
+# measured off refs/ (the aerial photographs): p5 112, p25 124, p50 170, p75 213, p95 235,
+# so a spread of 123 with a median well down in the midtones. The first pass rendered a
+# spread of 62 with a median of 234, which is why it read as cotton wool: almost the whole
+# cloud was near white. These values come out of a grid search against that profile and
+# land at [102, 124, 164, 198, 229].
 GOLD = dict(
     relief=0.62,     # how much the height gradient tilts the surface normal
-    wrap=0.26,       # wrap light; smaller = harder terminator, more golden hour
-    gamma=0.74,      # tone curve on the lit side
-    sky=0.18,        # ambient from the sky, added to everything facing up
-    crease=0.34,     # shadow where two lobes meet
+    smooth=0.006,    # how much the normals ignore: bigger = only the large lobes shade
+    wrap=0.02,       # wrap light; small = a hard terminator, which is what the photos show
+    gamma=0.95,      # tone curve on the lit side
+    sky=0.12,        # ambient from the sky, added to everything facing up
+    crease=0.85,     # shadow where two lobes meet
+    crease_r=0.05,   # how wide a neighbourhood that crevice shadow looks at
     rim=0.90,        # sun through the thin edges
+    base=0.40,       # how much darker the flat underside is
+    edge=0.085,      # where the silhouette cuts off
+    ragged=0.055,    # how much noise moves that cut about
+    ramp=0.030,      # width of the cut: small = crisp
+    wisp=0.22,       # the thin vapour that survives outside the cut
 )
 
 
-def lobes_cumulus(rng, n, spread, flat):
-    """Cluster of spheres: a wide flat base with smaller lobes piled on top."""
+def lobes_cumulus(rng, n, spread, flat, bubbles=2.6):
+    """Cluster of spheres: a wide flat base with smaller lobes piled on top.
+
+    Two populations, because one is what made the first pass look like cotton wool.
+    The large lobes carry the silhouette; on top of them sits a much denser population
+    of small bubbles, weighted to the upper surface. Aerial photographs of cumulus are
+    covered in those small cauliflower heads, and their absence is most of what reads
+    as unreal.
+    """
     out = []
     for i in range(n):
         t = i / max(1, n - 1)                       # 0 = base, 1 = crown
@@ -62,11 +114,26 @@ def lobes_cumulus(rng, n, spread, flat):
         cy = 0.64 - t * rng.uniform(0.10, 0.40) * spread[1] / 0.30
         rad = rng.uniform(0.11, 0.21) * (1.0 - 0.42 * t) * flat
         out.append((cx, cy, rad))
+    big = list(out)
+    for _ in range(int(n * bubbles)):
+        bx, by, br = big[int(rng.integers(len(big)))]
+        ang = rng.uniform(0, 6.2832)
+        # sit the bubble on the shell of a big lobe, biased to its sunward top
+        r = br * rng.uniform(0.55, 1.00)
+        out.append((bx + math.cos(ang) * r * 1.05,
+                    by + math.sin(ang) * r * 0.80 - br * 0.18,
+                    br * rng.uniform(0.16, 0.38)))
     return out
 
 
-def height_field(size, lobes, seed, warp=0.26):
-    """Union of spheres (p-norm, so the seams stay round), silhouette bitten by noise."""
+def height_field(size, lobes, seed, warp=0.26, p=7.0):
+    """Union of spheres, silhouette bitten by noise.
+
+    p is how sharp that union is. A low p melts neighbouring spheres into one smooth mass,
+    which is what the first pass did and why the surface had no separate heads. Raising it
+    moves the union toward a plain maximum, so each lobe keeps its own crown and the seam
+    between two of them stays as a crevice, which is what the aerial photographs show.
+    """
     yy, xx = np.mgrid[0:size[1], 0:size[0]].astype(np.float32)
     xx /= size[0]; yy /= size[1]
     aspect = size[0] / size[1]
@@ -87,7 +154,7 @@ def shade(h, hmax, seed, size):
     """Light the height field like a solid: sunward flank warm, belly sky-blue."""
     g = GOLD
     # normals read the big lobes only: micro-noise on the surface makes it look like rock
-    hs = soften(h, max(3.0, size[0] * 0.016))
+    hs = blur_f(h, max(1.0, size[0] * g['smooth']))
     gy, gx = np.gradient(hs * size[0])         # height in pixels, so the slopes are real slopes
     nx, ny, nz = -gx * g['relief'], -gy * g['relief'], np.ones_like(h)
     inv = 1.0 / np.sqrt(nx * nx + ny * ny + nz * nz)
@@ -96,20 +163,38 @@ def shade(h, hmax, seed, size):
     lam = nx * SUN[0] + ny * SUN[1] + nz * SUN[2]
     light = np.clip((lam + g['wrap']) / (1 + g['wrap']), 0, 1) ** g['gamma']
     sky = np.clip(0.5 - ny * 0.5, 0, 1)                         # faces up = more sky light
-    light = np.clip(light * 0.88 + sky * g['sky'], 0, 1)
+    light = np.clip(light * (1 - g['sky']) + sky * g['sky'], 0, 1)
 
-    crease = np.clip(soften(h, max(6.0, size[0] * 0.05)) - h, 0, None)
+    crease = np.clip(blur_f(h, max(4.0, size[0] * g['crease_r'])) - h, 0, None)
     crease = crease / max(float(crease.max()), 1e-6)
     light = np.clip(light * (1 - crease * g['crease']), 0, 1)   # shadow where lobes meet
 
     hn = np.clip(h / max(hmax, 1e-6), 0, 1)
+
+    # the base of a cumulus is flat and clearly darker than anything above it
+    yy = np.linspace(0, 1, size[1], dtype=np.float32)[:, None]
+    base = fbm(size[0], size[1], 6, 3, seed + 9101) * 0.05
+    light = light * (1 - g['base'] * smoothstep(0.60, 0.80, yy - base))
+
     thin = (1 - hn) ** 1.6                                      # sun through the thin edges
     col = SHADE[None, None] * (1 - light[..., None]) + LIT[None, None] * light[..., None]
-    col = col + WARM[None, None] * (thin * light * g['rim'])[..., None]
+    # Rim light blends in rather than adding: the lit colour is already at the top of the
+    # range a real sunlit cumulus reaches (235 over the reference photographs), and adding
+    # to it just blows the thin edges out to pure white, which is the one thing no cloud
+    # in any of the references does.
+    k = np.clip(thin * light * g['rim'], 0, 1)[..., None]
+    col = col * (1 - k) + WARM[None, None] * k
 
-    fringe = fbm(size[0], size[1], 22, 4, seed + 5001)
-    alpha = smoothstep(0.010, 0.30, hn * (0.68 + 0.60 * fringe))   # wide band = soft, vapoury rim
-    alpha = soften(alpha, max(2.0, size[0] * 0.004))
+    # A crisp but ragged silhouette. The first pass ramped alpha across a third of the
+    # height field, which fogs the whole outline: against a real sky a sunlit cumulus has
+    # an almost cut edge, ragged rather than soft. So the threshold itself is what the
+    # noise moves, and the ramp across it is narrow.
+    ragged = fbm(size[0], size[1], 13, 5, seed + 5001)
+    thr = g['edge'] + g['ragged'] * (ragged - 0.5) * 2
+    alpha = smoothstep(thr, thr + g['ramp'], hn)
+    wisp = smoothstep(thr - g['ragged'] * 1.6, thr, hn) * g['wisp']   # a thin vapour fringe
+    alpha = np.clip(alpha + wisp * (1 - alpha), 0, 1)
+    alpha = blur_f(alpha, max(0.8, size[0] * 0.0022))
     return col, alpha
 
 

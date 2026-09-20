@@ -16,7 +16,7 @@ import math, pathlib, random, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260920a'
+V = '20260920c'
 
 NEAR_TEX = [f'clouds/g_near{i}.webp' for i in range(1, 7)]
 FAR_TEX = [f'clouds/g_far{i}.webp' for i in range(1, 6)]
@@ -48,14 +48,14 @@ def field(seed=20260920, half=False):
     # ── far: many small clouds, slow, low contrast. This is the depth that demo 2
     # faked with a tiled band, and the reason that band looked stuck on.
     far = []
-    n = 9
+    n = 8
     for i in range(n):
         dur = rng.uniform(46, 60)
         far.append(sprite(
             rng, FAR_TEX[i % len(FAR_TEX)],
             angle=(i * 360 / n) + rng.uniform(-14, 14),
             r0=rng.uniform(1.0, 5.0), r1=rng.uniform(72, 104),
-            s0=rng.uniform(0.06, 0.12), s1=rng.uniform(0.95, 1.55),
+            s0=rng.uniform(0.05, 0.10), s1=rng.uniform(0.62, 1.05),
             dur=dur, delay=-dur * i / n + rng.uniform(-1.5, 1.5),
             opacity=rng.uniform(0.80, 1.00),
             drop=(i % 2 == 1), half=half))
@@ -63,14 +63,14 @@ def field(seed=20260920, half=False):
 
     # ── mid: crosses the headline. Fewer, bigger, faster.
     mid = []
-    n = 8
+    n = 6
     for i in range(n):
         dur = rng.uniform(30, 40)
         mid.append(sprite(
             rng, (FAR_TEX + NEAR_TEX)[i % (len(FAR_TEX) + len(NEAR_TEX))],
             angle=(i * 360 / n) + rng.uniform(-18, 18) + 22,
             r0=rng.uniform(0.5, 4.0), r1=rng.uniform(88, 124),
-            s0=rng.uniform(0.09, 0.17), s1=rng.uniform(2.30, 3.40),
+            s0=rng.uniform(0.07, 0.13), s1=rng.uniform(1.55, 2.25),
             dur=dur, delay=-dur * i / n + rng.uniform(-1.2, 1.2),
             opacity=rng.uniform(0.85, 1.00),
             drop=(i % 2 == 1), half=half))
@@ -92,7 +92,7 @@ def field(seed=20260920, half=False):
                 rng, NEAR_TEX[(gi * 3 + mi) % len(NEAR_TEX)],
                 angle=base_angle + rng.uniform(-9, 9),
                 r0=rng.uniform(0.3, 2.0), r1=rng.uniform(104, 152),
-                s0=rng.uniform(0.12, 0.20), s1=rng.uniform(3.00, 4.20),
+                s0=rng.uniform(0.10, 0.16), s1=rng.uniform(2.20, 3.10),
                 dur=dur, delay=base_delay + rng.uniform(-1.0, 1.0),
                 opacity=rng.uniform(0.85, 1.00),
                 drop=(mi == 2), half=half))

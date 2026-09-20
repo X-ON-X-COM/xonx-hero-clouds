@@ -39,20 +39,36 @@ REFS = {
 UA = 'xonx-hero-clouds/1.0 (iryna.oliinyk@x-on-x.com) palette extraction'
 LUMA = np.array([0.2126, 0.7152, 0.0722], np.float32)
 
-# What each role is for, and the exposure we put it at. Hue comes from the photographs:
-# 'warm' = the sunward family, 'cool' = the shadow-and-sky family.
+# X-ON-X, from the site tokens. The brand has no orange in it: its warm is a paper
+# cream at about 40deg with almost no saturation, and its neutral is graphite, which
+# leans very slightly blue-violet rather than sky blue.
+BRAND = {
+    'warm': 40.0,    # --warm #F0EDE6 / --border #E6E2DB
+    'cool': 240.0,   # --graphite #111116 / --charcoal #1C1C22
+}
+# How far each family is dragged off the measurement and onto the brand. Oleg, 20.09:
+# the golden hour has to sit in the company's colours and must not go pink. Measured
+# golden hour is 22deg, which is salmon on a screen; the brand cream is 40deg. Pulling
+# two thirds of the way keeps the hour and loses the postcard.
+PULL = {'warm': 0.66, 'cool': 0.34}
+
+# What each role is for, and the exposure we put it at. The hue is measured and then
+# pulled; saturation and value are ours, and they are deliberately low: this is a
+# muted sky in a graphite-and-cream identity, not a sunset.
 #                 family   sat    val
 ROLES = {
-    'cloud_lit':    ('warm', 0.11, 1.00),   # crown in full sun
-    'cloud_rim':    ('warm', 0.30, 1.00),   # light coming through the thin edges
-    'cloud_body':   ('warm', 0.06, 0.96),   # the sunlit flank between crown and belly
-    'cloud_shadow': ('cool', 0.21, 0.87),   # belly, lit by the sky alone
-    'cloud_core':   ('cool', 0.29, 0.73),   # deepest shade inside the cloud
-    'sky_high':     ('cool', 0.31, 0.88),   # zenith
-    'sky_mid':      ('cool', 0.17, 0.94),
-    'sky_warm':     ('warm', 0.17, 0.99),   # the warm band standing above the horizon
-    'sky_low':      ('warm', 0.06, 0.99),   # meets the site cream
-    'sun_glow':     ('warm', 0.23, 1.00),
+    'cloud_lit':    ('warm', 0.078, 0.94),  # crown in full sun. Not 1.00: measured over
+                                            # the reference photographs a sunlit cumulus
+                                            # tops out near 235, it is never blown out
+    'cloud_rim':    ('warm', 0.195, 1.00),  # light coming through the thin edges
+    'cloud_body':   ('warm', 0.035, 0.90),  # the sunlit flank between crown and belly
+    'cloud_shadow': ('cool', 0.135, 0.62),  # belly, lit by the sky alone
+    'cloud_core':   ('cool', 0.180, 0.45),  # deepest shade inside the cloud
+    'sky_high':     ('cool', 0.225, 0.86),  # zenith
+    'sky_mid':      ('cool', 0.120, 0.93),
+    'sky_warm':     ('warm', 0.105, 0.98),  # the warm band standing above the horizon
+    'sky_low':      ('warm', 0.030, 0.99),  # meets the site cream
+    'sun_glow':     ('warm', 0.150, 1.00),
 }
 
 
@@ -120,10 +136,14 @@ def main():
             'warm': [f'{hexs(C[i])} H{hue[i]:.0f} S{sat[i]:.2f}' for i in np.where(warm)[0]],
             'cool': [f'{hexs(C[i])} H{hue[i]:.0f} S{sat[i]:.2f}' for i in np.where(cool)[0]],
         }
-    hues = {
+    measured = {
         'warm': circular_mean(np.array(warm_h), np.array(warm_w)),
         'cool': circular_mean(np.array(cool_h), np.array(cool_w)),
     }
+    hues = {}
+    for fam, h in measured.items():
+        d = (BRAND[fam] - h + 180) % 360 - 180          # shortest way round the wheel
+        hues[fam] = (h + d * PULL[fam]) % 360
 
     work = {}
     for role, (fam, s, v) in ROLES.items():
@@ -133,7 +153,10 @@ def main():
     OUT.write_text(json.dumps({
         'source': 'Wikimedia Commons, cumulus at sunset, free licences',
         'refs': REFS,
-        'measured_hues': {k: round(v, 1) for k, v in hues.items()},
+        'measured_hues': {k: round(v, 1) for k, v in measured.items()},
+        'brand_hues': BRAND,
+        'pull_toward_brand': PULL,
+        'working_hues': {k: round(v, 1) for k, v in hues.items()},
         'per_reference': per_ref,
         'roles': {k: {'family': f, 'sat': s, 'val': v} for k, (f, s, v) in ROLES.items()},
         'working': {k: hexs(v) for k, v in work.items()},
@@ -148,7 +171,8 @@ def main():
         d.text((i * 150 + 10, 174), hexs(v), fill='#111111')
     sw.save(HERE / 'palette.png')
 
-    print('measured hues:', {k: round(v, 1) for k, v in hues.items()})
+    print('measured:', {k: round(v, 1) for k, v in measured.items()},
+          '-> working:', {k: round(v, 1) for k, v in hues.items()})
     for k, v in work.items():
         print(f'  {k:13s} {hexs(v)}')
 

@@ -25,15 +25,20 @@
   --cx: 64%;              /* where the flight is heading: the vanishing point      */
   --cy: 44%;              /* the sun and the nimbus sit here too                   */
 
-  /* golden hour, measured: warm family 22.3deg, cool family 213.0deg — see palette.json */
-  --g-cloud-lit:    #FFEDE3;
-  --g-cloud-rim:    #FFCFB2;
-  --g-cloud-shadow: #AFC4DE;
-  --g-sky-high:     #9BBAE0;
-  --g-sky-mid:      #C7D9F0;
-  --g-sky-warm:     #FCE1D2;
-  --g-sky-low:      #FCF3ED;
-  --g-sun:          #FFDAC4;
+  /* Golden hour in X-ON-X colours, not a postcard sunset. gen_palette.py measures the
+     two hue families off photographs (warm 22.3deg, cool 213.0deg) and then pulls them
+     onto the brand: --warm #F0EDE6 sits at 40deg and --graphite #111116 at 240deg, so the
+     working hues are 34deg and 222deg with the saturation cut hard. Oleg, 20.09: it has
+     to be the company's colours and it must not go pink. Regenerate with gen_palette.py. */
+  /* The cloud colours are baked into the sprites by gen_golden.py and live in
+     palette.json (lit #F0E8DD, rim #FFE9CD, shadow #898F9E, core #5E6473); only the
+     sky needs them here. */
+  --g-sky-high:     #AAB9DB;
+  --g-sky-mid:      #D1D9ED;
+  --g-sky-warm:     #FAEFE0;
+  --g-sky-low:      #FCF9F5;
+  --g-sun:          #FFEED9;
+  --g-paper:        #FAFAF5;   /* --cream, where the sky meets the hero */
 
   /* how much of each plane comes through. The two in front of the text are the
      ones that have to stay thin, or the hero stops being readable. */
@@ -55,10 +60,10 @@
   z-index: 0; pointer-events: none; overflow: hidden;
   background:
     radial-gradient(circle 30vmax at var(--cx) var(--cy),
-        rgba(255, 214, 188, 0.34) 0%, rgba(255, 228, 210, 0.13) 34%, transparent 66%),
+        rgba(255, 243, 228, 0.42) 0%, rgba(255, 246, 236, 0.16) 34%, transparent 66%),
     linear-gradient(180deg,
         var(--g-sky-high) 0%, var(--g-sky-mid) 34%, var(--g-sky-warm) 74%,
-        var(--g-sky-low) 89%, #FAF5E9 100%);
+        var(--g-sky-low) 89%, var(--g-paper) 100%);
 }
 
 /* ── the planes ───────────────────────────────────────────────────────────
@@ -212,8 +217,8 @@ html.xx-behind { --xx-mid-o: 0.88; --xx-near-o: 0.78; }
 .xx-halo__glow {
   width: 56vmax; height: 56vmax; margin: -28vmax 0 0 -28vmax;
   background: radial-gradient(circle,
-      rgba(255, 246, 232, 0.46) 0%, rgba(255, 233, 210, 0.26) 15%,
-      rgba(255, 218, 196, 0.12) 29%, rgba(255, 210, 186, 0.04) 44%, transparent 64%);
+      rgba(255, 250, 242, 0.46) 0%, rgba(255, 244, 228, 0.26) 15%,
+      rgba(255, 240, 222, 0.12) 29%, rgba(255, 238, 220, 0.04) 44%, transparent 64%);
   animation: xxFlare calc(var(--cycle) * var(--xx-tempo)) ease-in-out infinite;
 }
 .xx-halo__ring {
@@ -223,7 +228,7 @@ html.xx-behind { --xx-mid-o: 0.88; --xx-near-o: 0.78; }
 .xx-halo__ring--in {
   width: 29vmax; height: 29vmax; margin: -14.5vmax 0 0 -14.5vmax;
   background: radial-gradient(circle, transparent 0 40%,
-      rgba(255, 207, 178, 0.19) 47%, rgba(255, 237, 227, 0.09) 54%, transparent 62%);
+      rgba(255, 238, 216, 0.19) 47%, rgba(250, 247, 242, 0.09) 54%, transparent 62%);
 }
 .xx-halo__ring--out {
   width: 50vmax; height: 50vmax; margin: -25vmax 0 0 -25vmax;

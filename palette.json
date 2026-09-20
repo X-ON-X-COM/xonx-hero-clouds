@@ -14,6 +14,18 @@
     "warm": 22.3,
     "cool": 213.0
   },
+  "brand_hues": {
+    "warm": 40.0,
+    "cool": 240.0
+  },
+  "pull_toward_brand": {
+    "warm": 0.66,
+    "cool": 0.34
+  },
+  "working_hues": {
+    "warm": 34.0,
+    "cool": 222.2
+  },
   "per_reference": {
     "aitutaki": {
       "warm": [],
@@ -109,117 +121,117 @@
   "roles": {
     "cloud_lit": {
       "family": "warm",
-      "sat": 0.11,
-      "val": 1.0
+      "sat": 0.078,
+      "val": 0.94
     },
     "cloud_rim": {
       "family": "warm",
-      "sat": 0.3,
+      "sat": 0.195,
       "val": 1.0
     },
     "cloud_body": {
       "family": "warm",
-      "sat": 0.06,
-      "val": 0.96
+      "sat": 0.035,
+      "val": 0.9
     },
     "cloud_shadow": {
       "family": "cool",
-      "sat": 0.21,
-      "val": 0.87
+      "sat": 0.135,
+      "val": 0.62
     },
     "cloud_core": {
       "family": "cool",
-      "sat": 0.29,
-      "val": 0.73
+      "sat": 0.18,
+      "val": 0.45
     },
     "sky_high": {
       "family": "cool",
-      "sat": 0.31,
-      "val": 0.88
+      "sat": 0.225,
+      "val": 0.86
     },
     "sky_mid": {
       "family": "cool",
-      "sat": 0.17,
-      "val": 0.94
+      "sat": 0.12,
+      "val": 0.93
     },
     "sky_warm": {
       "family": "warm",
-      "sat": 0.17,
-      "val": 0.99
+      "sat": 0.105,
+      "val": 0.98
     },
     "sky_low": {
       "family": "warm",
-      "sat": 0.06,
+      "sat": 0.03,
       "val": 0.99
     },
     "sun_glow": {
       "family": "warm",
-      "sat": 0.23,
+      "sat": 0.15,
       "val": 1.0
     }
   },
   "working": {
-    "cloud_lit": "#FFEDE3",
-    "cloud_rim": "#FFCFB2",
-    "cloud_body": "#F5ECE6",
-    "cloud_shadow": "#AFC4DE",
-    "cloud_core": "#849CBA",
-    "sky_high": "#9BBAE0",
-    "sky_mid": "#C7D9F0",
-    "sky_warm": "#FCE1D2",
-    "sky_low": "#FCF3ED",
-    "sun_glow": "#FFDAC4"
+    "cloud_lit": "#F0E8DD",
+    "cloud_rim": "#FFE9CD",
+    "cloud_body": "#E6E2DD",
+    "cloud_shadow": "#898F9E",
+    "cloud_core": "#5E6473",
+    "sky_high": "#AAB9DB",
+    "sky_mid": "#D1D9ED",
+    "sky_warm": "#FAEFE0",
+    "sky_low": "#FCF9F5",
+    "sun_glow": "#FFEED9"
   },
   "working_rgb": {
     "cloud_lit": [
-      255,
-      237,
-      227
+      240,
+      232,
+      221
     ],
     "cloud_rim": [
       255,
-      207,
-      178
+      233,
+      205
     ],
     "cloud_body": [
-      245,
-      236,
-      230
+      230,
+      226,
+      221
     ],
     "cloud_shadow": [
-      175,
-      196,
-      222
+      137,
+      143,
+      158
     ],
     "cloud_core": [
-      132,
-      156,
-      186
+      94,
+      100,
+      115
     ],
     "sky_high": [
-      155,
-      186,
-      224
+      170,
+      185,
+      219
     ],
     "sky_mid": [
-      199,
+      209,
       217,
-      240
+      237
     ],
     "sky_warm": [
-      252,
-      225,
-      210
+      250,
+      239,
+      224
     ],
     "sky_low": [
       252,
-      243,
-      237
+      249,
+      245
     ],
     "sun_glow": [
       255,
-      218,
-      196
+      238,
+      217
     ]
   }
 }
