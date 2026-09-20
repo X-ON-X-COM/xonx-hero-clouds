@@ -11,7 +11,7 @@ import pathlib, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260920k'
+V = '20260920l'
 
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="sky controls">
@@ -63,7 +63,7 @@ PANEL = '''
 '''
 
 
-def build(name, out, partner, count, texture):
+def build(name, out, partner, count, texture, clouds=46):
     html = (SRC / name).read_text()
     html = re.sub(r'\?v=\d{8}[a-z]', f'?v={V}', html)
     html = html.replace("location.replace('m.html?", f"location.replace('{partner}?")
@@ -76,7 +76,7 @@ def build(name, out, partner, count, texture):
     a = html.index('</div><!-- /.xx-page -->') + len('</div><!-- /.xx-page -->')
     b = html.index('</body>')
     field = (f'<script src="js/three.min.js"></script>\n'
-             f'<script src="field.js?v={V}" data-count="{count}" data-texture="{texture}?v={V}" '
+             f'<script src="field.js?v={V}" data-count="{count}" data-clouds="{clouds}" data-texture="{texture}?v={V}" '
              f'data-sky="#ECE8E6"></script>\n')
     html = html[:a] + '\n' + PANEL + '\n' + field + html[b:]
     sky = ('\n  <!-- ──── SKY (demo 4: WebGL cloud field, after mrdoob) ──── -->\n'
@@ -89,5 +89,5 @@ def build(name, out, partner, count, texture):
 
 
 if __name__ == '__main__':
-    build('index.html', 'field.html', 'field-m.html', 5000, 'clouds/puff_photo.png')
-    build('m.html', 'field-m.html', 'field.html', 2200, 'clouds/puff_photo.png')
+    build('index.html', 'field.html', 'field-m.html', 6000, 'clouds/puff_photo.png', 46)
+    build('m.html', 'field-m.html', 'field.html', 2600, 'clouds/puff_photo.png', 30)

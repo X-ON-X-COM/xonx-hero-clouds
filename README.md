@@ -123,26 +123,31 @@ sprites are now real clouds, matted out of photographs by `cut_clouds.py`.
   transparency. Alpha is eroded by about a pixel and softened back to trim the last fringe.
 - Each cut writes a `_far` variant, mixed toward `sky_mid` and thinned, for the far plane.
 
-## Demo 4, 20.09 night: a cloud field in WebGL, after mrdoob
+## Demo 4, 20.09 night: demo 3's flight, mrdoob's cloud structure
 
 Iryna, after the photographic sprites: «структура хмар має бути як тут», pointing at
-[mrdoob.com/lab/javascript/webgl/clouds](https://mrdoob.com/lab/javascript/webgl/clouds/).
-The structure there is the whole point, and it is the opposite of everything demos 1–3 did.
-**No sprite is a cloud.** Thousands of small, soft, mostly transparent billboards are scattered
-down a long box and the camera flies down it; a cloud is what a few hundred of them add up to
-where they overlap. Overlap is what reads as volume, and a single rendered or cut-out cloud,
-however good, never will. That is why every 2D pass came back as вата.
+[mrdoob.com/lab/javascript/webgl/clouds](https://mrdoob.com/lab/javascript/webgl/clouds/). And
+after the first build of this page: «я просила лише структуру хмарок, а не змінювати все». So
+demo 4 is demo 3's composition exactly — separate clouds with a place and a size in three
+dimensions, coming at the viewer, diverging in perspective, passing through the text, on the
+same measured-and-pulled golden hour sky — and only what a cloud is made of has changed.
+
+**A cloud is not one sprite any more.** It is a cluster of a hundred or so small, soft, mostly
+transparent puffs that overlap, and the overlap is what reads as volume. That is mrdoob's
+structure, kept. His flat deck below the camera is not: it replaced the whole scene, and that
+was the mistake of the first build.
 
 `field.html` / `field-m.html`, `field.css`, `field.js`, `build_field.py`, Three r128 vendored in
 `js/` so nothing depends on a CDN.
 
-- **Same construction as the reference**: 5000 planes (8000 on the original; ours is airier),
-  `x` across 1000 units, `y = -rand·rand·260 - 70` so it is a deck below the camera, `z` spread
-  along 8000 units with a second copy of the field one box back for a seamless loop, random
-  spin and `rand·rand·1.5 + 0.5` scale, fov 30, `depthTest: false`, additive-free normal
-  blending, the fragment fading the puff at the lens with `pow(gl_FragCoord.z, 20)` and mixing
-  to the sky colour with distance. Camera flies at 0.03 units/ms; mouse gives a little parallax.
-  Built as one `InstancedMesh` rather than a merged `Geometry`, which r128 no longer has.
+- **Clouds**: 46 per box length, radius 110–470 units with small ones common, spread across
+  ±1170 sideways and −460..+300 vertically (some above the camera, more below), scattered along
+  an 8000-unit box with a second copy one box back for a seamless loop. Puffs per cloud scale
+  with its area, 6000 in all. Inside a cloud the puffs are laid out as a cumulus: wider than
+  tall, flattened underneath, lumpy on top, densest and largest in the middle.
+- **Rendering as the reference**: one `InstancedMesh` of 64-unit planes, `depthTest: false`,
+  fog mixed in the fragment shader, the puff at the lens fading with `pow(gl_FragCoord.z, 20)`,
+  camera at fov 30 flying at 0.03 units/ms with a little mouse parallax.
 - **Through the text, still.** Two canvases share the same seeded field. The back one draws
   everything beyond 700 units and sits behind the hero; the front one draws only what is nearer
   and sits in front of the words and the buttons at 55%. A 160-unit depth fade across the
@@ -151,11 +156,19 @@ however good, never will. That is why every 2D pass came back as вата.
 - **The puff is photographic.** mrdoob's `cloud10.png` is clearly cut from a photograph, and a
   noise puff stacks into smoke. Ours is the densest 256px window of the CC0 Gåseberg cut
   (`ph_3`), luminance kept, radially faded with a wobbling radius so it is not a disc, and
-  coloured from `palette.json` shadow → lit. Where the puff thins out the colour is pulled to
-  lit: thousands of shaded margins otherwise stack into a dark halo round every mass. Alpha
-  mean 0.34, so most of every puff is see-through and depth accumulates.
+  coloured from `palette.json` shadow → lit. It is mostly lit, with the variation in alpha: a
+  shaded puff stacked a hundred times goes grey.
+- **Premultiplied, or it halos.** A transparent WebGL canvas over the page has to be
+  premultiplied. With straight alpha the first puff over the cleared black framebuffer lands as
+  colour × alpha and the browser reads that darkened colour as if it were straight, which drew a
+  thick dark halo round every soft edge. The shader outputs premultiplied colour, the blend is
+  One / OneMinusSrcAlpha. Fog is the horizon colour, not the zenith, or the far edge of a cloud
+  goes blue-grey against the warm band.
 - **Tempo** goes through `--xx-tempo` as on the other demos; `motion: off` freezes the flight in
   place; `prefers-reduced-motion` renders one frame a way into the field and stops.
+
+Open: on this light cream sky the clouds read far softer than on mrdoob's deep blue; contrast
+is the next knob (denser puffs, or a little more blue at the zenith).
 
 ## Files
 

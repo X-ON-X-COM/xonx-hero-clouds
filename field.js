@@ -17,9 +17,10 @@
   'use strict';
   var script = document.currentScript;
   var cfg = {
-    count: +script.dataset.count || 5000,
+    count: +script.dataset.count || 5000,       // puffs across all clouds
+    clouds: +script.dataset.clouds || 46,        // clouds in one box length
     length: 8000,           // the box the field fills, in world units; the loop is this long
-    width: 1000,
+    width: 1300,
     puff: 64,
     speed: +script.dataset.speed || 0.03,       // world units per millisecond, as mrdoob
     fov: 30,
@@ -85,19 +86,45 @@
       blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor
     });
     var geo = new THREE.PlaneGeometry(cfg.puff, cfg.puff);
-    // the field, then a second copy one box further back so the loop has no seam
+    // The field is demo 3's: separate clouds, each with a place and a size in three
+    // dimensions, scattered down the box the camera flies through, so they come at the
+    // viewer, diverge, and pass through the text as before. What changed is only what a
+    // cloud is made of. It is not one sprite any more: it is a cluster of soft, mostly
+    // transparent puffs that overlap, and the overlap is what reads as volume. That is
+    // the structure of mrdoob's clouds, kept; his flat deck below the camera is not.
     var r = rng(cfg.seed), m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
     var z = new THREE.Vector3(0, 0, 1);
-    var mesh = new THREE.InstancedMesh(geo, mat, cfg.count * 2);
-    for (var i = 0; i < cfg.count; i++) {
-      var x = r() * cfg.width - cfg.width / 2;
-      var y = -r() * r() * 260 - 70;                      // a deck below the camera, as mrdoob, set a little lower so it sits under the copy
-      var zz = i * (cfg.length / cfg.count);
-      var rot = r() * Math.PI, sc = r() * r() * 1.5 + 0.5;
-      q.setFromAxisAngle(z, rot); s.set(sc, sc, 1);
-      p.set(x, y, zz); m.compose(p, q, s); mesh.setMatrixAt(i, m);
-      p.set(x, y, zz - cfg.length); m.compose(p, q, s); mesh.setMatrixAt(cfg.count + i, m);
+    var clouds = [];
+    for (var c = 0; c < cfg.clouds; c++) {
+      var R = 110 + r() * r() * 360;                        // radius, small clouds common
+      clouds.push({
+        x: (r() - 0.5) * 2 * cfg.width * 0.9,
+        y: -80 + (r() + r() - 1) * 380,                       // some above, more below
+        z: r() * cfg.length,
+        R: R,
+        n: Math.round(cfg.count * (R * R) / (cfg.clouds * 260 * 260))
+      });
     }
+    var total = 0;
+    clouds.forEach(function (cl) { total += cl.n; });
+    var mesh = new THREE.InstancedMesh(geo, mat, total * 2);
+    var i = 0;
+    function gauss() { return (r() + r() + r() - 1.5) * 1.15; }
+    clouds.forEach(function (cl) {
+      for (var k = 0; k < cl.n; k++) {
+        // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle
+        var gx = gauss(), gy = gauss(), gz = gauss();
+        var px = cl.x + gx * cl.R * 0.62;
+        var py = cl.y + (gy < 0 ? gy * 0.28 : gy * 0.55) * cl.R;
+        var pz = cl.z + gz * cl.R * 0.45;
+        var d = Math.sqrt(gx * gx + gy * gy + gz * gz);
+        var sc = (0.55 + r() * 0.9) * (cl.R / 200) * (d < 0.8 ? 1.25 : 1.0);
+        q.setFromAxisAngle(z, r() * Math.PI); s.set(sc, sc, 1);
+        p.set(px, py, pz); m.compose(p, q, s); mesh.setMatrixAt(i, m);
+        p.set(px, py, pz - cfg.length); m.compose(p, q, s); mesh.setMatrixAt(total + i, m);
+        i++;
+      }
+    });
     scene.add(mesh);
     return { renderer: renderer, scene: scene, camera: camera };
   }
