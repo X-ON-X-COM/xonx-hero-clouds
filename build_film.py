@@ -13,7 +13,7 @@ import pathlib, re, shutil
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 VID = pathlib.Path('/Users/user/Claude/xonx-hero-video/out')
 DST = pathlib.Path(__file__).parent
-V = '20260921h'
+V = '20260921i'
 
 CSS = '''
 /* ── demo 5: Legora's hero, ours ─────────────────────────────────────────────
