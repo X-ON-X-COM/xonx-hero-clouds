@@ -11,7 +11,7 @@ import pathlib, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260920q'
+V = '20260920t'
 
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="sky controls">

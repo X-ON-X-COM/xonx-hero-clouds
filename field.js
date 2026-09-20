@@ -123,11 +123,17 @@
     var clouds = [];
     for (var c = 0; c < cfg.clouds; c++) {
       var R = (120 + r() * r() * 400) * cfg.size;           // radius, small clouds common
+      // a cumulus is not one blob: a flat base with two to four crowns piled on it, the
+      // cauliflower silhouette. Each crown is a smaller sphere set into the upper half.
+      var lobes = [], nl = 2 + Math.floor(r() * 3);
+      for (var l = 0; l < nl; l++) {
+        lobes.push({ x: (r() - 0.5) * 1.0, y: 0.20 + r() * 0.45, z: (r() - 0.5) * 0.6, s: 0.32 + r() * 0.30 });
+      }
       clouds.push({
         x: gauss() * cfg.width * 1.05,                        // most near the line of flight, a few wide
         y: gauss() * 215 - 20,                                // at eye level: that is where the text is
         z: r() * cfg.length,
-        R: R,
+        R: R, lobes: lobes,
         n: Math.round(cfg.count * (R * R) / (cfg.clouds * 300 * 300))
       });
     }
@@ -144,11 +150,17 @@
     var i = 0;
     clouds.forEach(function (cl) {
       for (var k = 0; k < cl.n; k++) {
-        // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle
-        var gx = gauss(), gy = gauss(), gz = gauss();
-        var px = cl.x + gx * cl.R * 0.62;
-        var py = cl.y + (gy < 0 ? gy * 0.28 : gy * 0.55) * cl.R;
-        var pz = cl.z + gz * cl.R * 0.45;
+        // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle.
+        // A third of the puffs go to the crowns, the rest to the body.
+        var gx, gy, gz;
+        if (r() < 0.34) {
+          var lb = cl.lobes[Math.floor(r() * cl.lobes.length)];
+          gx = lb.x + gauss() * 0.5 * lb.s; gy = lb.y + gauss() * 0.5 * lb.s; gz = lb.z + gauss() * 0.5 * lb.s;
+        } else {
+          gx = gauss() * 0.62; gy = gauss(); gz = gauss() * 0.45;
+          gy = gy < 0 ? gy * 0.28 : gy * 0.45;
+        }
+        var px = cl.x + gx * cl.R, py = cl.y + gy * cl.R, pz = cl.z + gz * cl.R;
         var d = Math.sqrt(gx * gx + gy * gy + gz * gz);
         var sc = (0.7 + r() * 0.8) * (cl.R / 200) * (d < 0.8 ? 1.2 : 1.0);
         q.setFromAxisAngle(z, r() * Math.PI); s.set(sc, sc, 1);
