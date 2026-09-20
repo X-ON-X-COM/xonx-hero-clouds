@@ -94,6 +94,35 @@ cached in `refs/`), and four things came out of measuring against them:
   all over the surface came from. Normals are gradients, so `gen_golden.blur_f()` does the blur in
   float (by hand: PIL will not blur an `F` image and scipy is not installed).
 
+## Real clouds, 20.09 evening
+
+After three rendered passes Iryna's verdict was still «кусочки вати», with the note that the
+clouds may have a different structure altogether. A rendered cumulus is one closed silhouette
+with one kind of edge and one density; a real one has a dense core, translucent margins and
+detail at every scale, and nothing short of a full volumetric renderer gets there. So the
+sprites are now real clouds, matted out of photographs by `cut_clouds.py`.
+
+- **Sources, all CC0 or public domain on Wikimedia Commons**, so no attribution or share-alike
+  obligation follows them onto the site: *Cumulus congestus over Gåseberg 1, 2, 4* (CC0, the
+  three that key cleanly: sky at saturation ≈ 0.6, cloud at ≈ 0.1, under 8% ambiguous). The
+  aerial window series that served as the contrast reference is CC BY-SA and is used for
+  measurement only, never cut.
+- **Matte on saturation, not colour distance.** The belly of a cumulus is lit by the sky and is
+  therefore blue-grey: close to the sky in colour and no lighter than it, so a colour-distance
+  key keeps the crowns and punches holes in the body. What separates it is saturation. The
+  threshold comes from the sky itself, the body is closed so the shaded interior does not fall
+  out, and the largest connected blob is kept so a sprite is one cloud, not a frame of scraps.
+- **Graded, not copied.** Only the cloud's luminance and alpha survive. The colour is rebuilt
+  from `palette.json` along core → shadow → lit → rim, and the luminance is first mapped onto
+  the measured profile (p5 112 / p50 170 / p95 235), so sprites from different photographs
+  share one light and sit next to each other as one sky. The rim colour is held back to the
+  top 4% of the range; a wider band turned every crown peach.
+- **No despill into the colour.** Un-mixing the sky out of the half-transparent margin
+  overshoots dark wherever the sky estimate runs bright, which drew a grey outline round every
+  cloud. A margin pixel's own luminance is already about the cloud's, and alpha carries the
+  transparency. Alpha is eroded by about a pixel and softened back to trim the last fringe.
+- Each cut writes a `_far` variant, mixed toward `sky_mid` and thinned, for the far plane.
+
 ## Files
 
 - `clouds.css` demo 1, `halo.css` demo 2, `flight.css` demo 3 — transform and opacity only,

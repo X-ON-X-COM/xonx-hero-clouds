@@ -30,10 +30,13 @@ import math, pathlib, random, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260920d'
+V = '20260920e'
 
-NEAR_TEX = [f'clouds/g_near{i}.webp' for i in range(1, 7)]
-FAR_TEX = [f'clouds/g_far{i}.webp' for i in range(1, 6)]
+# Real clouds, cut out of CC0 / public-domain photographs by cut_clouds.py. The rendered
+# g_near / g_far set stays in the repo for comparison, but three rendered passes all came
+# back as «кусочки вати», and a photograph is the one thing that cannot.
+NEAR_TEX = [f'clouds/ph_{i}.webp' for i in (1, 2, 3, 6)]
+FAR_TEX = [f'clouds/ph_{i}_far.webp' for i in (1, 2, 3, 6)]
 
 EL = 44.0        # the sprite element is 44vmax wide; scale is relative to that
 K = 170.0        # projection constant: bigger = longer lens, clouds loom sooner
@@ -210,7 +213,7 @@ def build(name, out, partner, half=False):
     clouds = make_clouds()
     body = field(clouds)
     if half:                       # phones: same field, a quarter of the pixels
-        body = re.sub(r'(clouds/g_[a-z0-9]+)\.webp', r'\1-m.webp', body)
+        body = re.sub(r'(clouds/(?:g|ph)_[a-z0-9_]+)\.webp', r'\1-m.webp', body)
     sky = ('\n  <!-- ──── SKY (demo 3: golden hour, projected perspective) ──── -->\n'
            '  <div class="xx-sky" aria-hidden="true"></div>\n' + HALO + body)
     html = re.sub(r'(<div class="xx-page"[^>]*>)', lambda m: m.group(1) + sky, html, count=1)
