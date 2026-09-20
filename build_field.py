@@ -140,7 +140,9 @@ def build(name, out, partner, count, texture, clouds=46):
     html = re.sub(r'\?v=\d{8}[a-z]', f'?v={V}', html)
     html = html.replace("location.replace('m.html?", f"location.replace('{partner}?")
     html = html.replace("location.replace('index.html?", f"location.replace('{partner}?")
-    html = html.replace('</head>', f'<link rel="stylesheet" href="field.css?v={V}">\n</head>', 1)
+    html = html.replace('</head>', f'<link rel="stylesheet" href="field.css?v={V}">\n'
+                        '<style>html.bare .xx-nav, html.bare .xx-hero, html.bare .xx-proto, html.bare .xx-tune { display: none !important; }</style>\n'
+                        '<script>if (/[?&]bare=1/.test(location.search)) document.documentElement.classList.add("bare");</script>\n</head>', 1)
     html = html.replace('<title>X-ON-X – Home</title>', '<title>X-ON-X – Sky demo 4: cloud field</title>')
     start = html.index('<!-- ──── LATEST INSIGHTS')
     end = html.index('</div><!-- /.xx-page -->')

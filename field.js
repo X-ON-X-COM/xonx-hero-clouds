@@ -192,47 +192,60 @@
 
   function makeJourney(L) {
     if (!journey || !journey.length) return;
-    var cw = 400, ch = cw * 9 / 16, gap = cfg.length / journey.length;
+    var cw = 420, ch = cw * 9 / 16, gap = cfg.length / journey.length;
     var geo = new THREE.PlaneGeometry(cw, ch);
     var r = rng(cfg.seed + 7);
+    // Not a card. A hard rectangle in a sky is a hard rectangle in a sky, whatever is on it.
+    // The shot sits inside a soft oval whose edge is feathered and slightly hazed, so it
+    // surfaces out of the cloud and dissolves back into it, a memory rather than a screen.
     var fs2 = [
       'uniform sampler2D map; uniform float fogNear; uniform float fogFar; uniform vec3 fogColor; uniform float alpha;',
       'varying vec2 vUv;',
       'void main() {',
       '  vec4 c = texture2D(map, vUv);',
-      // rounded corners and a soft edge, in uv space
-      '  vec2 p = abs(vUv - 0.5) - vec2(0.5 - 0.035, 0.5 - 0.062);',
-      '  float d = length(max(p, 0.0)) - 0.035;',
-      '  float edge = 1.0 - smoothstep(-0.004, 0.004, d);',
+      '  vec2 q = (vUv - 0.5) * vec2(1.0, 1.35);',
+      '  float rr = length(q) * 2.0;',
+      '  float edge = 1.0 - smoothstep(0.62, 1.0, rr);',        // the oval, feathered over its outer third
       '  float depth = gl_FragCoord.z / gl_FragCoord.w;',
       '  float f = smoothstep(fogNear, fogFar, depth);',
-      '  c.rgb = mix(c.rgb, fogColor, f * 0.85);',
+      '  c.rgb = mix(c.rgb, fogColor, f * 0.85 + (1.0 - edge) * 0.35);',
       '  float a = edge * alpha * (1.0 - f * 0.9);',
       '  gl_FragColor = vec4(c.rgb * a, a);',
       '}'].join('\n');
+    // the videos live in the page, hidden: a detached <video> plays in Chrome and not in
+    // Safari, and a VideoTexture with no frame is a grey rectangle
+    var pen = document.getElementById('xx-journey-pen');
+    if (!pen) {
+      pen = document.createElement('div'); pen.id = 'xx-journey-pen';
+      pen.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;overflow:hidden;opacity:0.01;pointer-events:none;z-index:-1';
+      document.body.appendChild(pen);
+    }
     L.cards = journey.map(function (url, k) {
       var video = document.createElement('video');
-      video.src = url; video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'auto';
-      video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+      video.muted = true; video.loop = true; video.playsInline = true; video.autoplay = true; video.preload = 'auto';
+      video.setAttribute('muted', ''); video.setAttribute('playsinline', ''); video.setAttribute('autoplay', ''); video.setAttribute('loop', '');
+      video.src = url; video.width = 64; video.height = 36;
+      pen.appendChild(video);
+      video.load();
       var tex = new THREE.VideoTexture(video); tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
       var mat = new THREE.ShaderMaterial({
-        uniforms: { map: { value: tex }, fogNear: { value: 900 }, fogFar: { value: cfg.fogFar }, fogColor: { value: new THREE.Color(cfg.sky) }, alpha: { value: 1 } },
+        uniforms: { map: { value: tex }, fogNear: { value: 900 }, fogFar: { value: cfg.fogFar }, fogColor: { value: new THREE.Color(cfg.sky) }, alpha: { value: 0 } },
         vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
         fragmentShader: fs2, transparent: true, depthWrite: true, depthTest: true,
         blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
         blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor
       });
       var mesh = new THREE.Mesh(geo, mat);
-      // beside the line of flight, never on it: the copy sits bottom left, so the cards
-      // favour the right and the upper half, alternating a little so the flight has rhythm
-      // well off the line of flight, mostly right and up, so a card passes beside the copy
-      // rather than over it, and never gets to fill the frame before it fades
-      var side = (k % 2 === 0) ? 1 : -1;
-      mesh.position.set(side * (300 + r() * 220) + 160, 110 + r() * 200 - (k % 3 === 2 ? 240 : 0), (k + 0.5) * gap);
+      // to the right of the line of flight and above it, always: the copy is bottom left,
+      // and the shots must surface beside it, never across it
+      mesh.position.set(330 + r() * 260, 90 + r() * 220, (k + 0.5) * gap);
       mesh.userData = { video: video, z: mesh.position.z };
       L.scene.add(mesh);
       return mesh;
     });
+    // browsers that want a gesture before any playback: the first one starts them all
+    var kick = function () { L.cards.forEach(function (m) { m.userData.video.play().catch(function () {}); }); };
+    ['pointerdown', 'touchstart', 'keydown', 'scroll'].forEach(function (ev) { window.addEventListener(ev, kick, { once: true, passive: true }); });
   }
 
   function updateJourney(L, camZ) {
@@ -244,11 +257,13 @@
       if (dz > cfg.length / 2) dz -= cfg.length;
       m.position.z = camZ - dz;
       var ahead = dz > 0 && dz < cfg.fogFar;
-      var near = Math.min(1, Math.max(0, (dz - 260) / 420));  // gone well before it reaches the lens
-      m.material.uniforms.alpha.value = ahead ? near : 0;
-      m.visible = ahead;
+      var near = Math.min(1, Math.max(0, (dz - 420) / 520));  // dissolves well before it reaches the lens
+      var far = Math.min(1, Math.max(0, (cfg.fogFar * 0.85 - dz) / 500));  // and surfaces out of the haze
       var v = m.userData.video;
-      if (ahead && dz < cfg.fogFar * 0.8) { if (v.paused) v.play().catch(function () {}); }
+      var hasFrame = v.readyState >= 2;                       // no frame yet = nothing to show, not a grey plate
+      m.material.uniforms.alpha.value = (ahead && hasFrame) ? near * far : 0;
+      m.visible = ahead && hasFrame;
+      if (ahead && dz < cfg.fogFar * 0.9) { if (v.paused) v.play().catch(function () {}); }
       else if (!v.paused) v.pause();
     });
   }
@@ -268,7 +283,9 @@
       });
     }
     function frame() {
-      var t = paused || reduce ? frozen : (Date.now() - start);
+      // window.xxTime, when set, pins the flight to that millisecond: the film's cloud
+      // cutaways are captured this way, one frame at a time, deterministic
+      var t = (typeof window.xxTime === 'number') ? window.xxTime : (paused || reduce ? frozen : (Date.now() - start));
       var tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
       var pos = (t * cfg.speed / tempo) % cfg.length;
       if (paused && !rebuiltWhilePaused) { rebuiltWhilePaused = false; }

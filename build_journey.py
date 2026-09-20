@@ -17,7 +17,7 @@ import json, pathlib, re, shutil
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 VID = pathlib.Path('/Users/user/Claude/xonx-hero-video/out/shots')
 DST = pathlib.Path(__file__).parent
-V = '20260921d'
+V = '20260921f'
 
 CSS = '''
 /* ── demo 6: the flight, with the situations coming at you ─────────────────── */
