@@ -1,0 +1,277 @@
+/* ── X-ON-X hero, demo 3: flight through golden hour ────────────────────────
+   Built to the four points Oleg made on the 18.09 call:
+
+     1. nothing on the page may sit still. Demo 2 painted distance with two tiled
+        bands that only drifted, and they read as stuck on ("наліплені ... they
+        look bad"). There are no bands here. Every cloud is its own sprite on its
+        own trajectory, and every one of them is flying.
+     2. golden hour colour-coding, with hexes measured off photographs rather than
+        picked by eye. gen_palette.py does the measuring, palette.json holds the
+        result, and the tokens below are copied from it.
+     3. perspective. Clouds come out of the vanishing point and diverge outward as
+        they approach, the way a straight street opens up as you walk down it. A
+        near cloud is drawn as two or three sprites that start on top of each other
+        and are pulled apart by that same divergence, so it tears as it passes the
+        cockpit without any separate mechanism for tearing.
+     4. clouds pass through the text. Three planes: behind the words, across them,
+        and in front of the words and the buttons. The two upper planes are thin
+        enough to read through, which is the condition he attached to it.
+
+   Tuning lives in :root. Trajectories are per-sprite and come from build_flight.py. */
+
+:root {
+  --xx-tempo: 1;          /* duration multiplier: smaller = faster flight          */
+  --xx-halo: 1;           /* nimbus opacity, 0 turns it off                        */
+  --cx: 64%;              /* where the flight is heading: the vanishing point      */
+  --cy: 44%;              /* the sun and the nimbus sit here too                   */
+
+  /* golden hour, measured: warm family 22.3deg, cool family 213.0deg — see palette.json */
+  --g-cloud-lit:    #FFEDE3;
+  --g-cloud-rim:    #FFCFB2;
+  --g-cloud-shadow: #AFC4DE;
+  --g-sky-high:     #9BBAE0;
+  --g-sky-mid:      #C7D9F0;
+  --g-sky-warm:     #FCE1D2;
+  --g-sky-low:      #FCF3ED;
+  --g-sun:          #FFDAC4;
+
+  /* how much of each plane comes through. The two in front of the text are the
+     ones that have to stay thin, or the hero stops being readable. */
+  --xx-far-o: 1;
+  --xx-mid-o: 0.46;
+  --xx-near-o: 0.34;
+}
+
+.xx-page::before { display: none !important; }   /* the old gradient sky */
+.xx-page::after  { opacity: 0.30; }              /* keep the paper grain, at half strength */
+.xx-page { min-height: 100vh; }
+
+/* ── the sky ──────────────────────────────────────────────────────────────
+   Blue at the top, warm band standing above the horizon, the site cream at the
+   bottom so the hero still sits on its own paper. The sun is dead ahead, at the
+   vanishing point, which is what makes flying toward it mean something.        */
+.xx-sky {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(circle 30vmax at var(--cx) var(--cy),
+        rgba(255, 214, 188, 0.34) 0%, rgba(255, 228, 210, 0.13) 34%, transparent 66%),
+    linear-gradient(180deg,
+        var(--g-sky-high) 0%, var(--g-sky-mid) 34%, var(--g-sky-warm) 74%,
+        var(--g-sky-low) 89%, #FAF5E9 100%);
+}
+
+/* ── the planes ───────────────────────────────────────────────────────────
+   z 0 behind the hero, z 2 across it, z 4 in front of it. The nav keeps z 50,
+   so nothing ever crawls over the menu. All three ignore the pointer.          */
+.xx-flight {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none; overflow: hidden;
+}
+.xx-page > .xx-flight--far  { z-index: 0; opacity: var(--xx-far-o); }
+.xx-page > .xx-flight--mid  { z-index: 2; opacity: var(--xx-mid-o); }
+.xx-page > .xx-flight--near { z-index: 4; opacity: var(--xx-near-o); }
+
+/* one switch to put every plane back behind the text, for comparing the two calls */
+html.xx-behind .xx-page > .xx-flight--mid,
+html.xx-behind .xx-page > .xx-flight--near { z-index: 0; }
+html.xx-behind { --xx-mid-o: 0.88; --xx-near-o: 0.78; }
+
+/* ── one cloud ────────────────────────────────────────────────────────────
+   --ux/--uy is the direction it diverges in (a unit vector, y squashed to the
+   shape of a viewport), --r0/--r1 how far from the vanishing point it starts and
+   ends, --s0/--s1 how big. build_flight.py writes all of them per sprite.       */
+.xx-cl {
+  position: absolute; left: var(--cx); top: var(--cy);
+  width: 44vmax; height: 44vmax;
+  background-repeat: no-repeat; background-position: 50% 50%; background-size: contain;
+  opacity: 0; will-change: transform, opacity; backface-visibility: hidden;
+  --dr: calc(var(--r1) - var(--r0));
+  --ds: calc(var(--s1) - var(--s0));
+  animation: xxFlight calc(var(--dur) * var(--xx-tempo)) linear infinite;
+  animation-delay: calc(var(--d) * var(--xx-tempo));
+}
+
+/* Constant forward speed does not look constant on screen: a cloud crawls while it
+   is far away and then rushes past. That is the whole feeling of flight, so the
+   radius fractions below are shaped by hand rather than left to a timing function,
+   which keeps the fade independent of the motion. */
+@keyframes xxFlight {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * var(--r0)), calc(var(--uy) * var(--r0)))
+      scale(var(--s0));
+  }
+  12% { opacity: var(--o); }
+  25% {
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.035)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.035)))
+      scale(calc(var(--s0) + var(--ds) * 0.045)) rotate(calc(var(--rot) * 0.04));
+  }
+  45% {
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.085)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.085)))
+      scale(calc(var(--s0) + var(--ds) * 0.11)) rotate(calc(var(--rot) * 0.10));
+  }
+  62% {
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.16)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.16)))
+      scale(calc(var(--s0) + var(--ds) * 0.21)) rotate(calc(var(--rot) * 0.20));
+  }
+  76% {
+    opacity: var(--o);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.28)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.28)))
+      scale(calc(var(--s0) + var(--ds) * 0.37)) rotate(calc(var(--rot) * 0.36));
+  }
+  87% {
+    opacity: calc(var(--o) * 0.82);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.48)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.48)))
+      scale(calc(var(--s0) + var(--ds) * 0.60)) rotate(calc(var(--rot) * 0.58));
+  }
+  95% {
+    opacity: calc(var(--o) * 0.34);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.72)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.72)))
+      scale(calc(var(--s0) + var(--ds) * 0.80)) rotate(calc(var(--rot) * 0.80));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * var(--r1)), calc(var(--uy) * var(--r1)))
+      scale(var(--s1)) rotate(var(--rot));
+  }
+}
+
+/* The front plane needs a different curve, not a different trajectory. A cloud that close
+   is either past you or not there yet: if it faded in while it was still a speck at the
+   vanishing point it would sit over the headline as a haze for most of the cycle, which
+   is fog, not a cloud crossing the words. So it stays invisible until it is already large,
+   shows for a few seconds as it sweeps over the text, and is gone. */
+.xx-flight--near .xx-cl { animation-name: xxFlightNear; }
+
+@keyframes xxFlightNear {
+  0%, 46% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.09)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.09)))
+      scale(calc(var(--s0) + var(--ds) * 0.12));
+  }
+  62% {
+    opacity: calc(var(--o) * 0.55);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.16)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.16)))
+      scale(calc(var(--s0) + var(--ds) * 0.21)) rotate(calc(var(--rot) * 0.20));
+  }
+  76% {
+    opacity: var(--o);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.28)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.28)))
+      scale(calc(var(--s0) + var(--ds) * 0.37)) rotate(calc(var(--rot) * 0.36));
+  }
+  88% {
+    opacity: calc(var(--o) * 0.62);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.50)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.50)))
+      scale(calc(var(--s0) + var(--ds) * 0.62)) rotate(calc(var(--rot) * 0.60));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * var(--r1)), calc(var(--uy) * var(--r1)))
+      scale(var(--s1)) rotate(var(--rot));
+  }
+}
+
+/* ── the nimbus around the aircraft ───────────────────────────────────────
+   Unchanged in principle from demo 2, recoloured to the measured sun. A bright
+   core in normal blend, two faint rings in multiply, because a glory shows as
+   tinted rings on the cloud rather than as white.                              */
+.xx-halo {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 1; pointer-events: none; overflow: hidden;
+  opacity: var(--xx-halo); transition: opacity .4s ease;
+}
+.xx-halo > * {
+  position: absolute; left: var(--cx); top: var(--cy); border-radius: 50%;
+  margin: 0; will-change: transform, opacity; backface-visibility: hidden;
+  --cycle: 19s;
+}
+.xx-halo__glow {
+  width: 56vmax; height: 56vmax; margin: -28vmax 0 0 -28vmax;
+  background: radial-gradient(circle,
+      rgba(255, 246, 232, 0.46) 0%, rgba(255, 233, 210, 0.26) 15%,
+      rgba(255, 218, 196, 0.12) 29%, rgba(255, 210, 186, 0.04) 44%, transparent 64%);
+  animation: xxFlare calc(var(--cycle) * var(--xx-tempo)) ease-in-out infinite;
+}
+.xx-halo__ring {
+  mix-blend-mode: multiply; filter: blur(2px);
+  animation: xxRing calc(var(--cycle) * var(--xx-tempo)) ease-in-out infinite;
+}
+.xx-halo__ring--in {
+  width: 29vmax; height: 29vmax; margin: -14.5vmax 0 0 -14.5vmax;
+  background: radial-gradient(circle, transparent 0 40%,
+      rgba(255, 207, 178, 0.19) 47%, rgba(255, 237, 227, 0.09) 54%, transparent 62%);
+}
+.xx-halo__ring--out {
+  width: 50vmax; height: 50vmax; margin: -25vmax 0 0 -25vmax;
+  background: radial-gradient(circle, transparent 0 42%,
+      rgba(234, 244, 206, 0.09) 49%, rgba(201, 255, 51, 0.035) 54%, transparent 64%);
+  animation-delay: calc(var(--cycle) / -6 * var(--xx-tempo));
+}
+@keyframes xxFlare {
+  0%, 46% { transform: scale(1);    opacity: .74; }
+  78%     { transform: scale(1.14); opacity: 1;   }
+  100%    { transform: scale(1);    opacity: .74; }
+}
+@keyframes xxRing {
+  0%, 46% { transform: scale(0.98); opacity: .55; }
+  78%     { transform: scale(1.09); opacity: 1;   }
+  100%    { transform: scale(0.98); opacity: .55; }
+}
+
+/* ── demo controls ───────────────────────────────────────────────────────── */
+html.xx-tempo-rush { --xx-tempo: 0.62; }
+html.xx-tempo-calm { --xx-tempo: 1.60; }
+html.xx-nohalo     { --xx-halo: 0; }
+html.xx-thin       { --xx-mid-o: 0.26; --xx-near-o: 0.13; }
+html.xx-thick      { --xx-mid-o: 0.60; --xx-near-o: 0.34; }
+
+@media (max-width: 768px) {
+  :root { --cx: 50%; --cy: 46%; --xx-near-o: 0.16; }
+  .xx-hero { min-height: calc(100vh - 72px) !important; }
+  .xx-cl { width: 72vmax; height: 72vmax; }
+  .xx-halo__glow { width: 86vmax; height: 86vmax; margin: -43vmax 0 0 -43vmax; }
+  /* phones carry a thinner field: build_flight.py marks the sprites it may drop */
+  .xx-cl--drop { display: none; }
+}
+
+/* Motion off: a still sky, not a frozen frame of the field. Freezing everything piles
+   the whole cycle into one image, because every sprite stops at the same fraction of its
+   own trajectory. Only the far plane stays, at its own spread of sizes, and the two
+   planes that cross the text go away entirely. */
+@media (prefers-reduced-motion: reduce) {
+  .xx-cl, .xx-halo > * { animation: none !important; }
+  .xx-flight--mid, .xx-flight--near { display: none; }
+  .xx-flight--far .xx-cl {
+    opacity: calc(var(--o) * 0.85);
+    transform: translate(-50%, -50%)
+      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.34)),
+                calc(var(--uy) * (var(--r0) + var(--dr) * 0.34)))
+      scale(calc(var(--s0) + var(--ds) * 0.46));
+  }
+}
+html.xx-still .xx-cl,
+html.xx-still .xx-halo > * { animation-play-state: paused; }

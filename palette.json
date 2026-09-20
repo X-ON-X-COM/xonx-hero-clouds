@@ -1,0 +1,225 @@
+{
+  "source": "Wikimedia Commons, cumulus at sunset, free licences",
+  "refs": {
+    "latvia": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Sunset_-_cumulus_clouds_-_Latvia.jpg/1920px-Sunset_-_cumulus_clouds_-_Latvia.jpg",
+    "chermside1": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Cumulus_and_fractus_at_sunset_7th_Brigade_Park_P1050841.jpg/1920px-Cumulus_and_fractus_at_sunset_7th_Brigade_Park_P1050841.jpg",
+    "chermside2": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Cumulus_mediocris_at_sunset_7th_Brigade_Park_Chermside_P1220761.jpg/1920px-Cumulus_mediocris_at_sunset_7th_Brigade_Park_Chermside_P1220761.jpg",
+    "chermside3": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Cumulus_and_fractus_at_sunset_7th_Brigade_Park_P1050840.jpg/1920px-Cumulus_and_fractus_at_sunset_7th_Brigade_Park_P1050840.jpg",
+    "aitutaki": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Aitutaki_sunset_1.jpg",
+    "sterling": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/2016-07-01_20_24_39_Cumulus_clouds_near_sunset_along_Old_Ox_Road_%28Virginia_State_Secondary_Route_606%29_in_Sterling%2C_Loudoun_County%2C_Virginia.jpg/1920px-2016-07-01_20_24_39_Cumulus_clouds_near_sunset_along_Old_Ox_Road_%28Virginia_State_Secondary_Route_606%29_in_Sterling%2C_Loudoun_County%2C_Virginia.jpg",
+    "oakhill1": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/2020-08-04_19_56_22_Towering_cumulus_cloud_viewed_from_Tranquility_Court_in_the_Franklin_Farm_section_of_Oak_Hill%2C_Fairfax_County%2C_Virginia.jpg/1920px-2020-08-04_19_56_22_Towering_cumulus_cloud_viewed_from_Tranquility_Court_in_the_Franklin_Farm_section_of_Oak_Hill%2C_Fairfax_County%2C_Virginia.jpg",
+    "oakhill2": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/73/2020-08-04_20_13_51_Towering_cumulus_cloud_near_sunset_viewed_from_Tranquility_Court_in_the_Franklin_Farm_section_of_Oak_Hill%2C_Fairfax_County%2C_Virginia.jpg/1920px-2020-08-04_20_13_51_Towering_cumulus_cloud_near_sunset_viewed_from_Tranquility_Court_in_the_Franklin_Farm_section_of_Oak_Hill%2C_Fairfax_County%2C_Virginia.jpg"
+  },
+  "measured_hues": {
+    "warm": 22.3,
+    "cool": 213.0
+  },
+  "per_reference": {
+    "aitutaki": {
+      "warm": [],
+      "cool": [
+        "#5D6D7B H207 S0.24",
+        "#6B7D91 H211 S0.26",
+        "#5E738D H213 S0.33",
+        "#546B87 H213 S0.37",
+        "#4E6382 H215 S0.40",
+        "#42515A H202 S0.27",
+        "#475B79 H216 S0.41"
+      ]
+    },
+    "chermside1": {
+      "warm": [
+        "#BF927F H18 S0.33",
+        "#947B75 H12 S0.21",
+        "#A08984 H10 S0.17"
+      ],
+      "cool": []
+    },
+    "chermside2": {
+      "warm": [],
+      "cool": [
+        "#6A7282 H220 S0.19",
+        "#7B8392 H218 S0.16",
+        "#657C95 H211 S0.33",
+        "#6C869F H209 S0.32",
+        "#4E6782 H212 S0.40",
+        "#536F8C H210 S0.41",
+        "#5B7895 H210 S0.39"
+      ]
+    },
+    "chermside3": {
+      "warm": [
+        "#826E6B H9 S0.18",
+        "#A37F74 H13 S0.29",
+        "#705F5C H9 S0.19"
+      ],
+      "cool": []
+    },
+    "latvia": {
+      "warm": [
+        "#EFC59A H30 S0.36",
+        "#AE7D77 H6 S0.32",
+        "#F9A370 H22 S0.55",
+        "#997273 H357 S0.26",
+        "#876467 H356 S0.26",
+        "#D4896C H17 S0.49"
+      ],
+      "cool": [
+        "#574F62 H264 S0.20"
+      ]
+    },
+    "oakhill1": {
+      "warm": [
+        "#E9D2AA H38 S0.27"
+      ],
+      "cool": [
+        "#46648F H216 S0.51",
+        "#596172 H221 S0.22",
+        "#4C6B97 H215 S0.50",
+        "#435D83 H216 S0.48",
+        "#3C557C H217 S0.51",
+        "#5575A0 H214 S0.47"
+      ]
+    },
+    "oakhill2": {
+      "warm": [
+        "#FDC68A H32 S0.46",
+        "#DB9C79 H21 S0.45"
+      ],
+      "cool": [
+        "#728192 H213 S0.22",
+        "#798CA0 H210 S0.25",
+        "#697889 H213 S0.23",
+        "#879CAD H208 S0.22"
+      ]
+    },
+    "sterling": {
+      "warm": [
+        "#B18567 H24 S0.42",
+        "#806E65 H19 S0.21",
+        "#FAC379 H34 S0.52"
+      ],
+      "cool": [
+        "#3C4D61 H213 S0.38",
+        "#445566 H211 S0.33",
+        "#4E5D6B H209 S0.27"
+      ]
+    }
+  },
+  "roles": {
+    "cloud_lit": {
+      "family": "warm",
+      "sat": 0.11,
+      "val": 1.0
+    },
+    "cloud_rim": {
+      "family": "warm",
+      "sat": 0.3,
+      "val": 1.0
+    },
+    "cloud_body": {
+      "family": "warm",
+      "sat": 0.06,
+      "val": 0.96
+    },
+    "cloud_shadow": {
+      "family": "cool",
+      "sat": 0.21,
+      "val": 0.87
+    },
+    "cloud_core": {
+      "family": "cool",
+      "sat": 0.29,
+      "val": 0.73
+    },
+    "sky_high": {
+      "family": "cool",
+      "sat": 0.31,
+      "val": 0.88
+    },
+    "sky_mid": {
+      "family": "cool",
+      "sat": 0.17,
+      "val": 0.94
+    },
+    "sky_warm": {
+      "family": "warm",
+      "sat": 0.17,
+      "val": 0.99
+    },
+    "sky_low": {
+      "family": "warm",
+      "sat": 0.06,
+      "val": 0.99
+    },
+    "sun_glow": {
+      "family": "warm",
+      "sat": 0.23,
+      "val": 1.0
+    }
+  },
+  "working": {
+    "cloud_lit": "#FFEDE3",
+    "cloud_rim": "#FFCFB2",
+    "cloud_body": "#F5ECE6",
+    "cloud_shadow": "#AFC4DE",
+    "cloud_core": "#849CBA",
+    "sky_high": "#9BBAE0",
+    "sky_mid": "#C7D9F0",
+    "sky_warm": "#FCE1D2",
+    "sky_low": "#FCF3ED",
+    "sun_glow": "#FFDAC4"
+  },
+  "working_rgb": {
+    "cloud_lit": [
+      255,
+      237,
+      227
+    ],
+    "cloud_rim": [
+      255,
+      207,
+      178
+    ],
+    "cloud_body": [
+      245,
+      236,
+      230
+    ],
+    "cloud_shadow": [
+      175,
+      196,
+      222
+    ],
+    "cloud_core": [
+      132,
+      156,
+      186
+    ],
+    "sky_high": [
+      155,
+      186,
+      224
+    ],
+    "sky_mid": [
+      199,
+      217,
+      240
+    ],
+    "sky_warm": [
+      252,
+      225,
+      210
+    ],
+    "sky_low": [
+      252,
+      243,
+      237
+    ],
+    "sun_glow": [
+      255,
+      218,
+      196
+    ]
+  }
+}
