@@ -21,7 +21,7 @@
     clouds: +script.dataset.clouds || 46,        // clouds in one box length
     length: 8000,           // the box the field fills, in world units; the loop is this long
     width: 760,             // sideways spread; clouds are placed by a gaussian, so most come near the line of flight
-    puff: 96,
+    puff: 118,              // big and soft: the puffs must overlap into one mass, not read one by one
     speed: +script.dataset.speed || 0.085,      // world units per millisecond. mrdoob flies at 0.03, which
                                                 // is a crawl on a wide lens: at this speed a cloud on the far
                                                 // edge reaches you in about 25 s, the tempo demo 3 had
@@ -46,19 +46,24 @@
   function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
 
   var vs = [
-    'varying vec2 vUv;',
+    'varying vec2 vUv; varying vec3 vTint;',
     'void main() {',
     '  vUv = uv;',
+    '  #ifdef USE_INSTANCING_COLOR',
+    '  vTint = instanceColor;',
+    '  #else',
+    '  vTint = vec3(1.0);',
+    '  #endif',
     '  gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);',
     '}'].join('\n');
   var fs = [
     'uniform sampler2D map; uniform vec3 fogColor; uniform float fogNear; uniform float fogFar;',
     'uniform float splitNear; uniform float splitFar; uniform float tint;',
-    'varying vec2 vUv;',
+    'varying vec2 vUv; varying vec3 vTint;',
     'void main() {',
     '  float depth = gl_FragCoord.z / gl_FragCoord.w;',
     '  vec4 c = texture2D(map, vUv);',
-    '  c.rgb = mix(c.rgb, c.rgb * vec3(1.0, 0.985, 0.96), tint);',
+    '  c.rgb *= vTint;',                                     // per-puff shade: where it sits in its cloud
     '  c.a *= pow(gl_FragCoord.z, 20.0);',                 // the puff at the lens goes to vapour
     '  c.a *= smoothstep(70.0, 360.0, depth);',           // and a cloud you are inside dissolves instead of filling the frame
     '  c.a *= smoothstep(splitNear, splitFar, depth);',    // which canvas this puff belongs to
@@ -108,12 +113,16 @@
         y: gauss() * 215 - 20,                                // at eye level: that is where the text is
         z: r() * cfg.length,
         R: R,
-        n: Math.round(cfg.count * (R * R) / (cfg.clouds * 260 * 260))
+        n: Math.round(cfg.count * (R * R) / (cfg.clouds * 300 * 300))
       });
     }
     var total = 0;
     clouds.forEach(function (cl) { total += cl.n; });
     var mesh = new THREE.InstancedMesh(geo, mat, total * 2);
+    // Shading is per puff, not per pixel: a cumulus is lit on top and on the sunward
+    // flank and sits in blue-grey shade underneath. Each puff is tinted by where it is
+    // in its cloud, and the overlap blends those tints into a graded volume.
+    var lit = new THREE.Color(0xfbf8f3), shade = new THREE.Color(0x9aa3b4), tintC = new THREE.Color();
     var i = 0;
     clouds.forEach(function (cl) {
       for (var k = 0; k < cl.n; k++) {
@@ -123,10 +132,14 @@
         var py = cl.y + (gy < 0 ? gy * 0.28 : gy * 0.55) * cl.R;
         var pz = cl.z + gz * cl.R * 0.45;
         var d = Math.sqrt(gx * gx + gy * gy + gz * gz);
-        var sc = (0.55 + r() * 0.9) * (cl.R / 200) * (d < 0.8 ? 1.25 : 1.0);
+        var sc = (0.7 + r() * 0.8) * (cl.R / 200) * (d < 0.8 ? 1.2 : 1.0);
         q.setFromAxisAngle(z, r() * Math.PI); s.set(sc, sc, 1);
         p.set(px, py, pz); m.compose(p, q, s); mesh.setMatrixAt(i, m);
         p.set(px, py, pz - cfg.length); m.compose(p, q, s); mesh.setMatrixAt(total + i, m);
+        // 0 = deep in the belly, 1 = crown in the sun; the sun is up and a little to the right
+        var t = 0.5 + gy * 0.42 + gx * 0.14 - Math.max(0, 0.9 - d) * 0.35;
+        tintC.copy(shade).lerp(lit, Math.min(1, Math.max(0, t)));
+        mesh.setColorAt(i, tintC); mesh.setColorAt(total + i, tintC);
         i++;
       }
     });
