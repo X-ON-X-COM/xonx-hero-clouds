@@ -20,6 +20,7 @@ PANEL = '''
   <button type="button" data-xx="through">crosses text: yes</button>
   <button type="button" data-xx="veil">front: normal</button>
   <button type="button" data-xx="tune">tune &hellip;</button>
+  <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="film.html">demo 5: film &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
   <a href="halo.html">demo 2 &rarr;</a>

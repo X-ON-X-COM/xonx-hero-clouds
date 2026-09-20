@@ -13,7 +13,7 @@ import pathlib, re, shutil
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 VID = pathlib.Path('/Users/user/Claude/xonx-hero-video/out')
 DST = pathlib.Path(__file__).parent
-V = '20260921b'
+V = '20260921e'
 
 CSS = '''
 /* ── demo 5: Legora's hero, ours ─────────────────────────────────────────────
@@ -55,6 +55,7 @@ PANEL = '''
 <div class="xx-proto" role="group" aria-label="film controls">
   <button type="button" data-xx="veil">veil: on</button>
   <button type="button" data-xx="play">film: playing</button>
+  <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="field.html">demo 4: clouds &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
 </div>

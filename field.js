@@ -97,7 +97,7 @@
         tint: { value: 1.0 }
       },
       vertexShader: vs, fragmentShader: fs,
-      depthWrite: false, depthTest: false, transparent: true,
+      depthWrite: false, depthTest: true, transparent: true,
       blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
       blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor
     });
@@ -173,8 +173,84 @@
         i++;
       }
     });
+    mesh.renderOrder = 1;
     scene.add(mesh);
     L.mesh = mesh;
+  }
+
+  /* ── the journey: Oleg's brief from the 18.09 call ──────────────────────────
+     "летиш вперед, і по мірі польоту з'являються ситуації, з якими стикається
+     фаундер". The situations are the shots of the film, each on a card that lives
+     in the same space as the clouds: it comes out of the distance, passes beside
+     the camera and is gone, with cloud in front of it and behind it. Cards write
+     depth and the puffs test it, so a puff nearer than the card draws over it and
+     one behind it does not. Twelve cards along the box, one every ~600 units, so
+     at flight speed a situation arrives every six or seven seconds.
+     Enabled by data-journey on the script tag: a JSON list of clip urls.       */
+  var journey = null;
+  try { journey = script.dataset.journey ? JSON.parse(script.dataset.journey) : null; } catch (e) {}
+
+  function makeJourney(L) {
+    if (!journey || !journey.length) return;
+    var cw = 400, ch = cw * 9 / 16, gap = cfg.length / journey.length;
+    var geo = new THREE.PlaneGeometry(cw, ch);
+    var r = rng(cfg.seed + 7);
+    var fs2 = [
+      'uniform sampler2D map; uniform float fogNear; uniform float fogFar; uniform vec3 fogColor; uniform float alpha;',
+      'varying vec2 vUv;',
+      'void main() {',
+      '  vec4 c = texture2D(map, vUv);',
+      // rounded corners and a soft edge, in uv space
+      '  vec2 p = abs(vUv - 0.5) - vec2(0.5 - 0.035, 0.5 - 0.062);',
+      '  float d = length(max(p, 0.0)) - 0.035;',
+      '  float edge = 1.0 - smoothstep(-0.004, 0.004, d);',
+      '  float depth = gl_FragCoord.z / gl_FragCoord.w;',
+      '  float f = smoothstep(fogNear, fogFar, depth);',
+      '  c.rgb = mix(c.rgb, fogColor, f * 0.85);',
+      '  float a = edge * alpha * (1.0 - f * 0.9);',
+      '  gl_FragColor = vec4(c.rgb * a, a);',
+      '}'].join('\n');
+    L.cards = journey.map(function (url, k) {
+      var video = document.createElement('video');
+      video.src = url; video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'auto';
+      video.setAttribute('muted', ''); video.setAttribute('playsinline', '');
+      var tex = new THREE.VideoTexture(video); tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+      var mat = new THREE.ShaderMaterial({
+        uniforms: { map: { value: tex }, fogNear: { value: 900 }, fogFar: { value: cfg.fogFar }, fogColor: { value: new THREE.Color(cfg.sky) }, alpha: { value: 1 } },
+        vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: fs2, transparent: true, depthWrite: true, depthTest: true,
+        blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+        blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor
+      });
+      var mesh = new THREE.Mesh(geo, mat);
+      // beside the line of flight, never on it: the copy sits bottom left, so the cards
+      // favour the right and the upper half, alternating a little so the flight has rhythm
+      // well off the line of flight, mostly right and up, so a card passes beside the copy
+      // rather than over it, and never gets to fill the frame before it fades
+      var side = (k % 2 === 0) ? 1 : -1;
+      mesh.position.set(side * (300 + r() * 220) + 160, 110 + r() * 200 - (k % 3 === 2 ? 240 : 0), (k + 0.5) * gap);
+      mesh.userData = { video: video, z: mesh.position.z };
+      L.scene.add(mesh);
+      return mesh;
+    });
+  }
+
+  function updateJourney(L, camZ) {
+    if (!L.cards) return;
+    L.cards.forEach(function (m) {
+      // the card, or its copy one box back, whichever is ahead of the camera and nearest
+      var z = m.userData.z, dz = camZ - z;
+      if (dz < -cfg.length / 2) dz += cfg.length;            // wrap: treat the far copy as this one
+      if (dz > cfg.length / 2) dz -= cfg.length;
+      m.position.z = camZ - dz;
+      var ahead = dz > 0 && dz < cfg.fogFar;
+      var near = Math.min(1, Math.max(0, (dz - 260) / 420));  // gone well before it reaches the lens
+      m.material.uniforms.alpha.value = ahead ? near : 0;
+      m.visible = ahead;
+      var v = m.userData.video;
+      if (ahead && dz < cfg.fogFar * 0.8) { if (v.paused) v.play().catch(function () {}); }
+      else if (!v.paused) v.pause();
+    });
   }
 
   var loader = new THREE.TextureLoader();
@@ -184,6 +260,7 @@
       makeLayer(back, cfg.frontDepth - 160, cfg.frontDepth, tex),
       makeLayer(front, cfg.frontDepth, cfg.frontDepth - 160, tex)
     ];
+    makeJourney(layers[0]);
     function resize() {
       var w = window.innerWidth, h = window.innerHeight;
       layers.forEach(function (L) {
@@ -199,6 +276,7 @@
         L.camera.position.x += (mouseX - L.camera.position.x) * 0.01;
         L.camera.position.y += (-mouseY - L.camera.position.y) * 0.01;
         L.camera.position.z = -pos + cfg.length;
+        updateJourney(L, L.camera.position.z);
         L.renderer.render(L.scene, L.camera);
       });
       if (!reduce) requestAnimationFrame(frame);

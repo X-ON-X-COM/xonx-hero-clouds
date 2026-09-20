@@ -15,7 +15,7 @@
     if (new URLSearchParams(location.search).has('m')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w >  768) location.replace('film.html?v=20260921e' + location.hash);
+    if (w >  768) location.replace('journey.html?v=20260921d' + location.hash);
   } catch (e) {}
 })();
 </script>
@@ -42,23 +42,23 @@
 <title>X-ON-X | New market launch</title>
 <meta name="description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
 <link rel="canonical" href="https://www.x-on-x.com/">
-<link rel="icon" href="/favicon.ico?v=20260921e" sizes="32x32">
-<link rel="icon" href="/favicon.svg?v=20260921e" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260921e">
+<link rel="icon" href="/favicon.ico?v=20260921d" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=20260921d" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260921d">
 <meta name="theme-color" content="#FAFAF5">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="X-ON-X">
 <meta property="og:url" content="https://www.x-on-x.com/">
 <meta property="og:title" content="X-ON-X | New market launch">
 <meta property="og:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260921e">
+<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260921d">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="X-ON-X | New market launch">
 <meta name="twitter:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260921e">
+<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260921d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -1834,36 +1834,30 @@ body { background: var(--cream) !important; }
  ]
 }
 </script>
+<link rel="stylesheet" href="field.css?v=20260921d">
 <style>
-/* ── demo 5: Legora's hero, ours ─────────────────────────────────────────────
-   Full-screen film, a dark veil heavier at the top and the bottom, the nav floating
-   transparent over it, and the copy white, bottom left, three lines: the sentence,
-   one line of what we are, one button. Nothing else on the first screen.        */
-.xx-page::before, .xx-page::after { display: none !important; }
-.xx-page { min-height: 100vh; background: #14141A; }
-.xx-film { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; background: #14141A; }
-.xx-film video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; }
-.xx-film__veil { position: absolute; inset: 0; pointer-events: none;
-  /* the reference runs .5 / .1 / .1 / .5; our copy starts higher up the frame and half of
-     the film is cream, so the lower ramp starts at the middle and goes a little deeper */
-  background: linear-gradient(180deg, rgba(0,0,0,.50) 0%, rgba(0,0,0,.10) 13%, rgba(0,0,0,.12) 46%, rgba(0,0,0,.66) 100%); }
+/* ── demo 6: the flight, with the situations coming at you ─────────────────── */
+.xx-page::before { display: none !important; }
+.xx-page::after  { opacity: 0.22; }
+.xx-page { min-height: 100vh; }
 
-/* the nav: same links, no pill, no paper, white over the film */
+/* the nav: same links, no pill, no paper */
 .xx-nav { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
-.xx-nav__wordmark, .xx-nav__link, .xx-lang, .xx-lang strong { color: #F5F3EE !important; }
-.xx-nav__brand svg line { stroke: #F5F3EE !important; }
 
-/* the hero: everything off except the sentence, the line and the button, bottom left */
+/* the hero: three lines bottom left, as on the film demo, graphite on the light sky */
 .xx-hero { display: block !important; min-height: 100vh !important; padding: 0 !important; }
 .xx-hero__inner { position: absolute !important; left: 48px; right: 48px; bottom: 64px; max-width: none !important; margin: 0 !important; display: block !important; }
 .xx-hero__inner--split { grid-template-columns: 1fr !important; }
 .xx-hero__logo, .xx-hero__eyebrow, .xx-hero__right, .xx-hero-dock, .xx-hero__watermark, .xx-hero__meta, .xx-hero__leftlede, .xx-cta-dock .xx-btn--ghost { display: none !important; }
 .xx-hero__left { max-width: 1100px; }
-.xx-hero h1 { color: #F5F3EE !important; font-weight: 400 !important; font-size: clamp(44px, 5.2vw, 96px) !important; line-height: 1.04 !important; letter-spacing: -.01em; margin: 0 0 22px !important; text-shadow: 0 2px 28px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.25); }
-.xx-hero h1 em { display: none !important; }
-.xx-hero h1 br { display: none; }
-.xx-hero__sub { color: rgba(245,243,238,.86); text-shadow: 0 1px 12px rgba(0,0,0,.35); font: 400 clamp(16px, 1.25vw, 22px)/1.45 var(--font-sans, Inter, sans-serif); max-width: 640px; margin: 0 0 30px; }
+.xx-hero h1 { font-weight: 400 !important; font-size: clamp(44px, 5.2vw, 96px) !important; line-height: 1.04 !important; letter-spacing: -.01em; margin: 0 0 22px !important; text-shadow: 0 1px 0 rgba(250,250,245,.7); }
+.xx-hero h1 em, .xx-hero h1 br { display: none !important; }
+.xx-hero__sub { color: #3a3a40; font: 400 clamp(16px, 1.25vw, 22px)/1.45 var(--font-sans, Inter, sans-serif); max-width: 640px; margin: 0 0 30px; text-shadow: 0 1px 0 rgba(250,250,245,.7); }
 .xx-cta-dock { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; display: inline-flex !important; }
+/* the copy has to stay readable under a passing card: a soft cream pool behind it */
+.xx-hero__left::before { content: ''; position: absolute; left: -80px; right: -80px; top: -80px; bottom: -80px; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 60% 60% at 30% 70%, rgba(250,250,245,.78) 0%, rgba(250,250,245,.42) 45%, transparent 75%); }
+.xx-hero__left { position: relative; }
 @media (max-width: 768px) {
   .xx-hero__inner { left: 20px; right: 20px; bottom: 40px; }
   .xx-hero { min-height: 100vh !important; }
@@ -1873,11 +1867,10 @@ body { background: var(--cream) !important; }
 <body>
 
 <div class="xx-page">
-  <!-- ──── FILM (demo 5: the rough cut behind the hero, Legora's construction) ──── -->
-  <div class="xx-film" aria-hidden="true">
-    <video src="film/rough_cut.mp4?v=20260921e" poster="film/poster.jpg?v=20260921e" loop muted playsinline preload="none"></video>
-    <div class="xx-film__veil"></div>
-  </div>
+  <!-- ──── SKY + JOURNEY (demo 6: the cloud field, the situations as cards in it) ──── -->
+  <div class="xx-sky" aria-hidden="true"></div>
+  <canvas class="xx-gl" id="xx-gl-back" aria-hidden="true"></canvas>
+  <canvas class="xx-gl" id="xx-gl-front" aria-hidden="true"></canvas>
 
 
   <!-- ──── NAV ──── -->
@@ -1979,35 +1972,53 @@ body { background: var(--cream) !important; }
 
   </div><!-- /.xx-page -->
 
-<div class="xx-proto" role="group" aria-label="film controls">
-  <button type="button" data-xx="veil">veil: on</button>
-  <button type="button" data-xx="play">film: playing</button>
-  <a href="journey.html">demo 6: journey &rarr;</a>
+<div class="xx-proto" role="group" aria-label="sky controls">
+  <button type="button" data-xx="motion">motion: on</button>
+  <button type="button" data-xx="tempo">tempo: normal</button>
+  <button type="button" data-xx="through">crosses text: yes</button>
+  <button type="button" data-xx="veil">front: normal</button>
+  <a href="film.html">demo 5: film &rarr;</a>
   <a href="field.html">demo 4: clouds &rarr;</a>
-  <a href="flight.html">demo 3 &rarr;</a>
 </div>
 <style>
 .xx-proto{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .xx-proto button,.xx-proto a{font:11px/1 "JetBrains Mono",monospace;letter-spacing:1px;text-transform:uppercase;
- padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(28,28,34,.7);
- color:#F5F3EE;cursor:pointer;backdrop-filter:blur(8px);text-decoration:none}
-.xx-proto button:hover,.xx-proto a:hover{background:rgba(28,28,34,.95)}
+ padding:8px 12px;border-radius:999px;border:1px solid rgba(17,17,17,.18);background:rgba(255,254,248,.8);
+ color:#111;cursor:pointer;backdrop-filter:blur(8px);text-decoration:none}
+.xx-proto button:hover,.xx-proto a:hover{background:rgba(255,254,248,.98)}
 @media (max-width:768px){.xx-proto{right:10px;bottom:10px;gap:4px}.xx-proto button,.xx-proto a{padding:7px 10px;font-size:10px}}
 </style>
 <script>
 (function () {
-  var v = document.querySelector('.xx-film video'), veil = document.querySelector('.xx-film__veil');
-  // preload="none" as on the reference: start it by hand once the page is up
-  var play = function () { v.play().catch(function () {}); };
-  if (document.readyState === 'complete') play(); else window.addEventListener('load', play);
+  var root = document.documentElement;
+  var tempos = ['normal', 'rush', 'calm'], t = 0;
+  var veils = ['normal', 'thin', 'thick'], v = 0;
   document.querySelectorAll('.xx-proto button').forEach(function (b) {
     b.addEventListener('click', function () {
-      if (b.dataset.xx === 'veil') { veil.hidden = !veil.hidden; b.textContent = 'veil: ' + (veil.hidden ? 'off' : 'on'); }
-      else { if (v.paused) { v.play(); b.textContent = 'film: playing'; } else { v.pause(); b.textContent = 'film: paused'; } }
+      var k = b.dataset.xx;
+      if (k === 'motion') {
+        root.classList.toggle('xx-still');
+        b.textContent = 'motion: ' + (root.classList.contains('xx-still') ? 'off' : 'on');
+      } else if (k === 'tempo') {
+        t = (t + 1) % tempos.length;
+        root.classList.remove('xx-tempo-rush', 'xx-tempo-calm');
+        if (tempos[t] !== 'normal') root.classList.add('xx-tempo-' + tempos[t]);
+        b.textContent = 'tempo: ' + tempos[t];
+      } else if (k === 'through') {
+        root.classList.toggle('xx-behind');
+        b.textContent = 'crosses text: ' + (root.classList.contains('xx-behind') ? 'no' : 'yes');
+      } else {
+        v = (v + 1) % veils.length;
+        root.classList.remove('xx-thin', 'xx-thick');
+        if (veils[v] !== 'normal') root.classList.add('xx-' + veils[v]);
+        b.textContent = 'front: ' + veils[v];
+      }
     });
   });
 })();
 </script>
 
+<script src="js/three.min.js"></script>
+<script src="field.js?v=20260921d" data-count="3600" data-clouds="22" data-texture="clouds/puff_photo.png?v=20260921d" data-sky="#ECE8E6" data-journey="[&quot;journey/01.mp4?v=20260921d&quot;, &quot;journey/02.mp4?v=20260921d&quot;, &quot;journey/03.mp4?v=20260921d&quot;, &quot;journey/04.mp4?v=20260921d&quot;, &quot;journey/05.mp4?v=20260921d&quot;, &quot;journey/06.mp4?v=20260921d&quot;, &quot;journey/07.mp4?v=20260921d&quot;, &quot;journey/08.mp4?v=20260921d&quot;, &quot;journey/09.mp4?v=20260921d&quot;, &quot;journey/10.mp4?v=20260921d&quot;, &quot;journey/11.mp4?v=20260921d&quot;, &quot;journey/12.mp4?v=20260921d&quot;, &quot;journey/13.mp4?v=20260921d&quot;]"></script>
 </body>
 </html>
