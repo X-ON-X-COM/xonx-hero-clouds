@@ -13,35 +13,49 @@ import pathlib, re, shutil
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 VID = pathlib.Path('/Users/user/Claude/xonx-hero-video/out')
 DST = pathlib.Path(__file__).parent
-V = '20260920y'
+V = '20260921b'
 
 CSS = '''
-/* ── demo 5: the film behind the hero ─────────────────────────────────────── */
-.xx-page::before { display: none !important; }
-.xx-page::after  { opacity: 0.22; }
-.xx-page { min-height: 100vh; }
-.xx-film { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; background: #FAFAF5; }
+/* ── demo 5: Legora's hero, ours ─────────────────────────────────────────────
+   Full-screen film, a dark veil heavier at the top and the bottom, the nav floating
+   transparent over it, and the copy white, bottom left, three lines: the sentence,
+   one line of what we are, one button. Nothing else on the first screen.        */
+.xx-page::before, .xx-page::after { display: none !important; }
+.xx-page { min-height: 100vh; background: #14141A; }
+.xx-film { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; background: #14141A; }
 .xx-film video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; }
-/* Legora veils a dark film so light copy reads; ours is golden hour and cream throughout, so
-   the veil is light and the copy stays graphite, exactly as it is on the site. Same shape:
-   heavier at the top and the bottom, almost nothing across the middle. */
 .xx-film__veil { position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(250,250,245,.62) 0%, rgba(250,250,245,.14) 16%, rgba(250,250,245,.10) 70%, rgba(250,250,245,.60) 100%); }
-.xx-hero h1, .xx-hero__lede { text-shadow: 0 1px 0 rgba(250,250,245,.6); }
-.xx-hero h1 em { color: rgba(17,17,22,.42) !important; }
-.xx-btn--ghost { background: rgba(250,250,245,.55) !important; }
-/* Demo only: the hero goes down to what Oleg asked for on the 18.09 call, one sentence and the
-   buttons. The right column and the dock come off, so the film's inserts have the right half. */
-.xx-hero__right, .xx-hero-dock { display: none !important; }
+  /* the reference runs .5 / .1 / .1 / .5; our copy starts higher up the frame and half of
+     the film is cream, so the lower ramp starts at the middle and goes a little deeper */
+  background: linear-gradient(180deg, rgba(0,0,0,.50) 0%, rgba(0,0,0,.10) 13%, rgba(0,0,0,.12) 46%, rgba(0,0,0,.66) 100%); }
+
+/* the nav: same links, no pill, no paper, white over the film */
+.xx-nav { background: transparent !important; border-color: transparent !important; box-shadow: none !important; backdrop-filter: none !important; }
+.xx-nav__wordmark, .xx-nav__link, .xx-lang, .xx-lang strong { color: #F5F3EE !important; }
+.xx-nav__brand svg line { stroke: #F5F3EE !important; }
+
+/* the hero: everything off except the sentence, the line and the button, bottom left */
+.xx-hero { display: block !important; min-height: 100vh !important; padding: 0 !important; }
+.xx-hero__inner { position: absolute !important; left: 48px; right: 48px; bottom: 64px; max-width: none !important; margin: 0 !important; display: block !important; }
 .xx-hero__inner--split { grid-template-columns: 1fr !important; }
-@media (max-width: 768px) { .xx-hero { min-height: calc(100vh - 72px) !important; } }
+.xx-hero__logo, .xx-hero__eyebrow, .xx-hero__right, .xx-hero-dock, .xx-hero__watermark, .xx-hero__meta, .xx-hero__leftlede, .xx-cta-dock .xx-btn--ghost { display: none !important; }
+.xx-hero__left { max-width: 1100px; }
+.xx-hero h1 { color: #F5F3EE !important; font-weight: 400 !important; font-size: clamp(44px, 5.2vw, 96px) !important; line-height: 1.04 !important; letter-spacing: -.01em; margin: 0 0 22px !important; text-shadow: 0 2px 28px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.25); }
+.xx-hero h1 em { display: none !important; }
+.xx-hero h1 br { display: none; }
+.xx-hero__sub { color: rgba(245,243,238,.86); text-shadow: 0 1px 12px rgba(0,0,0,.35); font: 400 clamp(16px, 1.25vw, 22px)/1.45 var(--font-sans, Inter, sans-serif); max-width: 640px; margin: 0 0 30px; }
+.xx-cta-dock { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; display: inline-flex !important; }
+@media (max-width: 768px) {
+  .xx-hero__inner { left: 20px; right: 20px; bottom: 40px; }
+  .xx-hero { min-height: 100vh !important; }
+}
 '''
 
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="film controls">
   <button type="button" data-xx="veil">veil: on</button>
   <button type="button" data-xx="play">film: playing</button>
-  <a href="field.html">demo 4 &rarr;</a>
+  <a href="field.html">demo 4: clouds &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
 </div>
 <style>
@@ -76,6 +90,10 @@ def build(name, out, partner):
     html = html.replace("location.replace('index.html?", f"location.replace('{partner}?")
     html = html.replace('</head>', f'<style>{CSS}</style>\n</head>', 1)
     html = html.replace('<title>X-ON-X – Home</title>', '<title>X-ON-X – Hero demo 5: film</title>')
+    # one sentence, as Oleg asked: the lede moves up into the headline, the old headline goes
+    html = re.sub(r'<h1>.*?</h1>', '<h1>We take charge of your cross-border complexity.</h1>'
+                  '<p class="xx-hero__sub">A legal boutique for founders doing international business. '
+                  'Corporate, tax, contracts and disputes across borders, run as one project.</p>', html, count=1, flags=re.S)
     start = html.index('<!-- ──── LATEST INSIGHTS')
     end = html.index('</div><!-- /.xx-page -->')
     html = html[:start] + html[end:]
