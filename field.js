@@ -32,14 +32,20 @@
     fogNear: 300, fogFar: 2600,
     texture: script.dataset.texture,
     sky: script.dataset.sky || '#c9d5ea',
-    seed: 20260920
+    seed: 20260920,
+    // the tuning panel changes these live; `copy` in the panel prints them to bake in
+    size: 1.0,              // cloud radius multiplier
+    shade: 1.0,             // 0 = no shade at all, 1 = the shade colour below, >1 deeper
+    warmth: 0.35,           // 0 = neutral white crown, 1 = the palette's warm cream
+    lit: 0xfbf8f3, shadeColor: 0x9aa3b4
   };
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem('xx-field') || '{}')); } catch (e) {}
   if (!window.WebGLRenderingContext) return;
 
   var root = document.documentElement;
   var back = document.getElementById('xx-gl-back');
   var front = document.getElementById('xx-gl-front');
-  var mouseX = 0, mouseY = 0, start = Date.now(), paused = false, frozen = 0;
+  var mouseX = 0, mouseY = 0, start = Date.now(), paused = false, frozen = 0, rebuiltWhilePaused = false;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // one seeded field, so the two canvases and every reload agree
@@ -96,6 +102,15 @@
       blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor
     });
     var geo = new THREE.PlaneGeometry(cfg.puff, cfg.puff);
+    var L = { renderer: renderer, scene: scene, camera: camera, mat: mat, mesh: null };
+    L.build = function () { buildField(L, geo); };
+    L.build();
+    return L;
+  }
+
+  function buildField(L, geo) {
+    if (L.mesh) { L.scene.remove(L.mesh); L.mesh.dispose(); }
+    var mat = L.mat, scene = L.scene;
     // The field is demo 3's: separate clouds, each with a place and a size in three
     // dimensions, scattered down the box the camera flies through, so they come at the
     // viewer, diverge, and pass through the text as before. What changed is only what a
@@ -107,7 +122,7 @@
     function gauss() { return (r() + r() + r() - 1.5) * 1.15; }
     var clouds = [];
     for (var c = 0; c < cfg.clouds; c++) {
-      var R = 120 + r() * r() * 400;                        // radius, small clouds common
+      var R = (120 + r() * r() * 400) * cfg.size;           // radius, small clouds common
       clouds.push({
         x: gauss() * cfg.width * 1.05,                        // most near the line of flight, a few wide
         y: gauss() * 215 - 20,                                // at eye level: that is where the text is
@@ -122,7 +137,10 @@
     // Shading is per puff, not per pixel: a cumulus is lit on top and on the sunward
     // flank and sits in blue-grey shade underneath. Each puff is tinted by where it is
     // in its cloud, and the overlap blends those tints into a graded volume.
-    var lit = new THREE.Color(0xfbf8f3), shade = new THREE.Color(0x9aa3b4), tintC = new THREE.Color();
+    var white = new THREE.Color(0xf7f7f5), cream = new THREE.Color(cfg.lit);
+    var lit = white.clone().lerp(cream, cfg.warmth);
+    var shade = lit.clone().lerp(new THREE.Color(cfg.shadeColor), Math.min(1.6, cfg.shade));
+    var tintC = new THREE.Color();
     var i = 0;
     clouds.forEach(function (cl) {
       for (var k = 0; k < cl.n; k++) {
@@ -144,7 +162,7 @@
       }
     });
     scene.add(mesh);
-    return { renderer: renderer, scene: scene, camera: camera };
+    L.mesh = mesh;
   }
 
   var loader = new THREE.TextureLoader();
@@ -164,6 +182,7 @@
       var t = paused || reduce ? frozen : (Date.now() - start);
       var tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
       var pos = (t * cfg.speed / tempo) % cfg.length;
+      if (paused && !rebuiltWhilePaused) { rebuiltWhilePaused = false; }
       layers.forEach(function (L) {
         L.camera.position.x += (mouseX - L.camera.position.x) * 0.01;
         L.camera.position.y += (-mouseY - L.camera.position.y) * 0.01;
@@ -187,5 +206,19 @@
     obs.observe(root, { attributes: true, attributeFilter: ['class'] });
     frozen = 9000;                          // reduced motion: one frame, a way into the field
     frame();
+
+    // the tuning panel talks to this
+    window.xxField = {
+      cfg: cfg,
+      set: function (k, v) {
+        cfg[k] = v;
+        if (k === 'clouds' || k === 'count' || k === 'size' || k === 'shade' || k === 'warmth') {
+          layers.forEach(function (L) { L.build(); });
+        }
+        try { localStorage.setItem('xx-field', JSON.stringify({
+          clouds: cfg.clouds, count: cfg.count, size: cfg.size, speed: cfg.speed, shade: cfg.shade, warmth: cfg.warmth })); } catch (e) {}
+      },
+      reset: function () { try { localStorage.removeItem('xx-field'); } catch (e) {} location.reload(); }
+    };
   });
 })();
