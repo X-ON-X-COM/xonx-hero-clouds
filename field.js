@@ -21,7 +21,7 @@
     clouds: +script.dataset.clouds || 46,        // clouds in one box length
     length: 8000,           // the box the field fills, in world units; the loop is this long
     width: 760,             // sideways spread; clouds are placed by a gaussian, so most come near the line of flight
-    puff: 118,              // big and soft: the puffs must overlap into one mass, not read one by one
+    puff: 140,              // big and soft: the puffs must overlap into one mass, not read one by one
     speed: +script.dataset.speed || 0.085,      // world units per millisecond. mrdoob flies at 0.03, which
                                                 // is a crawl on a wide lens: at this speed a cloud on the far
                                                 // edge reaches you in about 25 s, the tempo demo 3 had
@@ -35,9 +35,9 @@
     seed: 20260920,
     // the tuning panel changes these live; `copy` in the panel prints them to bake in
     size: 1.0,              // cloud radius multiplier
-    shade: 1.0,             // 0 = no shade at all, 1 = the shade colour below, >1 deeper
+    shade: 0.85,            // 0 = no shade at all, 1 = the shade colour below, >1 deeper
     warmth: 0.35,           // 0 = neutral white crown, 1 = the palette's warm cream
-    lit: 0xfbf8f3, shadeColor: 0x9aa3b4
+    lit: 0xfbf8f3, shadeColor: 0xc4cad6   // the shade is light too: a cumulus in shade is still a white thing
   };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem('xx-field') || '{}')); } catch (e) {}
   if (!window.WebGLRenderingContext) return;
@@ -153,7 +153,7 @@
         // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle.
         // A third of the puffs go to the crowns, the rest to the body.
         var gx, gy, gz;
-        if (r() < 0.34) {
+        if (r() < 0.25) {
           var lb = cl.lobes[Math.floor(r() * cl.lobes.length)];
           gx = lb.x + gauss() * 0.5 * lb.s; gy = lb.y + gauss() * 0.5 * lb.s; gz = lb.z + gauss() * 0.5 * lb.s;
         } else {
@@ -167,7 +167,7 @@
         p.set(px, py, pz); m.compose(p, q, s); mesh.setMatrixAt(i, m);
         p.set(px, py, pz - cfg.length); m.compose(p, q, s); mesh.setMatrixAt(total + i, m);
         // 0 = deep in the belly, 1 = crown in the sun; the sun is up and a little to the right
-        var t = 0.5 + gy * 0.42 + gx * 0.14 - Math.max(0, 0.9 - d) * 0.35;
+        var t = 0.62 + gy * 0.45 + gx * 0.12 - Math.max(0, 0.8 - d) * 0.22;   // lit by default, shade only underneath
         tintC.copy(shade).lerp(lit, Math.min(1, Math.max(0, t)));
         mesh.setColorAt(i, tintC); mesh.setColorAt(total + i, tintC);
         i++;

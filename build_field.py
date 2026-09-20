@@ -159,5 +159,5 @@ def build(name, out, partner, count, texture, clouds=46):
 
 
 if __name__ == '__main__':
-    build('index.html', 'field.html', 'field-m.html', 5000, 'clouds/puff_photo.png', 34)
-    build('m.html', 'field-m.html', 'field.html', 2200, 'clouds/puff_photo.png', 22)
+    build('index.html', 'field.html', 'field-m.html', 9000, 'clouds/puff_photo.png', 34)
+    build('m.html', 'field-m.html', 'field.html', 3600, 'clouds/puff_photo.png', 22)
