@@ -20,12 +20,16 @@
     count: +script.dataset.count || 5000,       // puffs across all clouds
     clouds: +script.dataset.clouds || 46,        // clouds in one box length
     length: 8000,           // the box the field fills, in world units; the loop is this long
-    width: 1300,
-    puff: 64,
-    speed: +script.dataset.speed || 0.03,       // world units per millisecond, as mrdoob
-    fov: 30,
+    width: 760,             // sideways spread; clouds are placed by a gaussian, so most come near the line of flight
+    puff: 96,
+    speed: +script.dataset.speed || 0.085,      // world units per millisecond. mrdoob flies at 0.03, which
+                                                // is a crawl on a wide lens: at this speed a cloud on the far
+                                                // edge reaches you in about 25 s, the tempo demo 3 had
+    fov: 58,                // mrdoob's 30 is a long lens: it flattens the approach, and a cloud
+                            // seems to slide past instead of coming at you. A wide lens is what
+                            // makes flight feel like flight
     frontDepth: 700,        // puffs nearer than this draw on the front canvas
-    fogNear: -100, fogFar: 2200,
+    fogNear: 300, fogFar: 2600,
     texture: script.dataset.texture,
     sky: script.dataset.sky || '#c9d5ea',
     seed: 20260920
@@ -56,6 +60,7 @@
     '  vec4 c = texture2D(map, vUv);',
     '  c.rgb = mix(c.rgb, c.rgb * vec3(1.0, 0.985, 0.96), tint);',
     '  c.a *= pow(gl_FragCoord.z, 20.0);',                 // the puff at the lens goes to vapour
+    '  c.a *= smoothstep(70.0, 360.0, depth);',           // and a cloud you are inside dissolves instead of filling the frame
     '  c.a *= smoothstep(splitNear, splitFar, depth);',    // which canvas this puff belongs to
     '  float f = smoothstep(fogNear, fogFar, depth);',
     '  c = mix(c, vec4(fogColor, c.a), f);',
@@ -94,12 +99,13 @@
     // the structure of mrdoob's clouds, kept; his flat deck below the camera is not.
     var r = rng(cfg.seed), m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
     var z = new THREE.Vector3(0, 0, 1);
+    function gauss() { return (r() + r() + r() - 1.5) * 1.15; }
     var clouds = [];
     for (var c = 0; c < cfg.clouds; c++) {
-      var R = 110 + r() * r() * 360;                        // radius, small clouds common
+      var R = 120 + r() * r() * 400;                        // radius, small clouds common
       clouds.push({
-        x: (r() - 0.5) * 2 * cfg.width * 0.9,
-        y: -80 + (r() + r() - 1) * 380,                       // some above, more below
+        x: gauss() * cfg.width * 1.05,                        // most near the line of flight, a few wide
+        y: gauss() * 215 - 20,                                // at eye level: that is where the text is
         z: r() * cfg.length,
         R: R,
         n: Math.round(cfg.count * (R * R) / (cfg.clouds * 260 * 260))
@@ -109,7 +115,6 @@
     clouds.forEach(function (cl) { total += cl.n; });
     var mesh = new THREE.InstancedMesh(geo, mat, total * 2);
     var i = 0;
-    function gauss() { return (r() + r() + r() - 1.5) * 1.15; }
     clouds.forEach(function (cl) {
       for (var k = 0; k < cl.n; k++) {
         // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle
@@ -157,8 +162,8 @@
     resize();
     window.addEventListener('resize', resize);
     document.addEventListener('mousemove', function (e) {
-      mouseX = (e.clientX - window.innerWidth / 2) * 0.25;
-      mouseY = (e.clientY - window.innerHeight / 2) * 0.15;
+      mouseX = (e.clientX - window.innerWidth / 2) * 0.06;   // a hint of parallax, not a sideways drift
+      mouseY = (e.clientY - window.innerHeight / 2) * 0.04;
     });
     // `motion: off` in the corner panel freezes the flight where it is
     var obs = new MutationObserver(function () {

@@ -5,7 +5,7 @@
 
 :root {
   --xx-tempo: 1;            /* field.js reads this: bigger = slower flight       */
-  --xx-front-o: 0.55;       /* how much the plane in front of the text shows     */
+  --xx-front-o: 0.40;       /* how much the plane in front of the text shows     */
   --g-sky-high: #AAB9DB;
   --g-sky-mid:  #D1D9ED;
   --g-sky-warm: #FAEFE0;
@@ -37,8 +37,8 @@
 .xx-page > #xx-gl-front { z-index: 4; opacity: var(--xx-front-o); }
 
 html.xx-behind .xx-page > #xx-gl-front { z-index: 0; opacity: 1; }
-html.xx-thin  { --xx-front-o: 0.32; }
-html.xx-thick { --xx-front-o: 0.80; }
+html.xx-thin  { --xx-front-o: 0.24; }
+html.xx-thick { --xx-front-o: 0.60; }
 html.xx-tempo-rush { --xx-tempo: 0.55; }
 html.xx-tempo-calm { --xx-tempo: 1.8; }
 
