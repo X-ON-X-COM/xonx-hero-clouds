@@ -150,6 +150,7 @@ PANEL = '''
   <button type="button" data-xx="halo">nimbus: on</button>
   <button type="button" data-xx="through">crosses text: yes</button>
   <button type="button" data-xx="veil">density: normal</button>
+  <a href="field.html">demo 4 &rarr;</a>
   <a href="halo.html">demo 2 &rarr;</a>
   <a href="index.html">demo 1 &rarr;</a>
 </div>

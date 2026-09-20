@@ -1,0 +1,48 @@
+/* ── X-ON-X hero, demo 4: a cloud field, after mrdoob ─────────────────────
+   The sky is CSS, the clouds are two WebGL canvases (field.js) that share one
+   field: the back one behind the hero, the front one in front of the words and
+   the buttons, thinned. Colours are the measured-and-pulled palette of demo 3. */
+
+:root {
+  --xx-tempo: 1;            /* field.js reads this: bigger = slower flight       */
+  --xx-front-o: 0.55;       /* how much the plane in front of the text shows     */
+  --g-sky-high: #AAB9DB;
+  --g-sky-mid:  #D1D9ED;
+  --g-sky-warm: #FAEFE0;
+  --g-sky-low:  #FCF9F5;
+  --g-paper:    #FAFAF5;
+  --cx: 62%; --cy: 46%;     /* where the sun sits */
+}
+
+.xx-page::before { display: none !important; }   /* the old gradient sky */
+.xx-page::after  { opacity: 0.30; }              /* paper grain, at half strength */
+.xx-page { min-height: 100vh; }
+
+.xx-sky {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(circle 30vmax at var(--cx) var(--cy),
+        rgba(255, 243, 228, 0.42) 0%, rgba(255, 246, 236, 0.16) 34%, transparent 66%),
+    linear-gradient(180deg,
+        var(--g-sky-high) 0%, var(--g-sky-mid) 34%, var(--g-sky-warm) 74%,
+        var(--g-sky-low) 89%, var(--g-paper) 100%);
+}
+
+.xx-gl {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none; display: block;
+}
+.xx-page > #xx-gl-back  { z-index: 0; }
+.xx-page > #xx-gl-front { z-index: 4; opacity: var(--xx-front-o); }
+
+html.xx-behind .xx-page > #xx-gl-front { z-index: 0; opacity: 1; }
+html.xx-thin  { --xx-front-o: 0.32; }
+html.xx-thick { --xx-front-o: 0.80; }
+html.xx-tempo-rush { --xx-tempo: 0.55; }
+html.xx-tempo-calm { --xx-tempo: 1.8; }
+
+@media (max-width: 768px) {
+  :root { --cx: 50%; --cy: 44%; --xx-front-o: 0.42; }
+  .xx-hero { min-height: calc(100vh - 72px) !important; }
+}

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
 /* Viewport switch. Must stay below the viewport meta above: until that meta is
@@ -13,11 +15,31 @@
     if (new URLSearchParams(location.search).has('full')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w <= 768) location.replace('m.html?v=20260916a' + location.hash);
+    if (w <= 768) location.replace('field-m.html?v=20260920k' + location.hash);
   } catch (e) {}
 })();
 </script>
-<title>X-ON-X – Sky prototype</title>
+<title>X-ON-X | New market launch</title>
+<meta name="description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<link rel="canonical" href="https://www.x-on-x.com/">
+<link rel="alternate" media="only screen and (max-width: 768px)" href="https://www.x-on-x.com/m.html">
+<link rel="icon" href="/favicon.ico?v=20260920k" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=20260920k" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260920k">
+<meta name="theme-color" content="#FAFAF5">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="X-ON-X">
+<meta property="og:url" content="https://www.x-on-x.com/">
+<meta property="og:title" content="X-ON-X | New market launch">
+<meta property="og:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260920k">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="X-ON-X | New market launch">
+<meta name="twitter:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
+<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260920k">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -655,10 +677,27 @@ body { background: var(--cream) !important; }
 .xx-section--graphite > .xx-section__inner,
 .xx-closing__inner, .xx-footer__inner { max-width: 1440px !important; }
 
+/* v24: the side gutter the full-bleed layout forgot. The tinted bands drop their
+   own horizontal padding on purpose, so the band colour runs edge to edge, and
+   their inner column was left with padding 0. Above 1440px nobody noticed: the
+   max-width kept the text off the edge. At exactly 1440, and on every laptop
+   narrower than that, the headings sat flush against the window. 48 is the
+   figure .xx-section itself uses, so the bands now line up with the sections
+   that never lost their padding. */
+.xx-section--warm > .xx-section__inner,
+.xx-section--graphite > .xx-section__inner,
+.xx-section--how-stats > .xx-section__inner,
+.xx-closing__inner,
+.xx-footer__inner,
+.xx-footer__bot { padding-left: 48px; padding-right: 48px; box-sizing: border-box; }
+
 /* ── SHOWCASE (Legora-style auto-cycling tabs) ── */
 .xx-showcase { max-width: 1440px; margin: 0 auto; padding: 72px 0 96px; position: relative; }
 .xx-showcase--band { max-width: none; padding: 72px 0 96px; background: #FFFEFA; }
 .xx-showcase--band > * { max-width: 1440px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; box-sizing: border-box; }
+/* v24, continued: same 48px gutter. This has to sit after the rule above,
+   which zeroes the padding at the same specificity. */
+.xx-showcase, .xx-showcase--band > * { padding-left: 48px; padding-right: 48px; }
 .xx-showcase__head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 4px; }
 .xx-showcase__label { font: var(--t-mono-sm); letter-spacing: 1.5px; text-transform: uppercase; color: var(--fg3); display: flex; align-items: center; gap: 10px; }
 .xx-showcase__label::before { content: ''; width: 8px; height: 8px; background: var(--lime); border-radius: 50%; box-shadow: 0 0 0 4px rgba(201,255,51,0.18); }
@@ -736,6 +775,11 @@ body { background: var(--cream) !important; }
 
 /* v25: Hero fills screen */
 .xx-hero { min-height: calc(100vh - 72px) !important; justify-content: center; }
+/* 16.09.2026: the hero dock («What brings you here?») is absolute at bottom: 32px and
+   stands about 140px tall, but the hero kept only 100px of bottom padding, so on a
+   short window (about 720px and less) the centred CTA row landed under the dock's
+   label. Desktop only: below 920px the dock is static and in flow. */
+@media (min-width: 921px) { .xx-hero { padding-bottom: 196px !important; } }
 
 /* v25: How We Work dividers grey */
 .xx-how-stat { border-top-color: var(--gray) !important; }
@@ -1137,19 +1181,78 @@ body { background: var(--cream) !important; }
    underneath it.                                                            */
 #what-we-do { scroll-margin-top: 88px; }
 </style>
-<link rel="stylesheet" href="clouds.css?v=20260916a">
+<!-- Who we are, in the one format machines read without guessing. Every value
+     here is already visible on the page or in a public ranking profile; nothing
+     is asserted that a reader cannot check. -->
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://www.x-on-x.com/#org",
+   "name": "X-ON-X",
+   "url": "https://www.x-on-x.com/",
+   "description": "X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://www.x-on-x.com/img/apple-touch-icon.png",
+    "width": 180,
+    "height": 180
+   },
+   "image": "https://www.x-on-x.com/img/og.jpg",
+   "email": "ok@x-on-x.com",
+   "areaServed": [
+    {
+     "@type": "City",
+     "name": "London"
+    },
+    {
+     "@type": "City",
+     "name": "Kyiv"
+    },
+    {
+     "@type": "City",
+     "name": "Warsaw"
+    }
+   ],
+   "founder": [
+    {
+     "@type": "Person",
+     "name": "Oleg Kotliar"
+    },
+    {
+     "@type": "Person",
+     "name": "Viktoriia Kotliar"
+    }
+   ],
+   "sameAs": [
+    "https://www.legal500.com/rankings/ranking/c-ukraine/tax/243355-x-on-x",
+    "https://t.me/yourxsolution"
+   ]
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://www.x-on-x.com/#site",
+   "url": "https://www.x-on-x.com/",
+   "name": "X-ON-X",
+   "inLanguage": "en",
+   "publisher": {
+    "@id": "https://www.x-on-x.com/#org"
+   }
+  }
+ ]
+}
+</script>
+<link rel="stylesheet" href="field.css?v=20260920k">
 </head>
 <body>
 
 <div class="xx-page" id="homePage">
-  <!-- ──── SKY (prototype) ──── -->
-  <div class="xx-sky" aria-hidden="true">
-    <div class="xx-layer xx-layer--far"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
-    <div class="xx-layer xx-layer--mid"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
-  </div>
-  <div class="xx-sky xx-sky--near" aria-hidden="true">
-    <div class="xx-layer xx-layer--near"><div class="xx-cloud xx-cloud--a"></div><div class="xx-cloud xx-cloud--b"></div></div>
-  </div>
+  <!-- ──── SKY (demo 4: WebGL cloud field, after mrdoob) ──── -->
+  <div class="xx-sky" aria-hidden="true"></div>
+  <canvas class="xx-gl" id="xx-gl-back" aria-hidden="true"></canvas>
+  <canvas class="xx-gl" id="xx-gl-front" aria-hidden="true"></canvas>
 
 
   <!-- ──── NAV ──── -->
@@ -1239,11 +1342,54 @@ body { background: var(--cream) !important; }
 
   </div><!-- /.xx-page -->
 
-<button class="xx-proto-toggle" type="button" onclick="document.documentElement.classList.toggle('xx-still');this.textContent=document.documentElement.classList.contains('xx-still')?'motion: off':'motion: on'">motion: on</button>
-<a class="xx-proto-toggle xx-proto-link" href="field.html">demo 4 &rarr;</a>
-  <a class="xx-proto-toggle xx-proto-link" href="flight.html">demo 3 &rarr;</a>
-  <a class="xx-proto-toggle xx-proto-link" href="halo.html">demo 2 &rarr;</a>
-<style>.xx-proto-link{bottom:52px !important;text-decoration:none}.xx-proto-toggle{position:fixed;right:14px;bottom:14px;z-index:60;font:11px/1 "JetBrains Mono",monospace;letter-spacing:1px;text-transform:uppercase;padding:8px 12px;border-radius:999px;border:1px solid rgba(17,17,17,.18);background:rgba(255,254,248,.8);color:#111;cursor:pointer;backdrop-filter:blur(8px)}</style>
+<div class="xx-proto" role="group" aria-label="sky controls">
+  <button type="button" data-xx="motion">motion: on</button>
+  <button type="button" data-xx="tempo">tempo: normal</button>
+  <button type="button" data-xx="through">crosses text: yes</button>
+  <button type="button" data-xx="veil">front: normal</button>
+  <a href="flight.html">demo 3 &rarr;</a>
+  <a href="halo.html">demo 2 &rarr;</a>
+  <a href="index.html">demo 1 &rarr;</a>
+</div>
+<style>
+.xx-proto{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.xx-proto button,.xx-proto a{font:11px/1 "JetBrains Mono",monospace;letter-spacing:1px;text-transform:uppercase;
+ padding:8px 12px;border-radius:999px;border:1px solid rgba(17,17,17,.18);background:rgba(255,254,248,.8);
+ color:#111;cursor:pointer;backdrop-filter:blur(8px);text-decoration:none}
+.xx-proto button:hover,.xx-proto a:hover{background:rgba(255,254,248,.98)}
+@media (max-width:768px){.xx-proto{right:10px;bottom:10px;gap:4px}.xx-proto button,.xx-proto a{padding:7px 10px;font-size:10px}}
+</style>
+<script>
+(function () {
+  var root = document.documentElement;
+  var tempos = ['normal', 'rush', 'calm'], t = 0;
+  var veils = ['normal', 'thin', 'thick'], v = 0;
+  document.querySelectorAll('.xx-proto button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.dataset.xx;
+      if (k === 'motion') {
+        root.classList.toggle('xx-still');
+        b.textContent = 'motion: ' + (root.classList.contains('xx-still') ? 'off' : 'on');
+      } else if (k === 'tempo') {
+        t = (t + 1) % tempos.length;
+        root.classList.remove('xx-tempo-rush', 'xx-tempo-calm');
+        if (tempos[t] !== 'normal') root.classList.add('xx-tempo-' + tempos[t]);
+        b.textContent = 'tempo: ' + tempos[t];
+      } else if (k === 'through') {
+        root.classList.toggle('xx-behind');
+        b.textContent = 'crosses text: ' + (root.classList.contains('xx-behind') ? 'no' : 'yes');
+      } else {
+        v = (v + 1) % veils.length;
+        root.classList.remove('xx-thin', 'xx-thick');
+        if (veils[v] !== 'normal') root.classList.add('xx-' + veils[v]);
+        b.textContent = 'front: ' + veils[v];
+      }
+    });
+  });
+})();
+</script>
 
+<script src="js/three.min.js"></script>
+<script src="field.js?v=20260920k" data-count="5000" data-texture="clouds/puff_photo.png?v=20260920k" data-sky="#ECE8E6"></script>
 </body>
 </html>

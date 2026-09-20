@@ -123,6 +123,40 @@ sprites are now real clouds, matted out of photographs by `cut_clouds.py`.
   transparency. Alpha is eroded by about a pixel and softened back to trim the last fringe.
 - Each cut writes a `_far` variant, mixed toward `sky_mid` and thinned, for the far plane.
 
+## Demo 4, 20.09 night: a cloud field in WebGL, after mrdoob
+
+Iryna, after the photographic sprites: «структура хмар має бути як тут», pointing at
+[mrdoob.com/lab/javascript/webgl/clouds](https://mrdoob.com/lab/javascript/webgl/clouds/).
+The structure there is the whole point, and it is the opposite of everything demos 1–3 did.
+**No sprite is a cloud.** Thousands of small, soft, mostly transparent billboards are scattered
+down a long box and the camera flies down it; a cloud is what a few hundred of them add up to
+where they overlap. Overlap is what reads as volume, and a single rendered or cut-out cloud,
+however good, never will. That is why every 2D pass came back as вата.
+
+`field.html` / `field-m.html`, `field.css`, `field.js`, `build_field.py`, Three r128 vendored in
+`js/` so nothing depends on a CDN.
+
+- **Same construction as the reference**: 5000 planes (8000 on the original; ours is airier),
+  `x` across 1000 units, `y = -rand·rand·260 - 70` so it is a deck below the camera, `z` spread
+  along 8000 units with a second copy of the field one box back for a seamless loop, random
+  spin and `rand·rand·1.5 + 0.5` scale, fov 30, `depthTest: false`, additive-free normal
+  blending, the fragment fading the puff at the lens with `pow(gl_FragCoord.z, 20)` and mixing
+  to the sky colour with distance. Camera flies at 0.03 units/ms; mouse gives a little parallax.
+  Built as one `InstancedMesh` rather than a merged `Geometry`, which r128 no longer has.
+- **Through the text, still.** Two canvases share the same seeded field. The back one draws
+  everything beyond 700 units and sits behind the hero; the front one draws only what is nearer
+  and sits in front of the words and the buttons at 55%. A 160-unit depth fade across the
+  boundary keeps a puff that straddles it from being cut in half. `crosses text` in the corner
+  drops the front canvas behind the text; `front` cycles its strength.
+- **The puff is photographic.** mrdoob's `cloud10.png` is clearly cut from a photograph, and a
+  noise puff stacks into smoke. Ours is the densest 256px window of the CC0 Gåseberg cut
+  (`ph_3`), luminance kept, radially faded with a wobbling radius so it is not a disc, and
+  coloured from `palette.json` shadow → lit. Where the puff thins out the colour is pulled to
+  lit: thousands of shaded margins otherwise stack into a dark halo round every mass. Alpha
+  mean 0.34, so most of every puff is see-through and depth accumulates.
+- **Tempo** goes through `--xx-tempo` as on the other demos; `motion: off` freezes the flight in
+  place; `prefers-reduced-motion` renders one frame a way into the field and stops.
+
 ## Files
 
 - `clouds.css` demo 1, `halo.css` demo 2, `flight.css` demo 3 — transform and opacity only,
