@@ -43,8 +43,8 @@
   /* how much of each plane comes through. The two in front of the text are the
      ones that have to stay thin, or the hero stops being readable. */
   --xx-far-o: 1;
-  --xx-mid-o: 0.46;
-  --xx-near-o: 0.34;
+  --xx-mid-o: 0.36;
+  --xx-near-o: 0.24;
 }
 
 .xx-page::before { display: none !important; }   /* the old gradient sky */
@@ -83,121 +83,20 @@ html.xx-behind .xx-page > .xx-flight--near { z-index: 0; }
 html.xx-behind { --xx-mid-o: 0.88; --xx-near-o: 0.78; }
 
 /* ── one cloud ────────────────────────────────────────────────────────────
-   --ux/--uy is the direction it diverges in (a unit vector, y squashed to the
-   shape of a viewport), --r0/--r1 how far from the vanishing point it starts and
-   ends, --s0/--s1 how big. build_flight.py writes all of them per sprite.       */
+   Each sprite carries its own @keyframes block, written by build_flight.py: the
+   cloud's path is a real 3D position projected through its distance, sampled at
+   fifteen points spaced geometrically so the samples bunch up at the end, where a
+   constant fall in distance turns into a very fast change on screen. Only the
+   animation name, --dur and --d are inline; tempo still scales everything.     */
 .xx-cl {
   position: absolute; left: var(--cx); top: var(--cy);
   width: 44vmax; height: 44vmax;
   background-repeat: no-repeat; background-position: 50% 50%; background-size: contain;
   opacity: 0; will-change: transform, opacity; backface-visibility: hidden;
-  --dr: calc(var(--r1) - var(--r0));
-  --ds: calc(var(--s1) - var(--s0));
-  animation: xxFlight calc(var(--dur) * var(--xx-tempo)) linear infinite;
+  animation-duration: calc(var(--dur) * var(--xx-tempo));
   animation-delay: calc(var(--d) * var(--xx-tempo));
-}
-
-/* Constant forward speed does not look constant on screen: a cloud crawls while it
-   is far away and then rushes past. That is the whole feeling of flight, so the
-   radius fractions below are shaped by hand rather than left to a timing function,
-   which keeps the fade independent of the motion. */
-@keyframes xxFlight {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * var(--r0)), calc(var(--uy) * var(--r0)))
-      scale(var(--s0));
-  }
-  12% { opacity: var(--o); }
-  25% {
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.035)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.035)))
-      scale(calc(var(--s0) + var(--ds) * 0.045)) rotate(calc(var(--rot) * 0.04));
-  }
-  45% {
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.085)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.085)))
-      scale(calc(var(--s0) + var(--ds) * 0.11)) rotate(calc(var(--rot) * 0.10));
-  }
-  62% {
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.16)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.16)))
-      scale(calc(var(--s0) + var(--ds) * 0.21)) rotate(calc(var(--rot) * 0.20));
-  }
-  76% {
-    opacity: var(--o);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.28)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.28)))
-      scale(calc(var(--s0) + var(--ds) * 0.37)) rotate(calc(var(--rot) * 0.36));
-  }
-  87% {
-    opacity: calc(var(--o) * 0.82);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.48)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.48)))
-      scale(calc(var(--s0) + var(--ds) * 0.60)) rotate(calc(var(--rot) * 0.58));
-  }
-  95% {
-    opacity: calc(var(--o) * 0.34);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.72)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.72)))
-      scale(calc(var(--s0) + var(--ds) * 0.80)) rotate(calc(var(--rot) * 0.80));
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * var(--r1)), calc(var(--uy) * var(--r1)))
-      scale(var(--s1)) rotate(var(--rot));
-  }
-}
-
-/* The front plane needs a different curve, not a different trajectory. A cloud that close
-   is either past you or not there yet: if it faded in while it was still a speck at the
-   vanishing point it would sit over the headline as a haze for most of the cycle, which
-   is fog, not a cloud crossing the words. So it stays invisible until it is already large,
-   shows for a few seconds as it sweeps over the text, and is gone. */
-.xx-flight--near .xx-cl { animation-name: xxFlightNear; }
-
-@keyframes xxFlightNear {
-  0%, 46% {
-    opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.09)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.09)))
-      scale(calc(var(--s0) + var(--ds) * 0.12));
-  }
-  62% {
-    opacity: calc(var(--o) * 0.55);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.16)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.16)))
-      scale(calc(var(--s0) + var(--ds) * 0.21)) rotate(calc(var(--rot) * 0.20));
-  }
-  76% {
-    opacity: var(--o);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.28)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.28)))
-      scale(calc(var(--s0) + var(--ds) * 0.37)) rotate(calc(var(--rot) * 0.36));
-  }
-  88% {
-    opacity: calc(var(--o) * 0.62);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.50)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.50)))
-      scale(calc(var(--s0) + var(--ds) * 0.62)) rotate(calc(var(--rot) * 0.60));
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * var(--r1)), calc(var(--uy) * var(--r1)))
-      scale(var(--s1)) rotate(var(--rot));
-  }
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 /* ── the nimbus around the aircraft ───────────────────────────────────────
@@ -251,32 +150,23 @@ html.xx-behind { --xx-mid-o: 0.88; --xx-near-o: 0.78; }
 html.xx-tempo-rush { --xx-tempo: 0.62; }
 html.xx-tempo-calm { --xx-tempo: 1.60; }
 html.xx-nohalo     { --xx-halo: 0; }
-html.xx-thin       { --xx-mid-o: 0.26; --xx-near-o: 0.13; }
-html.xx-thick      { --xx-mid-o: 0.60; --xx-near-o: 0.34; }
+html.xx-thin       { --xx-mid-o: 0.22; --xx-near-o: 0.12; }
+html.xx-thick      { --xx-mid-o: 0.52; --xx-near-o: 0.36; }
 
 @media (max-width: 768px) {
   :root { --cx: 50%; --cy: 46%; --xx-near-o: 0.16; }
   .xx-hero { min-height: calc(100vh - 72px) !important; }
-  .xx-cl { width: 72vmax; height: 72vmax; }
   .xx-halo__glow { width: 86vmax; height: 86vmax; margin: -43vmax 0 0 -43vmax; }
   /* phones carry a thinner field: build_flight.py marks the sprites it may drop */
   .xx-cl--drop { display: none; }
 }
 
-/* Motion off: a still sky, not a frozen frame of the field. Freezing everything piles
-   the whole cycle into one image, because every sprite stops at the same fraction of its
-   own trajectory. Only the far plane stays, at its own spread of sizes, and the two
-   planes that cross the text go away entirely. */
+/* Motion off: the field frozen where it is. Every sprite starts with a negative delay,
+   so a paused animation already shows it somewhere along its path, and the frame reads
+   as a sky rather than a pile. The plane in front of the text goes away. */
 @media (prefers-reduced-motion: reduce) {
-  .xx-cl, .xx-halo > * { animation: none !important; }
-  .xx-flight--mid, .xx-flight--near { display: none; }
-  .xx-flight--far .xx-cl {
-    opacity: calc(var(--o) * 0.85);
-    transform: translate(-50%, -50%)
-      translate(calc(var(--ux) * (var(--r0) + var(--dr) * 0.34)),
-                calc(var(--uy) * (var(--r0) + var(--dr) * 0.34)))
-      scale(calc(var(--s0) + var(--ds) * 0.46));
-  }
+  .xx-cl, .xx-halo > * { animation-play-state: paused !important; }
+  .xx-flight--near { display: none; }
 }
 html.xx-still .xx-cl,
 html.xx-still .xx-halo > * { animation-play-state: paused; }
