@@ -9,7 +9,7 @@ the hero, the sky and the panel are identical and only the clouds differ.
 import pathlib, re
 
 DST = pathlib.Path(__file__).parent
-V = '20260928b'
+V = '20260928c'
 
 TUNE = '''<div class="xx-tune" id="xx-tune" hidden>
   <label>coverage <input type="range" data-k="coverage" min="0.2" max="0.8" step="0.01"><output></output></label>
@@ -29,6 +29,10 @@ def build(src, out, partner):
     html = (DST / src).read_text()
     html = html.replace(f"location.replace('{partner.replace('volume', 'field')}?", f"location.replace('{partner}?")
     html = html.replace('Sky demo 4: cloud field', 'Sky demo 7: volumetric clouds')
+    # A volumetric cloud has a hard surface: at demo 4's 40% the near part of a cloud shows as
+    # a ghost outline over its own far part. Nearer to opaque here; the words are checked on
+    # a screenshot, not assumed.
+    html = html.replace('</head>', '<style>:root{--xx-front-o:0.78} html.xx-thin{--xx-front-o:0.55} html.xx-thick{--xx-front-o:0.95}</style>\n</head>', 1)
     html = html.replace('(demo 4: WebGL cloud field, after mrdoob)', '(demo 7: raymarched volumetric clouds)')
     html = re.sub(r'<div class="xx-tune" id="xx-tune" hidden>.*?</textarea>\n</div>', TUNE, html, count=1, flags=re.S)
     html = re.sub(r'<script src="js/three.min.js"></script>\n<script src="field.js[^>]*></script>',

@@ -25,7 +25,7 @@
     lining: 0.6,            // forward scattering: the glow at the edges looking into the sun
     shade: 0.7,             // how dark the shaded side goes: demo 4 is light right through, so is this
     scale: +(script.dataset.scale || (mobile ? 0.33 : 0.5)),   // render resolution / screen
-    steps: +(script.dataset.steps || (mobile ? 40 : 64)),
+    steps: +(script.dataset.steps || (mobile ? 44 : 80)),
     split: 900              // nearer than this = front canvas
   };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem('xx-volume') || '{}')); } catch (e) {}
@@ -69,10 +69,20 @@
     '  float d = c * prof;',
     '  if (d <= 0.0) return 0.0;',
     '  if (fine) {',
-    '    vec3 r = p * 0.0085 + vec3(time * 0.00003, -time * 0.00002, 0.0);',
-    '    float e = noise(r) * 0.55 + noise(ROT * r * 2.2) * 0.3 + noise(ROT * ROT * r * 4.7) * 0.15;',
-    '    e = mix(1.0 - e, e, clamp(h * 3.0, 0.0, 1.0));',
-    '    d = remap(d, e * 0.30, 1.0);',
+    // Cauliflower: a cumulus is rounded heads with sharp creases between them. Ridged noise
+    // (1 - |2n - 1|) is high only along thin lines, so eroding by it bites narrow creases and
+    // leaves round heads between, at two sizes. The base is eroded by plain noise instead:
+    // ragged and wispy underneath, as in every reference photo.
+    '    vec3 r = p * 0.0058 + vec3(time * 0.00003, -time * 0.00002, 0.0);',
+    '    float r1 = 1.0 - abs(noise(r) * 2.0 - 1.0);',
+    '    float r2 = 1.0 - abs(noise(ROT * r * 2.7 + 3.0) * 2.0 - 1.0);',
+    '    float cauli = r1 * 0.62 + r2 * 0.38;',
+    '    float wisp = noise(r * 1.9) * 0.6 + noise(ROT * r * 4.3) * 0.4;',
+    '    float e = mix(wisp, cauli * cauli, smoothstep(0.08, 0.35, h));',
+    '    d = remap(d, e * 0.40, 1.0);',
+    // a cumulus is dense right under its surface: no translucent veil over the crowns,
+    // and fewer half-transparent samples, which is what read as sand at the edges
+    '    d = smoothstep(0.0, mix(0.55, 0.16, smoothstep(0.1, 0.4, h)), d);',
     '  }',
     '  return d * 2.2 * density;',
     '}',
@@ -89,7 +99,9 @@
     '  float T = 1.0; vec3 col = vec3(0.0);',
     '  float span = tFar - tNear;',
     // steps grow with distance: fine near the lens, coarse in the haze
-    '  float jitter = hash(vec3(gl_FragCoord.xy, time * 0.001));',
+    // interleaved gradient noise: an even, fine dither instead of white noise, which
+    // upscaled from half resolution read as sand along every edge
+    '  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))) + floor(time / 16.7) * 0.618034);',   // moves every frame: in motion it is grain, not a grid
     '  for (int i = 0; i < 96; i++) {',
     '    if (i >= steps || T < 0.02) break;',
     '    float f0 = (float(i) + jitter) / float(steps);',
@@ -107,11 +119,11 @@
     '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
     '      for (int k = 0; k < 3; k++) { sunL += am * exp(-od * bm) * mix(0.6, phaseN * 1.8 * lining * (0.25 + 0.75 * powder) + 0.6, gm); am *= 0.55; bm *= 0.35; gm *= 0.4; }',
     '      float h = clamp((p.y - BASE) / (TOP - BASE), 0.0, 1.0);',
-    '      vec3 amb = mix(skyLow * 0.80, mix(skyHigh, vec3(1.0), 0.62), h);',
+    '      vec3 amb = mix(skyLow * 0.80, mix(skyHigh, vec3(1.0), 0.75), h);',
     '      vec3 c = amb * (0.76 + 0.18 * h) + vec3(1.0, 0.975, 0.945) * sunL * (0.35 + 0.65 * powder) * 0.62;',
     '      float fog = smoothstep(600.0, 4200.0, t);',
     '      c = mix(c, fogCol, fog * 0.9);',
-    '      float a = 1.0 - exp(-d * 0.030 * dt);',
+    '      float a = 1.0 - exp(-d * 0.055 * dt);',
     '      a *= smoothstep(40.0, 480.0, t);',
     '      float wb = smoothstep(fadeA, fadeB, t);',            // the two canvases share a wide band, no hard cut at the split
     '      a *= mix(wb, 1.0 - wb, isFront);',
