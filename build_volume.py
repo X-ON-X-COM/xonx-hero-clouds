@@ -9,7 +9,7 @@ the hero, the sky and the panel are identical and only the clouds differ.
 import pathlib, re
 
 DST = pathlib.Path(__file__).parent
-V = '20260928a'
+V = '20260928b'
 
 TUNE = '''<div class="xx-tune" id="xx-tune" hidden>
   <label>coverage <input type="range" data-k="coverage" min="0.2" max="0.8" step="0.01"><output></output></label>

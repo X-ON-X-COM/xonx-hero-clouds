@@ -20,10 +20,10 @@
   var mobile = window.matchMedia('(max-width: 768px)').matches;
   var cfg = {
     speed: 0.085,           // world units per ms, demo 4's tempo
-    coverage: 0.50,         // how much of the sky is cloud
+    coverage: 0.56,         // how much of the sky is cloud
     density: 1.0,           // how thick the vapour is
-    lining: 1.0,            // forward scattering: the glow at the edges looking into the sun
-    shade: 1.0,             // how dark the shaded side goes
+    lining: 0.6,            // forward scattering: the glow at the edges looking into the sun
+    shade: 0.7,             // how dark the shaded side goes: demo 4 is light right through, so is this
     scale: +(script.dataset.scale || (mobile ? 0.33 : 0.5)),   // render resolution / screen
     steps: +(script.dataset.steps || (mobile ? 40 : 64)),
     split: 900              // nearer than this = front canvas
@@ -39,7 +39,7 @@
     'precision highp float;',
     'varying vec2 vUv;',
     'uniform vec2 res; uniform vec3 cam; uniform float time; uniform float tanHalf;',
-    'uniform float tNear; uniform float tFar; uniform int steps;',
+    'uniform float tNear; uniform float tFar; uniform int steps; uniform float fadeA; uniform float fadeB; uniform float isFront;',
     'uniform float coverage; uniform float density; uniform float lining; uniform float shade;',
     'uniform vec3 sunDir; uniform vec3 skyHigh; uniform vec3 skyLow; uniform vec3 fogCol;',
     '',
@@ -56,7 +56,7 @@
     // Shape = a low-frequency field thresholded by coverage (where the clouds are) times the
     // height profile, then bitten by higher octaves (cauliflower crowns, ragged edges).
     // The field drifts slowly on its own, so the clouds churn while you fly through them.
-    'const float BASE = -240.0; const float TOP = 560.0;',
+    'const float BASE = -440.0; const float TOP = 560.0;',
     'float remap(float v, float a, float b){ return clamp((v - a) / (b - a), 0.0, 1.0); }',
     'float cloud(vec3 p, bool fine){',
     '  float h = (p.y - BASE) / (TOP - BASE);',
@@ -64,14 +64,15 @@
     '  vec3 q = p * 0.0010 + vec3(0.0, 0.0, time * 0.000015);',
     '  float n = noise(q) * 0.62 + noise(ROT * q * 2.03) * 0.25 + noise(ROT * ROT * q * 4.01) * 0.13;',
     '  float c = remap(n, 1.0 - coverage, 1.0);',
-    '  float prof = smoothstep(0.0, 0.06, h) * remap(h, 0.25 + c * 0.75, 0.1 + c * 0.35);',
+    '  float ht = h + (noise(q * 3.1 + 7.0) - 0.5) * 0.34;',   // a lumpy top, never a plateau: a flat top below eye level reads as a straight line
+    '  float prof = smoothstep(0.0, 0.06, h) * remap(ht, 0.25 + c * 0.75, 0.1 + c * 0.35);',
     '  float d = c * prof;',
     '  if (d <= 0.0) return 0.0;',
     '  if (fine) {',
     '    vec3 r = p * 0.0085 + vec3(time * 0.00003, -time * 0.00002, 0.0);',
     '    float e = noise(r) * 0.55 + noise(ROT * r * 2.2) * 0.3 + noise(ROT * ROT * r * 4.7) * 0.15;',
     '    e = mix(1.0 - e, e, clamp(h * 3.0, 0.0, 1.0));',
-    '    d = remap(d, e * 0.42, 1.0);',
+    '    d = remap(d, e * 0.30, 1.0);',
     '  }',
     '  return d * 2.2 * density;',
     '}',
@@ -102,16 +103,18 @@
     '      float od = 0.0;',
     '      for (int j = 1; j <= 6; j++) od += cloud(p + sunDir * float(j * j) * 16.0, false) * float(2 * j - 1) * 16.0;',
     '      od *= 0.012 * shade;',
-    '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
-    '      for (int k = 0; k < 3; k++) { sunL += am * exp(-od * bm) * mix(0.6, phaseN * 4.0 * lining + 0.6, gm); am *= 0.55; bm *= 0.35; gm *= 0.4; }',
     '      float powder = 1.0 - exp(-d * 6.0);',
+    '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
+    '      for (int k = 0; k < 3; k++) { sunL += am * exp(-od * bm) * mix(0.6, phaseN * 1.8 * lining * (0.25 + 0.75 * powder) + 0.6, gm); am *= 0.55; bm *= 0.35; gm *= 0.4; }',
     '      float h = clamp((p.y - BASE) / (TOP - BASE), 0.0, 1.0);',
     '      vec3 amb = mix(skyLow * 0.80, mix(skyHigh, vec3(1.0), 0.62), h);',
-    '      vec3 c = amb * (0.62 + 0.25 * h) + vec3(1.0, 0.975, 0.945) * sunL * (0.35 + 0.65 * powder) * 0.62;',
+    '      vec3 c = amb * (0.76 + 0.18 * h) + vec3(1.0, 0.975, 0.945) * sunL * (0.35 + 0.65 * powder) * 0.62;',
     '      float fog = smoothstep(600.0, 4200.0, t);',
     '      c = mix(c, fogCol, fog * 0.9);',
     '      float a = 1.0 - exp(-d * 0.030 * dt);',
-    '      a *= smoothstep(40.0, 260.0, t);',
+    '      a *= smoothstep(40.0, 480.0, t);',
+    '      float wb = smoothstep(fadeA, fadeB, t);',            // the two canvases share a wide band, no hard cut at the split
+    '      a *= mix(wb, 1.0 - wb, isFront);',
     '      col += T * a * c; T *= 1.0 - a;',
     '    }',
     '  }',
@@ -134,7 +137,7 @@
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {};
-    ['res', 'cam', 'time', 'tanHalf', 'tNear', 'tFar', 'steps', 'coverage', 'density', 'lining', 'shade',
+    ['res', 'cam', 'time', 'tanHalf', 'tNear', 'tFar', 'steps', 'fadeA', 'fadeB', 'isFront', 'coverage', 'density', 'lining', 'shade',
      'sunDir', 'skyHigh', 'skyLow', 'fogCol'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     return { gl: gl, U: U, canvas: canvas, near: near, far: far };
   }
@@ -143,7 +146,8 @@
   var sun = [0.30, 0.42, -0.86], l = Math.hypot(sun[0], sun[1], sun[2]); sun = sun.map(function (v) { return v / l; });
 
   var back = document.getElementById('xx-gl-back'), front = document.getElementById('xx-gl-front');
-  var L = [layer(back, cfg.split - 120, 5200), layer(front, 1, cfg.split)].filter(Boolean);
+  var L = [layer(back, cfg.split - 320, 5200), layer(front, 1, cfg.split + 120)].filter(Boolean);
+  if (L[1]) L[1].front = true;
   if (!L.length) return;
 
   function resize() {
@@ -172,6 +176,7 @@
       gl.uniform1f(U.time, t % 3600000);
       gl.uniform1f(U.tanHalf, Math.tan(58 / 2 * Math.PI / 180));
       gl.uniform1f(U.tNear, x.near); gl.uniform1f(U.tFar, x.far);
+      gl.uniform1f(U.fadeA, cfg.split - 320); gl.uniform1f(U.fadeB, cfg.split + 120); gl.uniform1f(U.isFront, x.front ? 1 : 0);
       gl.uniform1i(U.steps, x.near < 10 ? Math.round(cfg.steps * 0.45) : cfg.steps);
       gl.uniform1f(U.coverage, cfg.coverage); gl.uniform1f(U.density, cfg.density);
       gl.uniform1f(U.lining, cfg.lining); gl.uniform1f(U.shade, cfg.shade);
