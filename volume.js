@@ -23,7 +23,7 @@
     coverage: 0.56,         // how much of the sky is cloud
     density: 1.0,           // how thick the vapour is
     lining: 0.6,            // forward scattering: the glow at the edges looking into the sun
-    shade: 0.7,             // how dark the shaded side goes: demo 4 is light right through, so is this
+    shade: 0.95,            // how dark the shaded side goes: demo 4 is light right through, so is this
     scale: +(script.dataset.scale || (mobile ? 0.33 : 0.5)),   // render resolution / screen
     steps: +(script.dataset.steps || (mobile ? 44 : 80)),
     split: 900              // nearer than this = front canvas
@@ -76,15 +76,16 @@
     '    vec3 r = p * 0.0058 + vec3(time * 0.00003, -time * 0.00002, 0.0);',
     '    float r1 = 1.0 - abs(noise(r) * 2.0 - 1.0);',
     '    float r2 = 1.0 - abs(noise(ROT * r * 2.7 + 3.0) * 2.0 - 1.0);',
-    '    float cauli = r1 * 0.62 + r2 * 0.38;',
+    '    float r0 = 1.0 - abs(noise(ROT * p * 0.0026 + 9.0) * 2.0 - 1.0);',   // the big towers a cloud is built of, a third of its size
+    '    float cauli = r0 * 0.42 + r1 * 0.36 + r2 * 0.22;',
     '    float wisp = noise(r * 1.9) * 0.6 + noise(ROT * r * 4.3) * 0.4;',
     '    float soft = noise(r * 1.3 + 11.0) * 0.5 + noise(ROT * r * 3.4 + 5.0) * 0.32 + noise(ROT * ROT * r * 8.1 + 2.0) * 0.18;',   // the finest octave is for clouds up close                             // round, crease-free lumps for the flanks and belly
     '    float e = mix(wisp, soft, smoothstep(0.06, 0.2, h));',
     '    e = mix(e, mix(soft, cauli * cauli, 0.7), smoothstep(0.2, 0.46, h));',            // creases only up in the crowns
-    '    d = remap(d, e * 0.40, 1.0);',
+    '    d = remap(d, e * 0.52, 1.0);',
     // a cumulus is dense right under its surface: no translucent veil over the crowns,
     // and fewer half-transparent samples, which is what read as sand at the edges
-    '    d = smoothstep(0.0, mix(0.55, 0.16, smoothstep(0.1, 0.4, h)), d);',
+    '    d = smoothstep(0.0, mix(0.34, 0.08, smoothstep(0.1, 0.4, h)), d);',
     '  }',
     '  return d * 2.2 * density;',
     '}',
@@ -115,7 +116,9 @@
     // light: six steps towards the sun, then three orders of scattering, each weaker,
     // softer and less forward than the last: why a real cloud is bright right through
     '      float od = 0.0;',
-    '      for (int j = 1; j <= 6; j++) od += cloud(p + sunDir * float(j * j) * 16.0, false) * float(2 * j - 1) * 16.0;',
+    // the first two light steps see the full detail, so a crown shades the one behind it
+    // and the creases between heads go dark: that is what gives a cumulus its structure
+    '      for (int j = 1; j <= 6; j++) od += cloud(p + sunDir * float(j * j) * 16.0, j <= 2) * float(2 * j - 1) * 16.0;',
     '      od *= 0.012 * shade;',
     '      float powder = 1.0 - exp(-d * 6.0);',
     '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
@@ -161,7 +164,7 @@
   }
 
   function rgb(hex) { var n = parseInt(hex.replace('#', ''), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
-  var sun = [0.30, 0.42, -0.86], l = Math.hypot(sun[0], sun[1], sun[2]); sun = sun.map(function (v) { return v / l; });
+  var sun = [0.78, 0.42, -0.46], l = Math.hypot(sun[0], sun[1], sun[2]); sun = sun.map(function (v) { return v / l; });
 
   var back = document.getElementById('xx-gl-back'), front = document.getElementById('xx-gl-front');
   var L = [layer(back, cfg.split - 320, 5200), layer(front, 1, cfg.split + 120)].filter(Boolean);
