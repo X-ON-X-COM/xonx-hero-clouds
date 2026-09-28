@@ -15,7 +15,7 @@
     if (new URLSearchParams(location.search).has('m')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w >  768) location.replace('field.html?v=20260928a' + location.hash);
+    if (w >  768) location.replace('volume.html?v=20260928a' + location.hash);
   } catch (e) {}
 })();
 </script>
@@ -1841,7 +1841,7 @@ body { background: var(--cream) !important; }
 <body>
 
 <div class="xx-page">
-  <!-- ──── SKY (demo 4: WebGL cloud field, after mrdoob) ──── -->
+  <!-- ──── SKY (demo 7: raymarched volumetric clouds) ──── -->
   <div class="xx-sky" aria-hidden="true"></div>
   <canvas class="xx-gl" id="xx-gl-back" aria-hidden="true"></canvas>
   <canvas class="xx-gl" id="xx-gl-front" aria-hidden="true"></canvas>
@@ -1953,6 +1953,7 @@ body { background: var(--cream) !important; }
   <button type="button" data-xx="veil">front: normal</button>
   <button type="button" data-xx="tune">tune &hellip;</button>
   <a href="volume.html">demo 7: volume &rarr;</a>
+  <a href="field.html">demo 4: field &rarr;</a>
   <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="film.html">demo 5: film &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
@@ -1960,16 +1961,14 @@ body { background: var(--cream) !important; }
   <a href="index.html">demo 1 &rarr;</a>
 </div>
 <div class="xx-tune" id="xx-tune" hidden>
-  <label>clouds <input type="range" data-k="clouds" min="14" max="70" step="1"><output></output></label>
-  <label>size <input type="range" data-k="size" min="0.5" max="1.8" step="0.05"><output></output></label>
+  <label>coverage <input type="range" data-k="coverage" min="0.2" max="0.8" step="0.01"><output></output></label>
+  <label>density <input type="range" data-k="density" min="0.3" max="2" step="0.05"><output></output></label>
   <label>speed <input type="range" data-k="speed" min="0.02" max="0.2" step="0.005"><output></output></label>
-  <label>shade <input type="range" data-k="shade" min="0" max="1.6" step="0.05"><output></output></label>
-  <label>warmth <input type="range" data-k="warmth" min="0" max="1" step="0.05"><output></output></label>
+  <label>shade <input type="range" data-k="shade" min="0" max="2" step="0.05"><output></output></label>
+  <label>lining <input type="range" data-k="lining" min="0" max="2.5" step="0.05"><output></output></label>
+  <label>quality <input type="range" data-k="scale" min="0.25" max="1" step="0.05"><output></output></label>
   <label>sky blue <input type="range" data-k="skyblue" min="0" max="1" step="0.05"><output></output></label>
   <label>warm band <input type="range" data-k="skywarm" min="0" max="1" step="0.05"><output></output></label>
-  <label>light <input type="range" data-k="light" min="0" max="1" step="0.05"><output></output></label>
-  <label>lining <input type="range" data-k="rim" min="0" max="1.5" step="0.05"><output></output></label>
-  <label>billow <input type="range" data-k="billow" min="0" max="1.5" step="0.05"><output></output></label>
   <div class="xx-tune__row"><button type="button" data-xx="copy">copy settings</button><button type="button" data-xx="reset">reset</button></div>
   <textarea id="xx-tune-out" rows="2" readonly></textarea>
 </div>
@@ -2039,8 +2038,8 @@ body { background: var(--cream) !important; }
   applySky();
   function settings() {
     var c = window.xxField ? window.xxField.cfg : {};
-    return JSON.stringify({ clouds: c.clouds, count: c.count, size: c.size, speed: c.speed, shade: c.shade, warmth: c.warmth,
-      light: c.light, rim: c.rim, billow: c.billow, skyblue: sky.skyblue, skywarm: sky.skywarm });
+    var o = {}; ['coverage','density','speed','shade','lining','scale'].forEach(function (k) { o[k] = c[k]; });
+    o.skyblue = sky.skyblue; o.skywarm = sky.skywarm; return JSON.stringify(o);
   }
   function sync() {
     var c = window.xxField ? window.xxField.cfg : null;
@@ -2069,7 +2068,6 @@ body { background: var(--cream) !important; }
 })();
 </script>
 
-<script src="js/three.min.js"></script>
-<script src="field.js?v=20260928a" data-count="3600" data-clouds="22" data-texture="clouds/puff_photo.png?v=20260928a" data-sky="#ECE8E6"></script>
+<script src="volume.js?v=20260928a"></script>
 </body>
 </html>

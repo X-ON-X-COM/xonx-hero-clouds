@@ -11,7 +11,7 @@ import pathlib, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260920t'
+V = '20260928a'
 
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="sky controls">
@@ -20,6 +20,7 @@ PANEL = '''
   <button type="button" data-xx="through">crosses text: yes</button>
   <button type="button" data-xx="veil">front: normal</button>
   <button type="button" data-xx="tune">tune &hellip;</button>
+  <a href="volume.html">demo 7: volume &rarr;</a>
   <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="film.html">demo 5: film &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
@@ -34,6 +35,9 @@ PANEL = '''
   <label>warmth <input type="range" data-k="warmth" min="0" max="1" step="0.05"><output></output></label>
   <label>sky blue <input type="range" data-k="skyblue" min="0" max="1" step="0.05"><output></output></label>
   <label>warm band <input type="range" data-k="skywarm" min="0" max="1" step="0.05"><output></output></label>
+  <label>light <input type="range" data-k="light" min="0" max="1" step="0.05"><output></output></label>
+  <label>lining <input type="range" data-k="rim" min="0" max="1.5" step="0.05"><output></output></label>
+  <label>billow <input type="range" data-k="billow" min="0" max="1.5" step="0.05"><output></output></label>
   <div class="xx-tune__row"><button type="button" data-xx="copy">copy settings</button><button type="button" data-xx="reset">reset</button></div>
   <textarea id="xx-tune-out" rows="2" readonly></textarea>
 </div>
@@ -104,7 +108,7 @@ PANEL = '''
   function settings() {
     var c = window.xxField ? window.xxField.cfg : {};
     return JSON.stringify({ clouds: c.clouds, count: c.count, size: c.size, speed: c.speed, shade: c.shade, warmth: c.warmth,
-      skyblue: sky.skyblue, skywarm: sky.skywarm });
+      light: c.light, rim: c.rim, billow: c.billow, skyblue: sky.skyblue, skywarm: sky.skywarm });
   }
   function sync() {
     var c = window.xxField ? window.xxField.cfg : null;

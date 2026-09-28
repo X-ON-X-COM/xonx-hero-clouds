@@ -15,7 +15,7 @@
     if (new URLSearchParams(location.search).has('full')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w <= 768) location.replace('field-m.html?v=20260920t' + location.hash);
+    if (w <= 768) location.replace('field-m.html?v=20260928a' + location.hash);
   } catch (e) {}
 })();
 </script>
@@ -23,23 +23,23 @@
 <meta name="description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
 <link rel="canonical" href="https://www.x-on-x.com/">
 <link rel="alternate" media="only screen and (max-width: 768px)" href="https://www.x-on-x.com/m.html">
-<link rel="icon" href="/favicon.ico?v=20260920t" sizes="32x32">
-<link rel="icon" href="/favicon.svg?v=20260920t" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260920t">
+<link rel="icon" href="/favicon.ico?v=20260928a" sizes="32x32">
+<link rel="icon" href="/favicon.svg?v=20260928a" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png?v=20260928a">
 <meta name="theme-color" content="#FAFAF5">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="X-ON-X">
 <meta property="og:url" content="https://www.x-on-x.com/">
 <meta property="og:title" content="X-ON-X | New market launch">
 <meta property="og:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260920t">
+<meta property="og:image" content="https://www.x-on-x.com/img/og.jpg?v=20260928a">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="X-ON-X | New market launch">
 <meta name="twitter:description" content="X-ON-X. Boutique law firm. Partners to Ukrainian founders building international businesses. Fashion, Investments, Miltech. Legal500, ITR, Forbes Next-250">
-<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260920t">
+<meta name="twitter:image" content="https://www.x-on-x.com/img/og.jpg?v=20260928a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -1244,7 +1244,7 @@ body { background: var(--cream) !important; }
  ]
 }
 </script>
-<link rel="stylesheet" href="field.css?v=20260920t">
+<link rel="stylesheet" href="field.css?v=20260928a">
 <style>html.bare .xx-nav, html.bare .xx-hero, html.bare .xx-proto, html.bare .xx-tune { display: none !important; }</style>
 <script>if (/[?&]bare=1/.test(location.search)) document.documentElement.classList.add("bare");</script>
 </head>
@@ -1350,6 +1350,7 @@ body { background: var(--cream) !important; }
   <button type="button" data-xx="through">crosses text: yes</button>
   <button type="button" data-xx="veil">front: normal</button>
   <button type="button" data-xx="tune">tune &hellip;</button>
+  <a href="volume.html">demo 7: volume &rarr;</a>
   <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="film.html">demo 5: film &rarr;</a>
   <a href="flight.html">demo 3 &rarr;</a>
@@ -1364,6 +1365,9 @@ body { background: var(--cream) !important; }
   <label>warmth <input type="range" data-k="warmth" min="0" max="1" step="0.05"><output></output></label>
   <label>sky blue <input type="range" data-k="skyblue" min="0" max="1" step="0.05"><output></output></label>
   <label>warm band <input type="range" data-k="skywarm" min="0" max="1" step="0.05"><output></output></label>
+  <label>light <input type="range" data-k="light" min="0" max="1" step="0.05"><output></output></label>
+  <label>lining <input type="range" data-k="rim" min="0" max="1.5" step="0.05"><output></output></label>
+  <label>billow <input type="range" data-k="billow" min="0" max="1.5" step="0.05"><output></output></label>
   <div class="xx-tune__row"><button type="button" data-xx="copy">copy settings</button><button type="button" data-xx="reset">reset</button></div>
   <textarea id="xx-tune-out" rows="2" readonly></textarea>
 </div>
@@ -1434,7 +1438,7 @@ body { background: var(--cream) !important; }
   function settings() {
     var c = window.xxField ? window.xxField.cfg : {};
     return JSON.stringify({ clouds: c.clouds, count: c.count, size: c.size, speed: c.speed, shade: c.shade, warmth: c.warmth,
-      skyblue: sky.skyblue, skywarm: sky.skywarm });
+      light: c.light, rim: c.rim, billow: c.billow, skyblue: sky.skyblue, skywarm: sky.skywarm });
   }
   function sync() {
     var c = window.xxField ? window.xxField.cfg : null;
@@ -1464,6 +1468,6 @@ body { background: var(--cream) !important; }
 </script>
 
 <script src="js/three.min.js"></script>
-<script src="field.js?v=20260920t" data-count="9000" data-clouds="34" data-texture="clouds/puff_photo.png?v=20260920t" data-sky="#ECE8E6"></script>
+<script src="field.js?v=20260928a" data-count="9000" data-clouds="34" data-texture="clouds/puff_photo.png?v=20260928a" data-sky="#ECE8E6"></script>
 </body>
 </html>

@@ -37,7 +37,13 @@
     size: 1.0,              // cloud radius multiplier
     shade: 0.85,            // 0 = no shade at all, 1 = the shade colour below, >1 deeper
     warmth: 0.35,           // 0 = neutral white crown, 1 = the palette's warm cream
-    lit: 0xfbf8f3, shadeColor: 0xc4cad6   // the shade is light too: a cumulus in shade is still a white thing
+    lit: 0xfbf8f3, shadeColor: 0xc4cad6,  // the shade is light too: a cumulus in shade is still a white thing
+    // 28.09, three things a photographed cumulus has and ours did not. Each is a slider;
+    // at 0 it is exactly the approved 20.09 build.
+    light: 1.0,             // 0 = tint by where a puff sits (20.09), 1 = tint by how much cloud lies between it and the sun
+    rim: 0.6,               // silver lining: the thin sunward edge glows when you look towards the sun
+    billow: 0.5,            // the puffs drift, turn and breathe, so a cloud churns instead of flying past as a stone
+    sun: [0.30, 0.55, -0.78] // up, right and ahead, where the sky's warm glow sits (--cx 62%, --cy 46%)
   };
   try { Object.assign(cfg, JSON.parse(localStorage.getItem('xx-field') || '{}')); } catch (e) {}
   if (!window.WebGLRenderingContext) return;
@@ -52,7 +58,9 @@
   function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
 
   var vs = [
-    'varying vec2 vUv; varying vec3 vTint;',
+    'attribute vec4 aRnd;',                                  // phase, spin, drift amplitude, how much of an edge this puff is
+    'uniform float time; uniform float billow; uniform float rim; uniform vec3 sunDir;',
+    'varying vec2 vUv; varying vec3 vTint; varying float vRim;',
     'void main() {',
     '  vUv = uv;',
     '  #ifdef USE_INSTANCING_COLOR',
@@ -60,16 +68,31 @@
     '  #else',
     '  vTint = vec3(1.0);',
     '  #endif',
-    '  gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);',
+    '  vec3 pos = position;',
+    // billow: each puff turns slowly on its own axis and breathes, and drifts a little
+    // around its place, so the overlap keeps changing and the mass churns
+    '  float ph = aRnd.x;',
+    '  float a = billow * aRnd.y * time * 0.00005;',
+    '  pos.xy = mat2(cos(a), sin(a), -sin(a), cos(a)) * pos.xy;',
+    '  pos.xy *= 1.0 + billow * 0.09 * sin(time * 0.00023 + ph);',
+    '  vec4 wp = modelMatrix * instanceMatrix * vec4(pos, 1.0);',
+    '  wp.xyz += billow * aRnd.z * vec3(sin(time * 0.00013 + ph * 1.7), sin(time * 0.00017 + ph * 2.3) * 0.7, sin(time * 0.00011 + ph * 0.9));',
+    // silver lining: forward scattering, strongest looking straight at the sun, on the
+    // thin sunward edge of a cloud only (aRnd.w, worked out when the field is built)
+    '  vec3 V = normalize(wp.xyz - cameraPosition);',
+    '  float ct = max(dot(V, sunDir), 0.0);',
+    '  vRim = rim * aRnd.w * (0.2 + 0.8 * pow(ct, 4.0));',
+    '  gl_Position = projectionMatrix * viewMatrix * wp;',
     '}'].join('\n');
   var fs = [
     'uniform sampler2D map; uniform vec3 fogColor; uniform float fogNear; uniform float fogFar;',
     'uniform float splitNear; uniform float splitFar; uniform float tint;',
-    'varying vec2 vUv; varying vec3 vTint;',
+    'varying vec2 vUv; varying vec3 vTint; varying float vRim;',
     'void main() {',
     '  float depth = gl_FragCoord.z / gl_FragCoord.w;',
     '  vec4 c = texture2D(map, vUv);',
-    '  c.rgb *= vTint;',                                     // per-puff shade: where it sits in its cloud
+    '  c.rgb *= vTint;',                                     // per-puff shade: how much cloud lies between it and the sun
+    '  c.rgb = mix(c.rgb, vec3(1.0, 0.985, 0.955), clamp(vRim * (1.15 - c.a), 0.0, 0.9));',   // the lining glows where the puff is thin
     '  c.a *= pow(gl_FragCoord.z, 20.0);',                 // the puff at the lens goes to vapour
     '  c.a *= smoothstep(70.0, 360.0, depth);',           // and a cloud you are inside dissolves instead of filling the frame
     '  c.a *= smoothstep(splitNear, splitFar, depth);',    // which canvas this puff belongs to
@@ -94,7 +117,9 @@
         fogColor: { value: new THREE.Color(cfg.sky) },
         fogNear: { value: cfg.fogNear }, fogFar: { value: cfg.fogFar },
         splitNear: { value: splitNear }, splitFar: { value: splitFar },
-        tint: { value: 1.0 }
+        tint: { value: 1.0 },
+        time: { value: 0 }, billow: { value: cfg.billow }, rim: { value: cfg.rim },
+        sunDir: { value: new THREE.Vector3().fromArray(cfg.sun).normalize() }
       },
       vertexShader: vs, fragmentShader: fs,
       depthWrite: false, depthTest: true, transparent: true,
@@ -147,11 +172,19 @@
     var lit = white.clone().lerp(cream, cfg.warmth);
     var shade = lit.clone().lerp(new THREE.Color(cfg.shadeColor), Math.min(1.6, cfg.shade));
     var tintC = new THREE.Color();
+    // new randoms come from their own stream: the field above must stay exactly as approved
+    var r2 = rng(cfg.seed + 11);
+    var rnd = new Float32Array(total * 2 * 4);
+    var sun = new THREE.Vector3().fromArray(cfg.sun).normalize();
     var i = 0;
     clouds.forEach(function (cl) {
-      for (var k = 0; k < cl.n; k++) {
-        // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle.
-        // A third of the puffs go to the crowns, the rest to the body.
+      // First pass: where every puff of this cloud goes, in cloud units (radius = 1).
+      // Second: splat them into a coarse density grid and blur it. Third: from every
+      // puff, march towards the sun through the grid; the optical depth on the way is
+      // how much cloud shades it. That is what puts a crease between two crowns and
+      // lets one crown shadow the next, which a tint by position never can.
+      var P = [], k;
+      for (k = 0; k < cl.n; k++) {
         var gx, gy, gz;
         if (r() < 0.25) {
           var lb = cl.lobes[Math.floor(r() * cl.lobes.length)];
@@ -160,22 +193,83 @@
           gx = gauss() * 0.62; gy = gauss(); gz = gauss() * 0.45;
           gy = gy < 0 ? gy * 0.28 : gy * 0.45;
         }
-        var px = cl.x + gx * cl.R, py = cl.y + gy * cl.R, pz = cl.z + gz * cl.R;
         var d = Math.sqrt(gx * gx + gy * gy + gz * gz);
         var sc = (0.7 + r() * 0.8) * (cl.R / 200) * (d < 0.8 ? 1.2 : 1.0);
-        q.setFromAxisAngle(z, r() * Math.PI); s.set(sc, sc, 1);
+        var rot = r() * Math.PI;
+        P.push([gx, gy, gz, d, sc, rot]);
+      }
+      var trans = lightCloud(P, cl.R, sun);
+      for (k = 0; k < cl.n; k++) {
+        var Q = P[k];
+        // a cumulus: wider than tall, flat underneath, lumpy on top, densest in the middle.
+        // A third of the puffs go to the crowns, the rest to the body.
+        gx = Q[0]; gy = Q[1]; gz = Q[2]; d = Q[3]; sc = Q[4];
+        var px = cl.x + gx * cl.R, py = cl.y + gy * cl.R, pz = cl.z + gz * cl.R;
+        q.setFromAxisAngle(z, Q[5]); s.set(sc, sc, 1);
         p.set(px, py, pz); m.compose(p, q, s); mesh.setMatrixAt(i, m);
         p.set(px, py, pz - cfg.length); m.compose(p, q, s); mesh.setMatrixAt(total + i, m);
         // 0 = deep in the belly, 1 = crown in the sun; the sun is up and a little to the right
-        var t = 0.62 + gy * 0.45 + gx * 0.12 - Math.max(0, 0.8 - d) * 0.22;   // lit by default, shade only underneath
+        var t0 = 0.62 + gy * 0.45 + gx * 0.12 - Math.max(0, 0.8 - d) * 0.22;   // 20.09: lit by default, shade only underneath
+        var t1 = 0.46 + 0.54 * trans[k] + 0.10 * gy;                          // 28.09: shade = cloud between the puff and the sun, plus skylight on top
+        var t = t0 + (t1 - t0) * cfg.light;
         tintC.copy(shade).lerp(lit, Math.min(1, Math.max(0, t)));
         mesh.setColorAt(i, tintC); mesh.setColorAt(total + i, tintC);
+        // an edge puff: out on the silhouette as seen from behind the cloud, and in the sun
+        var ex = Math.sqrt(gx * gx / (0.62 * 0.62) + (gy > 0 ? gy * gy / 0.2 : gy * gy / 0.08));
+        var edge = Math.min(1, Math.max(0, (ex - 0.7) / 0.6)) * trans[k];
+        var o = i * 4, o2 = (total + i) * 4;
+        rnd[o] = rnd[o2] = r2() * 6.2832;                 // phase
+        rnd[o + 1] = rnd[o2 + 1] = r2() * 2 - 1;          // spin, either way
+        rnd[o + 2] = rnd[o2 + 2] = cl.R * (0.03 + r2() * 0.05);   // drift, in proportion to the cloud
+        rnd[o + 3] = rnd[o2 + 3] = edge;
         i++;
       }
     });
+    geo.setAttribute('aRnd', new THREE.InstancedBufferAttribute(rnd, 4));
     mesh.renderOrder = 1;
     scene.add(mesh);
     L.mesh = mesh;
+  }
+
+  // How much of the sun reaches each puff of one cloud, 0..1. Cloud units: radius 1.
+  var GX = 24, GY = 16, GZ = 18, X0 = -1.8, X1 = 1.8, Y0 = -0.9, Y1 = 1.5, Z0 = -1.3, Z1 = 1.3;
+  var grid = new Float32Array(GX * GY * GZ), tmp = new Float32Array(GX * GY * GZ);
+  function lightCloud(P, R, sun) {
+    grid.fill(0);
+    var cx = (X1 - X0) / GX, cy = (Y1 - Y0) / GY, cz = (Z1 - Z0) / GZ;
+    function idx(x, y, z) { return (z * GY + y) * GX + x; }
+    P.forEach(function (Q) {
+      var x = Math.floor((Q[0] - X0) / cx), y = Math.floor((Q[1] - Y0) / cy), z = Math.floor((Q[2] - Z0) / cz);
+      if (x < 0 || y < 0 || z < 0 || x >= GX || y >= GY || z >= GZ) return;
+      grid[idx(x, y, z)] += Q[4] * Q[4];                  // a big puff is more cloud
+    });
+    // blur twice along each axis: a puff is a soft ball, not a point
+    for (var pass = 0; pass < 2; pass++) {
+      [[1, 0, 0], [0, 1, 0], [0, 0, 1]].forEach(function (a) {
+        for (var z = 0; z < GZ; z++) for (var y = 0; y < GY; y++) for (var x = 0; x < GX; x++) {
+          var v = grid[idx(x, y, z)] * 2, n = 2;
+          var xa = x - a[0], ya = y - a[1], za = z - a[2], xb = x + a[0], yb = y + a[1], zb = z + a[2];
+          if (xa >= 0 && ya >= 0 && za >= 0) { v += grid[idx(xa, ya, za)]; n++; }
+          if (xb < GX && yb < GY && zb < GZ) { v += grid[idx(xb, yb, zb)]; n++; }
+          tmp[idx(x, y, z)] = v / n;
+        }
+        grid.set(tmp);
+      });
+    }
+    // normalise by the cloud's own mean density, so the shading does not depend on how
+    // many puffs it got: optical depth 1 = one cloud-radius of average cloud
+    var sum = 0, cnt = 0;
+    for (var j = 0; j < grid.length; j++) if (grid[j] > 1e-6) { sum += grid[j]; cnt++; }
+    var mean = cnt ? sum / cnt : 1, K = 1.6, h = 0.09;
+    return P.map(function (Q) {
+      var od = 0, px = Q[0], py = Q[1], pz = Q[2];
+      for (var st = 1; st <= 18; st++) {
+        var x = Math.floor((px + sun.x * h * st - X0) / cx), y = Math.floor((py + sun.y * h * st - Y0) / cy), z = Math.floor((pz + sun.z * h * st - Z0) / cz);
+        if (x < 0 || y < 0 || z < 0 || x >= GX || y >= GY || z >= GZ) break;
+        od += grid[idx(x, y, z)] / mean * h;
+      }
+      return Math.exp(-K * od);
+    });
   }
 
   /* ── the journey: Oleg's brief from the 18.09 call ──────────────────────────
@@ -293,6 +387,9 @@
         L.camera.position.x += (mouseX - L.camera.position.x) * 0.01;
         L.camera.position.y += (-mouseY - L.camera.position.y) * 0.01;
         L.camera.position.z = -pos + cfg.length;
+        L.mat.uniforms.time.value = t % 3600000;
+        L.mat.uniforms.billow.value = reduce ? 0 : cfg.billow;
+        L.mat.uniforms.rim.value = cfg.rim;
         updateJourney(L, L.camera.position.z);
         L.renderer.render(L.scene, L.camera);
       });
@@ -319,11 +416,12 @@
       cfg: cfg,
       set: function (k, v) {
         cfg[k] = v;
-        if (k === 'clouds' || k === 'count' || k === 'size' || k === 'shade' || k === 'warmth') {
+        if (k === 'clouds' || k === 'count' || k === 'size' || k === 'shade' || k === 'warmth' || k === 'light') {
           layers.forEach(function (L) { L.build(); });
         }
         try { localStorage.setItem('xx-field', JSON.stringify({
-          clouds: cfg.clouds, count: cfg.count, size: cfg.size, speed: cfg.speed, shade: cfg.shade, warmth: cfg.warmth })); } catch (e) {}
+          clouds: cfg.clouds, count: cfg.count, size: cfg.size, speed: cfg.speed, shade: cfg.shade, warmth: cfg.warmth,
+          light: cfg.light, rim: cfg.rim, billow: cfg.billow })); } catch (e) {}
       },
       reset: function () { try { localStorage.removeItem('xx-field'); } catch (e) {} location.reload(); }
     };
