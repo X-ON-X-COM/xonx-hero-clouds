@@ -66,7 +66,7 @@
     '  float c = remap(n, 1.0 - coverage, 1.0);',
     '  float ht = h + (noise(q * 3.1 + 7.0) - 0.5) * 0.34;',   // a lumpy top, never a plateau: a flat top below eye level reads as a straight line
     '  float prof = smoothstep(0.0, 0.06, h) * remap(ht, 0.25 + c * 0.75, 0.1 + c * 0.35);',
-    '  float d = c * prof;',
+    '  float d = remap(c * prof, 0.035, 1.0);',   // no thin haze: it glowed into pillars and blobs looking towards the sun
     '  if (d <= 0.0) return 0.0;',
     '  if (fine) {',
     // Cauliflower: a cumulus is rounded heads with sharp creases between them. Ridged noise
@@ -78,7 +78,9 @@
     '    float r2 = 1.0 - abs(noise(ROT * r * 2.7 + 3.0) * 2.0 - 1.0);',
     '    float cauli = r1 * 0.62 + r2 * 0.38;',
     '    float wisp = noise(r * 1.9) * 0.6 + noise(ROT * r * 4.3) * 0.4;',
-    '    float e = mix(wisp, cauli * cauli, smoothstep(0.08, 0.35, h));',
+    '    float soft = noise(r * 1.3 + 11.0) * 0.5 + noise(ROT * r * 3.4 + 5.0) * 0.32 + noise(ROT * ROT * r * 8.1 + 2.0) * 0.18;',   // the finest octave is for clouds up close                             // round, crease-free lumps for the flanks and belly
+    '    float e = mix(wisp, soft, smoothstep(0.06, 0.2, h));',
+    '    e = mix(e, mix(soft, cauli * cauli, 0.7), smoothstep(0.2, 0.46, h));',            // creases only up in the crowns
     '    d = remap(d, e * 0.40, 1.0);',
     // a cumulus is dense right under its surface: no translucent veil over the crowns,
     // and fewer half-transparent samples, which is what read as sand at the edges
@@ -117,10 +119,14 @@
     '      od *= 0.012 * shade;',
     '      float powder = 1.0 - exp(-d * 6.0);',
     '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
-    '      for (int k = 0; k < 3; k++) { sunL += am * exp(-od * bm) * mix(0.6, phaseN * 1.8 * lining * (0.25 + 0.75 * powder) + 0.6, gm); am *= 0.55; bm *= 0.35; gm *= 0.4; }',
+    '      for (int k = 0; k < 3; k++) { sunL += am * exp(-od * bm) * mix(0.6, phaseN * 1.8 * lining * powder * powder + 0.6, gm); am *= 0.55; bm *= 0.35; gm *= 0.4; }',
     '      float h = clamp((p.y - BASE) / (TOP - BASE), 0.0, 1.0);',
-    '      vec3 amb = mix(skyLow * 0.80, mix(skyHigh, vec3(1.0), 0.75), h);',
-    '      vec3 c = amb * (0.76 + 0.18 * h) + vec3(1.0, 0.975, 0.945) * sunL * (0.35 + 0.65 * powder) * 0.62;',
+    // In every reference the shaded side is lit by the blue sky and the sunlit side by a
+    // low warm sun: cool shadow against warm light is most of what reads as real. The
+    // shadow here is skylight (cool), plus a little warm bounce from the haze below.
+    '      vec3 sh = mix(skyHigh, vec3(dot(skyHigh, vec3(0.299, 0.587, 0.114))), 0.35);',   // the sky colour, a third less saturated
+    '      vec3 amb = mix(sh * 0.84, mix(sh, vec3(1.0), 0.66), h) + skyLow * 0.07 * (1.0 - h);',
+    '      vec3 c = amb * (0.70 + 0.18 * h) + vec3(1.0, 0.955, 0.90) * sunL * (0.35 + 0.65 * powder) * 0.66;',
     '      float fog = smoothstep(600.0, 4200.0, t);',
     '      c = mix(c, fogCol, fog * 0.9);',
     '      float a = 1.0 - exp(-d * 0.055 * dt);',
