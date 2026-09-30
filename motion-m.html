@@ -15,7 +15,7 @@
     if (new URLSearchParams(location.search).has('m')) return;
     var w = Math.min(window.innerWidth || Infinity,
                      (window.screen && window.screen.width) || Infinity);
-    if (w >  768) location.replace('field.html?v=20261001a' + location.hash);
+    if (w >  768) location.replace('motion.html?v=20261001a' + location.hash);
   } catch (e) {}
 })();
 </script>
@@ -1837,6 +1837,7 @@ body { background: var(--cream) !important; }
 <link rel="stylesheet" href="field.css?v=20261001a">
 <style>html.bare .xx-nav, html.bare .xx-hero, html.bare .xx-proto, html.bare .xx-tune { display: none !important; }</style>
 <script>if (/[?&]bare=1/.test(location.search)) document.documentElement.classList.add("bare");</script>
+<style>html.xx-studio .xx-proto, html.xx-studio .xx-tune { display: none !important; }</style>
 </head>
 <body>
 
@@ -2072,5 +2073,9 @@ body { background: var(--cream) !important; }
 
 <script src="js/three.min.js"></script>
 <script src="field.js?v=20261001a" data-count="3600" data-clouds="22" data-texture="clouds/puff_photo.png?v=20261001a" data-sky="#ECE8E6"></script>
+<script src="motion-state.js?v=20261001a"></script>
+<script>window.process = window.process || { env: { NODE_ENV: "production" } };</script>
+<script src="js/theatre-core-and-studio.js?v=20261001a"></script>
+<script src="motion.js?v=20261001a"></script>
 </body>
 </html>

@@ -52,6 +52,9 @@
   var back = document.getElementById('xx-gl-back');
   var front = document.getElementById('xx-gl-front');
   var mouseX = 0, mouseY = 0, start = Date.now(), paused = false, frozen = 0, rebuiltWhilePaused = false;
+  // demo 8: a Theatre.js timeline writes into window.xxMotion (speed, push, camera, fog...).
+  // Without it every value below falls back to what demo 4 does on its own.
+  var flight = 0, lastNow = 0;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // one seeded field, so the two canvases and every reload agree
@@ -381,15 +384,31 @@
       // cutaways are captured this way, one frame at a time, deterministic
       var t = (typeof window.xxTime === 'number') ? window.xxTime : (paused || reduce ? frozen : (Date.now() - start));
       var tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
-      var pos = (t * cfg.speed / tempo) % cfg.length;
+      var M = window.xxMotion, pos;
+      if (M && typeof window.xxTime !== 'number') {
+        // speed is a multiplier the timeline can ramp, so the flight is integrated, not t * v;
+        // push is a keyframable offset along the line of flight (a surge, a pull-back)
+        var now = paused || reduce ? lastNow : Date.now();
+        if (lastNow) flight += (now - lastNow) * cfg.speed * (M.speed == null ? 1 : M.speed) / tempo;
+        lastNow = now;
+        pos = (((flight + (M.push || 0)) % cfg.length) + cfg.length) % cfg.length;
+      } else {
+        pos = (t * cfg.speed / tempo) % cfg.length;
+      }
       if (paused && !rebuiltWhilePaused) { rebuiltWhilePaused = false; }
       layers.forEach(function (L) {
-        L.camera.position.x += (mouseX - L.camera.position.x) * 0.01;
-        L.camera.position.y += (-mouseY - L.camera.position.y) * 0.01;
+        L.mx = (L.mx || 0) + (mouseX - (L.mx || 0)) * 0.01;
+        L.my = (L.my || 0) + (-mouseY - (L.my || 0)) * 0.01;
+        L.camera.position.x = L.mx + (M && M.camX || 0);
+        L.camera.position.y = L.my + (M && M.camY || 0);
+        L.camera.rotation.z = M && M.roll || 0;
+        var fov = M && M.fov || cfg.fov;
+        if (L.camera.fov !== fov) { L.camera.fov = fov; L.camera.updateProjectionMatrix(); }
+        if (M && M.haze) L.mat.uniforms.fogFar.value = M.haze;
         L.camera.position.z = -pos + cfg.length;
         L.mat.uniforms.time.value = t % 3600000;
-        L.mat.uniforms.billow.value = reduce ? 0 : cfg.billow;
-        L.mat.uniforms.rim.value = cfg.rim;
+        L.mat.uniforms.billow.value = reduce ? 0 : (M && M.billow != null ? M.billow : cfg.billow);
+        L.mat.uniforms.rim.value = M && M.rim != null ? M.rim : cfg.rim;
         updateJourney(L, L.camera.position.z);
         L.renderer.render(L.scene, L.camera);
       });

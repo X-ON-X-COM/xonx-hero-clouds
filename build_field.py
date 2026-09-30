@@ -11,7 +11,7 @@ import pathlib, re
 
 SRC = pathlib.Path('/Users/user/Claude/xonx-site-preview')
 DST = pathlib.Path(__file__).parent
-V = '20260928a'
+V = '20261001a'
 
 PANEL = '''
 <div class="xx-proto" role="group" aria-label="sky controls">
@@ -20,6 +20,7 @@ PANEL = '''
   <button type="button" data-xx="through">crosses text: yes</button>
   <button type="button" data-xx="veil">front: normal</button>
   <button type="button" data-xx="tune">tune &hellip;</button>
+  <a href="motion.html">demo 8: motion &rarr;</a>
   <a href="volume.html">demo 7: volume &rarr;</a>
   <a href="journey.html">demo 6: journey &rarr;</a>
   <a href="film.html">demo 5: film &rarr;</a>
