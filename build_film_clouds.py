@@ -11,13 +11,14 @@ sits above all of it and does not move.
 import pathlib
 
 DST = pathlib.Path(__file__).parent
-V = '20261001a'
+V = '20261001c'
 
 CSS = '''<style>
 .xx-film .xx-gl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: block;
   opacity: var(--xx-cloud-o, .15); }
 .xx-film #xx-gl-back { z-index: 1; } .xx-film #xx-gl-front { z-index: 2; }
-html.xx-studio .xx-proto, html.xx-play .xx-proto { display: none !important; }
+html.xx-play .xx-proto, html.xx-studio .xx-proto a { display: none !important; }   /* the studio keeps the film pause button: pause, then scrub */
+html.xx-studio .xx-proto { bottom: auto; top: 64px; right: 330px; }
 /* the dark scrim stays on top of the clouds and the wipe: the white copy must read even at the
    whitest moment of a wipe */
 .xx-film .xx-film__veil { z-index: 4; }
@@ -35,7 +36,7 @@ def build(src, out, partner_src, partner, count, nclouds):
     html = html.replace(a, a + '    <canvas class="xx-gl" id="xx-gl-back"></canvas>\n    <canvas class="xx-gl" id="xx-gl-front"></canvas>\n')
     scripts = (f'<script src="js/three.min.js"></script>\n'
                f'<script src="field.js?v={V}" data-count="{count}" data-clouds="{nclouds}" data-texture="clouds/puff_photo.png?v={V}" '
-               f'data-sky="#ECE8E6" data-fogalpha="1"></script>\n'
+               f'data-sky="#ECE8E6" data-fogalpha="1" data-dpr="1"></script>\n'
                '<script>window.process = window.process || { env: { NODE_ENV: "production" } };</script>\n'
                f'<script src="js/theatre-core-and-studio.js?v={V}"></script>\n'
                f'<script src="film-state.js?v={V}"></script>\n'
@@ -51,5 +52,5 @@ def build(src, out, partner_src, partner, count, nclouds):
 
 
 if __name__ == '__main__':
-    build('film.html', 'film-clouds.html', 'film-m.html', 'film-clouds-m.html', 9000, 34)
-    build('film-m.html', 'film-clouds-m.html', 'film.html', 'film-clouds.html', 3600, 22)
+    build('film.html', 'film-clouds.html', 'film-m.html', 'film-clouds-m.html', 5000, 30)   # lighter than demo 4: the film decoder needs the machine
+    build('film-m.html', 'film-clouds-m.html', 'film.html', 'film-clouds.html', 2400, 20)

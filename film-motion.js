@@ -5,10 +5,10 @@
  * demo 4's cloud field flies over the footage (under the copy), and at the cuts into and out
  * of the flight shots a cloud sweeps through the frame and tears open on the next shot.
  *
- * The timeline IS the film: the sequence position follows video.currentTime every frame, so
- * the cuts sit where they are in the cut and a keyframe at 7.72 s lands on the cut at 7.72 s.
- * Scrub the playhead in the studio and the film seeks with it; press space and Theatre leads,
- * the film follows.
+ * The timeline IS the film: while the film plays, the sequence position follows
+ * video.currentTime every frame, so a keyframe at 7.72 s lands on the cut at 7.72 s. To scrub:
+ * pause the film (the FILM button at the top), then drag the playhead and the
+ * film shows the frame under it. Press space and Theatre leads, the film follows.
  *
  *   film-clouds.html          studio open
  *   film-clouds.html?play=1   as it would ship */
@@ -46,6 +46,7 @@
   });
   clouds.onValuesChange(function (v) {
     root.style.setProperty('--xx-cloud-o', v.amount.toFixed(3));
+    M.off = v.amount < 0.005;
     M.rim = v.lining; M.billow = v.billow; M.haze = v.haze;
   });
 
@@ -55,21 +56,26 @@
   // ── the film is the clock ──
   var video = document.querySelector('.xx-film video');
   project.ready.then(function () {
-    var seq = sheet.sequence, lastSet = -1;
+    var seq = sheet.sequence, len = core.val(seq.pointer.length);
     window.xxSheet = sheet;
+    // Start the film ourselves too: demo 5 starts it on window load, and a browser that
+    // refuses (no gesture yet) gets another go on the first click, key or touch.
+    var kick = function () { if (video.paused && !core.val(seq.pointer.playing)) video.play().catch(function () {}); };
+    kick();
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) { window.addEventListener(ev, kick, { once: true, passive: true }); });
     (function sync() {
-      var theatrePlaying = core.val(seq.pointer.playing);
-      if (theatrePlaying) {
+      // The film is the clock and nothing here ever seeks a playing film: an earlier version
+      // told a dragged playhead from normal progress by comparing positions, and on a slow
+      // frame rate ordinary progress looked like a drag, so it kept seeking the film back.
+      if (core.val(seq.pointer.playing)) {
         // space in the studio: Theatre leads, the film follows
-        if (Math.abs(video.currentTime - seq.position) > 0.15) video.currentTime = seq.position;
+        if (Math.abs(video.currentTime - seq.position) > 0.25) video.currentTime = seq.position;
         if (video.paused) video.play().catch(function () {});
-      } else if (lastSet >= 0 && Math.abs(seq.position - lastSet) > 0.05) {
-        // the playhead was dragged: seek the film there
-        video.currentTime = seq.position;
-        lastSet = seq.position;
+      } else if (!playOnly && video.paused) {
+        // film paused, studio open: the playhead leads, so a drag shows the frame under it
+        if (Math.abs(video.currentTime - seq.position) > 0.04 && !video.seeking) video.currentTime = seq.position;
       } else if (video.readyState >= 1) {
-        seq.position = Math.min(video.currentTime, core.val(seq.pointer.length));
-        lastSet = seq.position;
+        seq.position = Math.min(video.currentTime, len);
       }
       requestAnimationFrame(sync);
     })();

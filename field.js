@@ -112,7 +112,7 @@
     // as colour * alpha, and the browser then reads that darkened colour as if it were
     // straight. The shader outputs premultiplied colour and the blend is One / OneMinusSrcAlpha.
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true, premultipliedAlpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, +script.dataset.dpr || 1.5));
     renderer.setClearColor(0x000000, 0);
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(cfg.fov, 1, 1, cfg.fogFar);
@@ -416,6 +416,10 @@
         L.mat.uniforms.billow.value = reduce ? 0 : (M && M.billow != null ? M.billow : cfg.billow);
         L.mat.uniforms.rim.value = M && M.rim != null ? M.rim : cfg.rim;
         updateJourney(L, L.camera.position.z);
+        // demo 9: while no cloud shows over the film, draw nothing at all, so the film
+        // decoder gets the machine (a hidden field still cost every frame and stalled it)
+        if (M && M.off) { if (!L.blank) { L.renderer.clear(); L.blank = true; } return; }
+        L.blank = false;
         L.renderer.render(L.scene, L.camera);
       });
       if (!reduce) requestAnimationFrame(frame);

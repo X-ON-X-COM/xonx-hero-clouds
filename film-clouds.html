@@ -1283,7 +1283,8 @@ body { background: var(--cream) !important; }
 .xx-film .xx-gl { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; display: block;
   opacity: var(--xx-cloud-o, .15); }
 .xx-film #xx-gl-back { z-index: 1; } .xx-film #xx-gl-front { z-index: 2; }
-html.xx-studio .xx-proto, html.xx-play .xx-proto { display: none !important; }
+html.xx-play .xx-proto, html.xx-studio .xx-proto a { display: none !important; }   /* the studio keeps the film pause button: pause, then scrub */
+html.xx-studio .xx-proto { bottom: auto; top: 64px; right: 330px; }
 /* the dark scrim stays on top of the clouds and the wipe: the white copy must read even at the
    whitest moment of a wipe */
 .xx-film .xx-film__veil { z-index: 4; }
@@ -1421,11 +1422,11 @@ html.xx-studio .xx-proto, html.xx-play .xx-proto { display: none !important; }
 </script>
 
 <script src="js/three.min.js"></script>
-<script src="field.js?v=20261001a" data-count="9000" data-clouds="34" data-texture="clouds/puff_photo.png?v=20261001a" data-sky="#ECE8E6" data-fogalpha="1"></script>
+<script src="field.js?v=20261001c" data-count="5000" data-clouds="30" data-texture="clouds/puff_photo.png?v=20261001c" data-sky="#ECE8E6" data-fogalpha="1" data-dpr="1"></script>
 <script>window.process = window.process || { env: { NODE_ENV: "production" } };</script>
-<script src="js/theatre-core-and-studio.js?v=20261001a"></script>
-<script src="film-state.js?v=20261001a"></script>
-<script src="veil.js?v=20261001a"></script>
-<script src="film-motion.js?v=20261001a"></script>
+<script src="js/theatre-core-and-studio.js?v=20261001c"></script>
+<script src="film-state.js?v=20261001c"></script>
+<script src="veil.js?v=20261001c"></script>
+<script src="film-motion.js?v=20261001c"></script>
 </body>
 </html>
