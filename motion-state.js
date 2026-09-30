@@ -476,6 +476,103 @@ window.xxMotionState = {
           "value": 58
          }
         ]
+       },
+       "t012": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Flight:shake",
+        "keyframes": [
+         {
+          "id": "k0053",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0.55
+         },
+         {
+          "id": "k0054",
+          "position": 2.6,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0055",
+          "position": 4.0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0056",
+          "position": 13.2,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0057",
+          "position": 13.6,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0.32
+         },
+         {
+          "id": "k0058",
+          "position": 15.2,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0059",
+          "position": 16.0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
        }
       },
       "trackIdByPropPath": {
@@ -484,7 +581,8 @@ window.xxMotionState = {
        "[\"camY\"]": "t002",
        "[\"camX\"]": "t003",
        "[\"roll\"]": "t004",
-       "[\"fov\"]": "t005"
+       "[\"fov\"]": "t005",
+       "[\"shake\"]": "t012"
       }
      },
      "Clouds": {
@@ -709,11 +807,11 @@ window.xxMotionState = {
        "[\"sunY\"]": "t009"
       }
      },
-     "Text / Nav": {
+     "Veil": {
       "trackData": {
        "t010": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Nav:opacity",
+        "__debugName": "Veil:open",
         "keyframes": [
          {
           "id": "k0047",
@@ -730,7 +828,7 @@ window.xxMotionState = {
          },
          {
           "id": "k0048",
-          "position": 0.2,
+          "position": 0.35,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -743,7 +841,7 @@ window.xxMotionState = {
          },
          {
           "id": "k0049",
-          "position": 1.0,
+          "position": 2.3,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -758,7 +856,7 @@ window.xxMotionState = {
        },
        "t011": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Nav:y",
+        "__debugName": "Veil:blur",
         "keyframes": [
          {
           "id": "k0050",
@@ -771,11 +869,11 @@ window.xxMotionState = {
            0
           ],
           "type": "bezier",
-          "value": 26
+          "value": 14
          },
          {
           "id": "k0051",
-          "position": 0.2,
+          "position": 0.35,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -784,56 +882,11 @@ window.xxMotionState = {
            0
           ],
           "type": "bezier",
-          "value": 26
+          "value": 14
          },
          {
           "id": "k0052",
-          "position": 1.0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0
-         }
-        ]
-       },
-       "t012": {
-        "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Nav:blur",
-        "keyframes": [
-         {
-          "id": "k0053",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
-          "id": "k0054",
-          "position": 0.2,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
-          "id": "k0055",
-          "position": 1.0,
+          "position": 2.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -848,19 +901,18 @@ window.xxMotionState = {
        }
       },
       "trackIdByPropPath": {
-       "[\"opacity\"]": "t010",
-       "[\"y\"]": "t011",
-       "[\"blur\"]": "t012"
+       "[\"open\"]": "t010",
+       "[\"blur\"]": "t011"
       }
      },
-     "Text / Logo": {
+     "Text / Nav": {
       "trackData": {
        "t013": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Logo:opacity",
+        "__debugName": "Text / Nav:opacity",
         "keyframes": [
          {
-          "id": "k0056",
+          "id": "k0060",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -873,8 +925,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0057",
-          "position": 0.5,
+          "id": "k0061",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -886,8 +938,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0058",
-          "position": 1.4,
+          "id": "k0062",
+          "position": 1.8,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -902,10 +954,10 @@ window.xxMotionState = {
        },
        "t014": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Logo:y",
+        "__debugName": "Text / Nav:y",
         "keyframes": [
          {
-          "id": "k0059",
+          "id": "k0063",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -918,8 +970,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0060",
-          "position": 0.5,
+          "id": "k0064",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -931,8 +983,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0061",
-          "position": 1.4,
+          "id": "k0065",
+          "position": 1.8,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -947,10 +999,10 @@ window.xxMotionState = {
        },
        "t015": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Logo:blur",
+        "__debugName": "Text / Nav:blur",
         "keyframes": [
          {
-          "id": "k0062",
+          "id": "k0066",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -963,8 +1015,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0063",
-          "position": 0.5,
+          "id": "k0067",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -976,8 +1028,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0064",
-          "position": 1.4,
+          "id": "k0068",
+          "position": 1.8,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -997,14 +1049,14 @@ window.xxMotionState = {
        "[\"blur\"]": "t015"
       }
      },
-     "Text / Eyebrow": {
+     "Text / Logo": {
       "trackData": {
        "t016": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Eyebrow:opacity",
+        "__debugName": "Text / Logo:opacity",
         "keyframes": [
          {
-          "id": "k0065",
+          "id": "k0069",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1017,8 +1069,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0066",
-          "position": 0.8,
+          "id": "k0070",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1030,8 +1082,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0067",
-          "position": 1.7,
+          "id": "k0071",
+          "position": 1.9,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1046,10 +1098,10 @@ window.xxMotionState = {
        },
        "t017": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Eyebrow:y",
+        "__debugName": "Text / Logo:y",
         "keyframes": [
          {
-          "id": "k0068",
+          "id": "k0072",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1062,8 +1114,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0069",
-          "position": 0.8,
+          "id": "k0073",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1075,8 +1127,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0070",
-          "position": 1.7,
+          "id": "k0074",
+          "position": 1.9,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1091,10 +1143,10 @@ window.xxMotionState = {
        },
        "t018": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Eyebrow:blur",
+        "__debugName": "Text / Logo:blur",
         "keyframes": [
          {
-          "id": "k0071",
+          "id": "k0075",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1107,8 +1159,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0072",
-          "position": 0.8,
+          "id": "k0076",
+          "position": 1.0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1120,8 +1172,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0073",
-          "position": 1.7,
+          "id": "k0077",
+          "position": 1.9,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1141,14 +1193,14 @@ window.xxMotionState = {
        "[\"blur\"]": "t018"
       }
      },
-     "Text / Headline": {
+     "Text / Eyebrow": {
       "trackData": {
        "t019": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Headline:opacity",
+        "__debugName": "Text / Eyebrow:opacity",
         "keyframes": [
          {
-          "id": "k0074",
+          "id": "k0078",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1161,8 +1213,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0075",
-          "position": 1.1,
+          "id": "k0079",
+          "position": 1.2,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1174,8 +1226,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0076",
-          "position": 2.5,
+          "id": "k0080",
+          "position": 2.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1190,10 +1242,10 @@ window.xxMotionState = {
        },
        "t020": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Headline:y",
+        "__debugName": "Text / Eyebrow:y",
         "keyframes": [
          {
-          "id": "k0077",
+          "id": "k0081",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1206,8 +1258,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0078",
-          "position": 1.1,
+          "id": "k0082",
+          "position": 1.2,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1219,8 +1271,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0079",
-          "position": 2.5,
+          "id": "k0083",
+          "position": 2.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1235,69 +1287,11 @@ window.xxMotionState = {
        },
        "t021": {
         "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Headline:blur",
+        "__debugName": "Text / Eyebrow:blur",
         "keyframes": [
-         {
-          "id": "k0080",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
-          "id": "k0081",
-          "position": 1.1,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
-          "id": "k0082",
-          "position": 2.5,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0
-         }
-        ]
-       },
-       "t022": {
-        "type": "BasicKeyframedTrack",
-        "__debugName": "Text / Headline:tracking",
-        "keyframes": [
-         {
-          "id": "k0083",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0.06
-         },
          {
           "id": "k0084",
-          "position": 1.1,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1306,11 +1300,24 @@ window.xxMotionState = {
            0
           ],
           "type": "bezier",
-          "value": 0.06
+          "value": 12
          },
          {
           "id": "k0085",
-          "position": 2.9,
+          "position": 1.2,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 12
+         },
+         {
+          "id": "k0086",
+          "position": 2.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1327,32 +1334,18 @@ window.xxMotionState = {
       "trackIdByPropPath": {
        "[\"opacity\"]": "t019",
        "[\"y\"]": "t020",
-       "[\"blur\"]": "t021",
-       "[\"tracking\"]": "t022"
+       "[\"blur\"]": "t021"
       }
      },
      "Text / Lede": {
       "trackData": {
-       "t023": {
+       "t022": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Lede:opacity",
         "keyframes": [
          {
-          "id": "k0086",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0
-         },
-         {
           "id": "k0087",
-          "position": 1.7,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1365,7 +1358,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0088",
-          "position": 2.8,
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0089",
+          "position": 3.2,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1378,26 +1384,13 @@ window.xxMotionState = {
          }
         ]
        },
-       "t024": {
+       "t023": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Lede:y",
         "keyframes": [
          {
-          "id": "k0089",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 26
-         },
-         {
           "id": "k0090",
-          "position": 1.7,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1410,7 +1403,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0091",
-          "position": 2.8,
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 26
+         },
+         {
+          "id": "k0092",
+          "position": 3.2,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1423,26 +1429,13 @@ window.xxMotionState = {
          }
         ]
        },
-       "t025": {
+       "t024": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Lede:blur",
         "keyframes": [
          {
-          "id": "k0092",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
           "id": "k0093",
-          "position": 1.7,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1455,7 +1448,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0094",
-          "position": 2.8,
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 12
+         },
+         {
+          "id": "k0095",
+          "position": 3.2,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1470,33 +1476,20 @@ window.xxMotionState = {
        }
       },
       "trackIdByPropPath": {
-       "[\"opacity\"]": "t023",
-       "[\"y\"]": "t024",
-       "[\"blur\"]": "t025"
+       "[\"opacity\"]": "t022",
+       "[\"y\"]": "t023",
+       "[\"blur\"]": "t024"
       }
      },
      "Text / Buttons": {
       "trackData": {
-       "t026": {
+       "t025": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Buttons:opacity",
         "keyframes": [
          {
-          "id": "k0095",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0
-         },
-         {
           "id": "k0096",
-          "position": 2.1,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1509,7 +1502,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0097",
-          "position": 3.1,
+          "position": 2.6,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0098",
+          "position": 3.5,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1522,26 +1528,13 @@ window.xxMotionState = {
          }
         ]
        },
-       "t027": {
+       "t026": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Buttons:y",
         "keyframes": [
          {
-          "id": "k0098",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 26
-         },
-         {
           "id": "k0099",
-          "position": 2.1,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1554,7 +1547,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0100",
-          "position": 3.1,
+          "position": 2.6,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 26
+         },
+         {
+          "id": "k0101",
+          "position": 3.5,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1567,26 +1573,13 @@ window.xxMotionState = {
          }
         ]
        },
-       "t028": {
+       "t027": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Buttons:blur",
         "keyframes": [
          {
-          "id": "k0101",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 12
-         },
-         {
           "id": "k0102",
-          "position": 2.1,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1599,7 +1592,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0103",
-          "position": 3.1,
+          "position": 2.6,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 12
+         },
+         {
+          "id": "k0104",
+          "position": 3.5,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1614,33 +1620,20 @@ window.xxMotionState = {
        }
       },
       "trackIdByPropPath": {
-       "[\"opacity\"]": "t026",
-       "[\"y\"]": "t027",
-       "[\"blur\"]": "t028"
+       "[\"opacity\"]": "t025",
+       "[\"y\"]": "t026",
+       "[\"blur\"]": "t027"
       }
      },
      "Text / Right column": {
       "trackData": {
-       "t029": {
+       "t028": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Right column:opacity",
         "keyframes": [
          {
-          "id": "k0104",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 0
-         },
-         {
           "id": "k0105",
-          "position": 2.5,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1653,7 +1646,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0106",
-          "position": 3.5,
+          "position": 2.8,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0107",
+          "position": 3.7,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1666,26 +1672,13 @@ window.xxMotionState = {
          }
         ]
        },
-       "t030": {
+       "t029": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Right column:y",
         "keyframes": [
          {
-          "id": "k0107",
-          "position": 0,
-          "connectedRight": true,
-          "handles": [
-           0.25,
-           1,
-           0.4,
-           0
-          ],
-          "type": "bezier",
-          "value": 26
-         },
-         {
           "id": "k0108",
-          "position": 2.5,
+          "position": 0,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1698,7 +1691,20 @@ window.xxMotionState = {
          },
          {
           "id": "k0109",
-          "position": 3.5,
+          "position": 2.8,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 26
+         },
+         {
+          "id": "k0110",
+          "position": 3.7,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1711,12 +1717,12 @@ window.xxMotionState = {
          }
         ]
        },
-       "t031": {
+       "t030": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Right column:blur",
         "keyframes": [
          {
-          "id": "k0110",
+          "id": "k0111",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1729,8 +1735,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0111",
-          "position": 2.5,
+          "id": "k0112",
+          "position": 2.8,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1742,8 +1748,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0112",
-          "position": 3.5,
+          "id": "k0113",
+          "position": 3.7,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1758,19 +1764,19 @@ window.xxMotionState = {
        }
       },
       "trackIdByPropPath": {
-       "[\"opacity\"]": "t029",
-       "[\"y\"]": "t030",
-       "[\"blur\"]": "t031"
+       "[\"opacity\"]": "t028",
+       "[\"y\"]": "t029",
+       "[\"blur\"]": "t030"
       }
      },
      "Text / Situations": {
       "trackData": {
-       "t032": {
+       "t031": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Situations:opacity",
         "keyframes": [
          {
-          "id": "k0113",
+          "id": "k0114",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1783,8 +1789,8 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0114",
-          "position": 2.9,
+          "id": "k0115",
+          "position": 3.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1796,7 +1802,7 @@ window.xxMotionState = {
           "value": 0
          },
          {
-          "id": "k0115",
+          "id": "k0116",
           "position": 3.9,
           "connectedRight": true,
           "handles": [
@@ -1810,12 +1816,12 @@ window.xxMotionState = {
          }
         ]
        },
-       "t033": {
+       "t032": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Situations:y",
         "keyframes": [
          {
-          "id": "k0116",
+          "id": "k0117",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1828,8 +1834,8 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0117",
-          "position": 2.9,
+          "id": "k0118",
+          "position": 3.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1841,7 +1847,7 @@ window.xxMotionState = {
           "value": 26
          },
          {
-          "id": "k0118",
+          "id": "k0119",
           "position": 3.9,
           "connectedRight": true,
           "handles": [
@@ -1855,12 +1861,12 @@ window.xxMotionState = {
          }
         ]
        },
-       "t034": {
+       "t033": {
         "type": "BasicKeyframedTrack",
         "__debugName": "Text / Situations:blur",
         "keyframes": [
          {
-          "id": "k0119",
+          "id": "k0120",
           "position": 0,
           "connectedRight": true,
           "handles": [
@@ -1873,8 +1879,8 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0120",
-          "position": 2.9,
+          "id": "k0121",
+          "position": 3.1,
           "connectedRight": true,
           "handles": [
            0.25,
@@ -1886,7 +1892,7 @@ window.xxMotionState = {
           "value": 12
          },
          {
-          "id": "k0121",
+          "id": "k0122",
           "position": 3.9,
           "connectedRight": true,
           "handles": [
@@ -1902,9 +1908,821 @@ window.xxMotionState = {
        }
       },
       "trackIdByPropPath": {
-       "[\"opacity\"]": "t032",
-       "[\"y\"]": "t033",
-       "[\"blur\"]": "t034"
+       "[\"opacity\"]": "t031",
+       "[\"y\"]": "t032",
+       "[\"blur\"]": "t033"
+      }
+     },
+     "Words / 1 Beyond": {
+      "trackData": {
+       "t034": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 1 Beyond:opacity",
+        "keyframes": [
+         {
+          "id": "k0123",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0124",
+          "position": 1.35,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0125",
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 1
+         }
+        ]
+       },
+       "t035": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 1 Beyond:y",
+        "keyframes": [
+         {
+          "id": "k0126",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0127",
+          "position": 1.35,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0128",
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t036": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 1 Beyond:blur",
+        "keyframes": [
+         {
+          "id": "k0129",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0130",
+          "position": 1.35,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0131",
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t037": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 1 Beyond:rotate",
+        "keyframes": [
+         {
+          "id": "k0132",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": -4
+         },
+         {
+          "id": "k0133",
+          "position": 1.35,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": -4
+         },
+         {
+          "id": "k0134",
+          "position": 2.3,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       }
+      },
+      "trackIdByPropPath": {
+       "[\"opacity\"]": "t034",
+       "[\"y\"]": "t035",
+       "[\"blur\"]": "t036",
+       "[\"rotate\"]": "t037"
+      }
+     },
+     "Words / 2 Borders": {
+      "trackData": {
+       "t038": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 2 Borders:opacity",
+        "keyframes": [
+         {
+          "id": "k0135",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0136",
+          "position": 1.55,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0137",
+          "position": 2.5,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 1
+         }
+        ]
+       },
+       "t039": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 2 Borders:y",
+        "keyframes": [
+         {
+          "id": "k0138",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0139",
+          "position": 1.55,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0140",
+          "position": 2.5,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t040": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 2 Borders:blur",
+        "keyframes": [
+         {
+          "id": "k0141",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0142",
+          "position": 1.55,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0143",
+          "position": 2.5,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t041": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 2 Borders:rotate",
+        "keyframes": [
+         {
+          "id": "k0144",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 3
+         },
+         {
+          "id": "k0145",
+          "position": 1.55,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 3
+         },
+         {
+          "id": "k0146",
+          "position": 2.5,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       }
+      },
+      "trackIdByPropPath": {
+       "[\"opacity\"]": "t038",
+       "[\"y\"]": "t039",
+       "[\"blur\"]": "t040",
+       "[\"rotate\"]": "t041"
+      }
+     },
+     "Words / 3 Beyond": {
+      "trackData": {
+       "t042": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 3 Beyond:opacity",
+        "keyframes": [
+         {
+          "id": "k0147",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0148",
+          "position": 1.75,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0149",
+          "position": 2.7,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 1
+         }
+        ]
+       },
+       "t043": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 3 Beyond:y",
+        "keyframes": [
+         {
+          "id": "k0150",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0151",
+          "position": 1.75,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0152",
+          "position": 2.7,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t044": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 3 Beyond:blur",
+        "keyframes": [
+         {
+          "id": "k0153",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0154",
+          "position": 1.75,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0155",
+          "position": 2.7,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t045": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 3 Beyond:rotate",
+        "keyframes": [
+         {
+          "id": "k0156",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": -3
+         },
+         {
+          "id": "k0157",
+          "position": 1.75,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": -3
+         },
+         {
+          "id": "k0158",
+          "position": 2.7,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       }
+      },
+      "trackIdByPropPath": {
+       "[\"opacity\"]": "t042",
+       "[\"y\"]": "t043",
+       "[\"blur\"]": "t044",
+       "[\"rotate\"]": "t045"
+      }
+     },
+     "Words / 4 Advisory": {
+      "trackData": {
+       "t046": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 4 Advisory:opacity",
+        "keyframes": [
+         {
+          "id": "k0159",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0160",
+          "position": 1.95,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         },
+         {
+          "id": "k0161",
+          "position": 2.9,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 1
+         }
+        ]
+       },
+       "t047": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 4 Advisory:y",
+        "keyframes": [
+         {
+          "id": "k0162",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0163",
+          "position": 1.95,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 40
+         },
+         {
+          "id": "k0164",
+          "position": 2.9,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t048": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 4 Advisory:blur",
+        "keyframes": [
+         {
+          "id": "k0165",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0166",
+          "position": 1.95,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 10
+         },
+         {
+          "id": "k0167",
+          "position": 2.9,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       },
+       "t049": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Words / 4 Advisory:rotate",
+        "keyframes": [
+         {
+          "id": "k0168",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 4
+         },
+         {
+          "id": "k0169",
+          "position": 1.95,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 4
+         },
+         {
+          "id": "k0170",
+          "position": 2.9,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       }
+      },
+      "trackIdByPropPath": {
+       "[\"opacity\"]": "t046",
+       "[\"y\"]": "t047",
+       "[\"blur\"]": "t048",
+       "[\"rotate\"]": "t049"
+      }
+     },
+     "Text / Headline": {
+      "trackData": {
+       "t050": {
+        "type": "BasicKeyframedTrack",
+        "__debugName": "Text / Headline:tracking",
+        "keyframes": [
+         {
+          "id": "k0171",
+          "position": 0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0.05
+         },
+         {
+          "id": "k0172",
+          "position": 1.4,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0.05
+         },
+         {
+          "id": "k0173",
+          "position": 3.0,
+          "connectedRight": true,
+          "handles": [
+           0.25,
+           1,
+           0.4,
+           0
+          ],
+          "type": "bezier",
+          "value": 0
+         }
+        ]
+       }
+      },
+      "trackIdByPropPath": {
+       "[\"tracking\"]": "t050"
       }
      }
     }

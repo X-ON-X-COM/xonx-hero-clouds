@@ -10,14 +10,14 @@ studio open the demo panels are hidden: the studio has its own panels in the sam
 import pathlib
 
 DST = pathlib.Path(__file__).parent
-V = '20261001a'
+V = '20261001b'
 
 
 def build(src, out, partner, src_partner):
     html = (DST / src).read_text()
     html = html.replace(f"location.replace('{src_partner}?", f"location.replace('{partner}?")
     html = html.replace('Sky demo 4: cloud field', 'Sky demo 8: motion')
-    html = html.replace('</head>', '<style>html.xx-studio .xx-proto, html.xx-studio .xx-tune { display: none !important; }</style>\n</head>', 1)
+    html = html.replace('</head>', '<style>html.xx-studio .xx-proto, html.xx-studio .xx-tune, html.xx-play .xx-proto, html.xx-play .xx-tune { display: none !important; }</style>\n</head>', 1)
     a = html.index('<script src="field.js')
     b = html.index('</script>', a) + len('</script>')
     html = (html[:b] + f'\n<script src="motion-state.js?v={V}"></script>\n'

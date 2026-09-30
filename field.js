@@ -399,9 +399,13 @@
       layers.forEach(function (L) {
         L.mx = (L.mx || 0) + (mouseX - (L.mx || 0)) * 0.01;
         L.my = (L.my || 0) + (-mouseY - (L.my || 0)) * 0.01;
-        L.camera.position.x = L.mx + (M && M.camX || 0);
-        L.camera.position.y = L.my + (M && M.camY || 0);
-        L.camera.rotation.z = M && M.roll || 0;
+        // turbulence: three incommensurate sines, so the buffet never repeats visibly
+        var sk = M && M.shake || 0, tt = Date.now() * 0.001;
+        var bx = sk ? sk * 9 * (Math.sin(tt * 13.1) + 0.6 * Math.sin(tt * 29.7 + 1.3)) : 0;
+        var by = sk ? sk * 7 * (Math.sin(tt * 11.3 + 0.7) + 0.5 * Math.sin(tt * 31.9)) : 0;
+        L.camera.position.x = L.mx + (M && M.camX || 0) + bx;
+        L.camera.position.y = L.my + (M && M.camY || 0) + by;
+        L.camera.rotation.z = (M && M.roll || 0) + (sk ? sk * 0.006 * Math.sin(tt * 17.3 + 2.1) : 0);
         var fov = M && M.fov || cfg.fov;
         if (L.camera.fov !== fov) { L.camera.fov = fov; L.camera.updateProjectionMatrix(); }
         if (M && M.haze) L.mat.uniforms.fogFar.value = M.haze;
