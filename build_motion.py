@@ -10,7 +10,7 @@ studio open the demo panels are hidden: the studio has its own panels in the sam
 import pathlib
 
 DST = pathlib.Path(__file__).parent
-V = '20261001b'
+V = '20261001d'
 
 
 def build(src, out, partner, src_partner):

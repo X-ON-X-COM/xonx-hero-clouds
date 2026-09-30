@@ -67,114 +67,79 @@
     root.style.setProperty('--g-sky-warm', hex(mix([0xFA, 0xEF, 0xE0], [0xF6, 0xE3, 0xC9], v.warm)));
   });
 
-  // ── the veil: the page opens inside a cloud, and the cloud parts from the sun outwards ──
-  var veil = document.createElement('div');
-  veil.className = 'xx-veil'; veil.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(veil);
+  // ── the veil: the page opens inside a cloud, and the cloud tears open from the sun ──
+  // Not a CSS radial gradient: a perfect circle opening reads as a porthole. The veil is a
+  // small canvas (scaled up, it is vapour, softness is free) whose edge is pushed in and out
+  // by fBm noise, so it tears into ragged wisps; the noise also shades the inside of the
+  // cloud a little, so the white has a body. It is redrawn only while its values change.
   var css = document.createElement('style');
   css.textContent =
-    '.xx-veil{position:fixed;inset:0;z-index:55;pointer-events:none;' +
-    'background:radial-gradient(circle at var(--vx,62%) var(--vy,46%),' +
-    'rgba(247,246,242,0) calc(var(--vo,0) * 140%),' +
-    'rgba(247,246,242,var(--va,1)) calc(var(--vo,0) * 140% + var(--vs,26%)));' +
+    '.xx-veil-blur{position:fixed;inset:0;z-index:54;pointer-events:none;' +
     'backdrop-filter:blur(var(--vb,0px));-webkit-backdrop-filter:blur(var(--vb,0px))}' +
-    '.xx-hero h1 .xx-w{display:inline-block;will-change:opacity,transform,filter}';
+    '.xx-veil{position:fixed;left:-16px;top:-16px;width:calc(100vw + 32px);height:calc(100vh + 32px);z-index:55;pointer-events:none;filter:blur(3px)}' +   // oversized: the blur must not thin the screen edges
+    '';
   document.head.appendChild(css);
+  var vblur = document.createElement('div'); vblur.className = 'xx-veil-blur';
+  var veil = document.createElement('canvas'); veil.className = 'xx-veil';
+  [vblur, veil].forEach(function (el) { el.setAttribute('aria-hidden', 'true'); document.body.appendChild(el); });
+  var VW = 256, VH = Math.max(90, Math.round(256 * window.innerHeight / window.innerWidth));
+  veil.width = VW; veil.height = VH;
+  var vctx = veil.getContext('2d'), vimg = vctx.createImageData(VW, VH);
+  // fBm on a tile twice as wide as the veil, so the tear can drift sideways as it opens
+  var NW = VW * 2, noiseT = new Float32Array(NW * VH);
+  (function () {
+    var seed = 20261001;
+    function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+    var total = 0;
+    [[8, 0.5], [16, 0.25], [32, 0.15], [64, 0.1]].forEach(function (o) {
+      var gx = o[0] + 1, gy = Math.ceil(o[0] * VH / NW) + 2, g = [];
+      for (var i = 0; i < gx * gy; i++) g.push(rnd());
+      for (var y = 0; y < VH; y++) for (var x = 0; x < NW; x++) {
+        var fx = x / NW * o[0], fy = y / NW * o[0], ix = Math.floor(fx), iy = Math.floor(fy);
+        var tx = fx - ix, ty = fy - iy; tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+        var a = g[iy * gx + ix], b = g[iy * gx + ix + 1], c = g[(iy + 1) * gx + ix], d = g[(iy + 1) * gx + ix + 1];
+        noiseT[y * NW + x] += ((a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty) * o[1];
+      }
+      total += o[1];
+    });
+    for (var j = 0; j < noiseT.length; j++) noiseT[j] /= total;
+  })();
+  function drawVeil(v) {
+    var data = vimg.data, ox = v.originX / 100 * VW, oy = v.originY / 100 * VH;
+    var diag = Math.sqrt(VW * VW + VH * VH), sft = Math.max(0.02, v.softness / 100);
+    var reach = v.open * 1.75 - 0.25, drift = Math.round(v.open * VW * 0.35);
+    for (var y = 0; y < VH; y++) for (var x = 0; x < VW; x++) {
+      var nz = noiseT[y * NW + x + drift];
+      var dx = x - ox, dy = (y - oy) * 1.15, r = Math.sqrt(dx * dx + dy * dy) / diag;
+      var e = r + (nz - 0.5) * v.ragged - reach;               // < 0 = torn away, > 0 = still cloud
+      var a = Math.min(1, Math.max(0, (e + sft) / (2 * sft)));
+      a = a * a * (3 - 2 * a) * v.density;
+      var k = (y * VW + x) * 4, shade = (nz - 0.5) * 38 * v.body;   // a little tone inside the white
+      data[k] = 247 - shade * 0.9; data[k + 1] = 246 - shade * 0.8; data[k + 2] = 242 - shade * 0.35;
+      data[k + 3] = a * 255;
+    }
+    vctx.putImageData(vimg, 0, 0);
+  }
   var veilObj = sheet.object('Veil', {
     open: n(1, 0, 1, 0.01),           // 0 = inside the cloud, 1 = gone
     density: n(1, 0, 1, 0.01),        // how white the cloud is
-    softness: n(26, 2, 80, 0.5),      // % width of the torn edge
+    softness: n(12, 2, 60, 0.5),      // width of the torn edge
+    ragged: n(0.55, 0, 1.5, 0.01),    // how far the noise pushes the edge in and out: 0 = a circle
+    body: n(1, 0, 2, 0.02),           // tone inside the white
     blur: n(0, 0, 30, 0.2),           // the world behind the vapour, out of focus
     originX: n(62, 0, 100, 0.5),      // where it tears open first: the sun
     originY: n(46, 0, 100, 0.5)
   });
   veilObj.onValuesChange(function (v) {
-    veil.style.setProperty('--vo', v.open.toFixed(3));
-    veil.style.setProperty('--va', v.density.toFixed(3));
-    veil.style.setProperty('--vs', v.softness.toFixed(1) + '%');
-    veil.style.setProperty('--vb', v.blur.toFixed(1) + 'px');
-    veil.style.setProperty('--vx', v.originX.toFixed(1) + '%');
-    veil.style.setProperty('--vy', v.originY.toFixed(1) + '%');
-    veil.style.display = v.open >= 0.999 ? 'none' : '';
+    var gone = v.open >= 0.999 || v.density <= 0.001;
+    veil.style.display = gone ? 'none' : '';
+    vblur.style.display = v.blur > 0.05 ? '' : 'none';
+    vblur.style.setProperty('--vb', v.blur.toFixed(1) + 'px');
+    if (!gone) drawVeil(v);
   });
 
-  // ── depth: the words hang at different distances in the air ──
-  // Each text layer moves with the mouse by its own depth, the headline most, the nav not at
-  // all; `strength` on the Depth object scales the lot (0 = flat, as on the live site).
-  var depthObj = sheet.object('Depth', { strength: n(1, 0, 3, 0.02), ease: n(0.06, 0.01, 0.3, 0.005) });
-  var depthV = { strength: 1, ease: 0.06 };
-  depthObj.onValuesChange(function (v) { depthV = v; });
-  var mx = 0, my = 0, px = 0, py = 0, layers = [];
-  document.addEventListener('mousemove', function (e) {
-    mx = e.clientX / window.innerWidth - 0.5; my = e.clientY / window.innerHeight - 0.5;
-  });
-
-  function apply(L) {
-    var v = L.v, dx = -px * L.depth * 22 * depthV.strength, dy = -py * L.depth * 14 * depthV.strength;
-    L.els.forEach(function (el) {
-      el.style.opacity = v.opacity;
-      el.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + (v.y + dy).toFixed(1) + 'px) scale(' + v.scale.toFixed(3) + ')' +
-        (v.rotate ? ' rotate(' + v.rotate.toFixed(2) + 'deg)' : '');
-      el.style.filter = v.blur > 0.05 ? 'blur(' + v.blur.toFixed(1) + 'px)' : '';
-      if (v.tracking != null) el.style.letterSpacing = Math.abs(v.tracking) > 0.0005 ? v.tracking.toFixed(3) + 'em' : '';
-      el.style.transformOrigin = L.origin;
-      el.style.willChange = 'opacity, transform, filter';
-    });
-  }
-  function layer(name, sel, depth, extra) {
-    var els = typeof sel === 'string' ? [].slice.call(document.querySelectorAll(sel)) : sel;
-    if (!els.length) return;
-    var props = {
-      opacity: n(1, 0, 1, 0.01),
-      y: n(0, -120, 120, 1),          // px, + = lower
-      blur: n(0, 0, 24, 0.2),         // px
-      scale: n(1, 0.6, 1.4, 0.005)
-    };
-    Object.assign(props, extra || {});
-    var o = sheet.object(name, props);
-    var L = { els: els, depth: depth, v: null, origin: name.indexOf('Word') >= 0 ? '50% 80%' : '0 50%' };
-    o.onValuesChange(function (v) { L.v = v; apply(L); });
-    layers.push(L);
-  }
-  var TR = { tracking: n(0, -0.05, 0.3, 0.002) };   // letter-spacing, em
-  layer('Text / Nav', '.xx-nav', 0);
-  layer('Text / Logo', '.xx-hero__logo', 0.35);
-  layer('Text / Eyebrow', '.xx-hero__eyebrow', 0.45);
-  layer('Text / Headline', '.xx-hero h1', 0.9, TR);
-  layer('Text / Lede', '.xx-hero__leftlede', 0.6);
-  layer('Text / Buttons', '.xx-cta-dock--home', 0.5);
-  layer('Text / Right column', '.xx-hero__right', 0.7);
-  layer('Text / Situations', '.xx-hero-dock', 0.25);
-
-  // the headline, word by word: every word its own object, so they can arrive one at a time
-  var h1 = document.querySelector('.xx-hero h1'), words = [];
-  if (h1) {
-    (function split(node) {
-      [].slice.call(node.childNodes).forEach(function (c) {
-        if (c.nodeType === 3 && c.nodeValue.trim()) {
-          var frag = document.createDocumentFragment();
-          c.nodeValue.split(/(\s+)/).forEach(function (w) {
-            if (!w) return;
-            if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(w)); return; }
-            var sp = document.createElement('span'); sp.className = 'xx-w'; sp.textContent = w;
-            frag.appendChild(sp); words.push(sp);
-          });
-          node.replaceChild(frag, c);
-        } else if (c.nodeType === 1 && c.tagName !== 'BR') split(c);
-      });
-    })(h1);
-  }
-  words.forEach(function (w, i) {
-    layer('Words / ' + (i + 1) + ' ' + w.textContent.replace(/\W/g, ''), [w], 0.9 + i * 0.12,
-          { rotate: n(0, -20, 20, 0.1) });
-  });
-
-  (function tick() {
-    // the mouse, eased, re-applied to every layer each frame
-    px += (mx - px) * depthV.ease; py += (my - py) * depthV.ease;
-    layers.forEach(function (L) { if (L.v) apply(L); });
-    requestAnimationFrame(tick);
-  })();
+  // The words do not move (Iryna, 01.10: «букви не треба рухати. грайся тільки з хмарами»):
+  // no text objects on the timeline, no mouse depth on the words. Only the sky moves.
 
   project.ready.then(function () {
     // the intro plays once, then the rest loops; in the studio, space pauses and the playhead scrubs

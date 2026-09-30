@@ -46,27 +46,11 @@ track('Sky', 'sunX', [(INTRO, 62), (10, 66), (END, 62)])
 track('Sky', 'sunY', [(INTRO, 46), (10, 43), (END, 46)])
 
 # the page opens inside a cloud: white, out of focus, buffeting; it tears open from the sun
-track('Veil', 'open', [(0, 0), (0.35, 0), (2.3, 1)], OUT)
-track('Veil', 'blur', [(0, 14), (0.35, 14), (2.0, 0)], OUT)
+track('Veil', 'open', [(0, 0), (0.4, 0), (2.9, 1)], [0.42, 1, 0.3, 0])
+track('Veil', 'blur', [(0, 14), (0.4, 14), (2.5, 0)], OUT)
 track('Flight', 'shake', [(0, 0.55), (2.6, 0), (INTRO, 0), (13.2, 0), (13.6, 0.32), (15.2, 0), (END, 0)], OUT)
 
-# the words surface one after the other: out of a blur, rising
-LAYERS = [('Nav', 1.0, 1.8), ('Logo', 1.0, 1.9), ('Eyebrow', 1.2, 2.1),
-          ('Lede', 2.3, 3.2), ('Buttons', 2.6, 3.5), ('Right column', 2.8, 3.7), ('Situations', 3.1, 3.9)]
-for name, a, b in LAYERS:
-    obj = 'Text / ' + name
-    track(obj, 'opacity', [(0, 0), (a, 0), (b, 1)], OUT)
-    track(obj, 'y', [(0, 26), (a, 26), (b, 0)], OUT)
-    track(obj, 'blur', [(0, 12), (a, 12), (b, 0)], OUT)
-# the headline word by word, each tipping upright as it lands; the whole line tightens after
-for i, (w, rot) in enumerate([('Beyond', -4), ('Borders', 3), ('Beyond', -3), ('Advisory', 4)]):
-    obj = f'Words / {i + 1} {w}'
-    a = 1.35 + i * 0.2; b = a + 0.95
-    track(obj, 'opacity', [(0, 0), (a, 0), (b, 1)], OUT)
-    track(obj, 'y', [(0, 40), (a, 40), (b, 0)], OUT)
-    track(obj, 'blur', [(0, 10), (a, 10), (b, 0)], OUT)
-    track(obj, 'rotate', [(0, rot), (a, rot), (b, 0)], OUT)
-track('Text / Headline', 'tracking', [(0, 0.05), (1.4, 0.05), (3.0, 0)], OUT)
+# the words do not move: only the clouds, the camera and the sky are on the timeline
 
 state = {
     'sheetsById': {'Hero': {
