@@ -32,6 +32,7 @@
     fogNear: 300, fogFar: 2600,
     texture: script.dataset.texture,
     sky: script.dataset.sky || '#c9d5ea',
+    fogAlpha: +script.dataset.fogalpha || 0,   // demo 9, over a film: far clouds thin to nothing instead of to the sky colour
     seed: 20260920,
     // the tuning panel changes these live; `copy` in the panel prints them to bake in
     size: 1.0,              // cloud radius multiplier
@@ -89,7 +90,7 @@
     '}'].join('\n');
   var fs = [
     'uniform sampler2D map; uniform vec3 fogColor; uniform float fogNear; uniform float fogFar;',
-    'uniform float splitNear; uniform float splitFar; uniform float tint;',
+    'uniform float splitNear; uniform float splitFar; uniform float tint; uniform float fogAlpha;',
     'varying vec2 vUv; varying vec3 vTint; varying float vRim;',
     'void main() {',
     '  float depth = gl_FragCoord.z / gl_FragCoord.w;',
@@ -100,7 +101,8 @@
     '  c.a *= smoothstep(70.0, 360.0, depth);',           // and a cloud you are inside dissolves instead of filling the frame
     '  c.a *= smoothstep(splitNear, splitFar, depth);',    // which canvas this puff belongs to
     '  float f = smoothstep(fogNear, fogFar, depth);',
-    '  c = mix(c, vec4(fogColor, c.a), f);',
+    '  c = mix(c, vec4(fogColor, c.a), f * (1.0 - fogAlpha));',
+    '  c.a *= 1.0 - f * fogAlpha;',
     '  gl_FragColor = vec4(c.rgb * c.a, c.a);',              // premultiplied, see makeLayer
     '}'].join('\n');
 
@@ -120,7 +122,7 @@
         fogColor: { value: new THREE.Color(cfg.sky) },
         fogNear: { value: cfg.fogNear }, fogFar: { value: cfg.fogFar },
         splitNear: { value: splitNear }, splitFar: { value: splitFar },
-        tint: { value: 1.0 },
+        tint: { value: 1.0 }, fogAlpha: { value: cfg.fogAlpha },
         time: { value: 0 }, billow: { value: cfg.billow }, rim: { value: cfg.rim },
         sunDir: { value: new THREE.Vector3().fromArray(cfg.sun).normalize() }
       },

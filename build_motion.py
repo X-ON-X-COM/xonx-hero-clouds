@@ -10,7 +10,7 @@ studio open the demo panels are hidden: the studio has its own panels in the sam
 import pathlib
 
 DST = pathlib.Path(__file__).parent
-V = '20261001d'
+V = '20261001e'
 
 
 def build(src, out, partner, src_partner):
@@ -25,6 +25,7 @@ def build(src, out, partner, src_partner):
             # access (connect-src 'none') and no `process`, so give it an empty one
             '<script>window.process = window.process || { env: { NODE_ENV: "production" } };</script>\n'
             f'<script src="js/theatre-core-and-studio.js?v={V}"></script>\n'
+            f'<script src="veil.js?v={V}"></script>\n'
             f'<script src="motion.js?v={V}"></script>' + html[b:])
     assert 'motion.js' in html and 'field.js' in html
     (DST / out).write_text(html)
