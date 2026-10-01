@@ -119,7 +119,9 @@
     '      float od = 0.0;',
     // the first two light steps see the full detail, so a crown shades the one behind it
     // and the creases between heads go dark: that is what gives a cumulus its structure
-    '      for (int j = 1; j <= 6; j++) od += cloud(p + sunDir * float(j * j) * 16.0, j <= 2) * float(2 * j - 1) * 16.0;',
+    // 01.10 speed: four light steps reaching as far as the six did (the last ones are coarse
+    // anyway), the first with full detail for the creases
+    '      for (int j = 1; j <= 4; j++) od += cloud(p + sunDir * float(j * j) * 36.0, j == 1) * float(2 * j - 1) * 36.0;',
     '      od *= 0.012 * shade;',
     '      float powder = 1.0 - exp(-d * 6.0);',
     '      float sunL = 0.0; float am = 1.0, bm = 1.0, gm = 1.0;',
