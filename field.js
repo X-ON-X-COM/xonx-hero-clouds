@@ -57,13 +57,18 @@
   // Without it every value below falls back to what demo 4 does on its own.
   var flight = 0, lastNow = 0;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 01.10 «дуже підтуплює»: soft clouds do not need retina pixels. Start at 0.8 of CSS pixels
+  // (×1.5 before on a retina screen: 3.5× the fill), and let the frame time move it between
+  // 0.45 and the start value: a slow machine gets softer clouds instead of a stutter.
+  var quality = { max: Math.min(+script.dataset.dpr || 0.8, window.devicePixelRatio || 1), scale: 0, slow: 0, fast: 0, ema: 16.7, last: 0 };
+  quality.scale = quality.max;
 
   // one seeded field, so the two canvases and every reload agree
   function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
 
   var vs = [
     'attribute vec4 aRnd;',                                  // phase, spin, drift amplitude, how much of an edge this puff is
-    'uniform float time; uniform float billow; uniform float rim; uniform vec3 sunDir;',
+    'uniform float time; uniform float billow; uniform float rim; uniform vec3 sunDir; uniform float bandNear; uniform float bandFar;',
     'varying vec2 vUv; varying vec3 vTint; varying float vRim;',
     'void main() {',
     '  vUv = uv;',
@@ -83,6 +88,10 @@
     '  wp.xyz += billow * aRnd.z * vec3(sin(time * 0.00013 + ph * 1.7), sin(time * 0.00017 + ph * 2.3) * 0.7, sin(time * 0.00011 + ph * 0.9));',
     // silver lining: forward scattering, strongest looking straight at the sun, on the
     // thin sunward edge of a cloud only (aRnd.w, worked out when the field is built)
+    // 01.10 speed: a puff outside this canvas\'s depth band never reaches the rasteriser. Before,
+    // both canvases drew all 18 000 quads and hid the other half in the fragment shader.
+    '  float vd = -(viewMatrix * wp).z;',
+    '  if (vd < bandNear || vd > bandFar) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); vUv = vec2(0.0); vTint = vec3(0.0); vRim = 0.0; return; }',
     '  vec3 V = normalize(wp.xyz - cameraPosition);',
     '  float ct = max(dot(V, sunDir), 0.0);',
     '  vRim = rim * aRnd.w * (0.2 + 0.8 * pow(ct, 4.0));',
@@ -112,7 +121,7 @@
     // as colour * alpha, and the browser then reads that darkened colour as if it were
     // straight. The shader outputs premultiplied colour and the blend is One / OneMinusSrcAlpha.
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, alpha: true, premultipliedAlpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, +script.dataset.dpr || 1.5));
+    renderer.setPixelRatio(quality.scale);
     renderer.setClearColor(0x000000, 0);
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(cfg.fov, 1, 1, cfg.fogFar);
@@ -122,6 +131,7 @@
         fogColor: { value: new THREE.Color(cfg.sky) },
         fogNear: { value: cfg.fogNear }, fogFar: { value: cfg.fogFar },
         splitNear: { value: splitNear }, splitFar: { value: splitFar },
+        bandNear: { value: splitNear < splitFar ? splitNear - 10 : 0 }, bandFar: { value: splitNear < splitFar ? 1e6 : splitNear + 10 },
         tint: { value: 1.0 }, fogAlpha: { value: cfg.fogAlpha },
         time: { value: 0 }, billow: { value: cfg.billow }, rim: { value: cfg.rim },
         sunDir: { value: new THREE.Vector3().fromArray(cfg.sun).normalize() }
@@ -385,7 +395,23 @@
       // window.xxTime, when set, pins the flight to that millisecond: the film's cloud
       // cutaways are captured this way, one frame at a time, deterministic
       var t = (typeof window.xxTime === 'number') ? window.xxTime : (paused || reduce ? frozen : (Date.now() - start));
-      var tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
+      // reading a computed style every frame forces a style recalc: once a second is plenty
+      if (!frame.n || frame.n % 60 === 0) frame.tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
+      frame.n = (frame.n || 0) + 1;
+      var tempo = frame.tempo;
+      // adaptive resolution from the frame time
+      var pn = performance.now();
+      if (quality.last) {
+        quality.ema += (Math.min(100, pn - quality.last) - quality.ema) * 0.05;
+        if (quality.ema > 22) quality.slow++; else quality.slow = 0;
+        if (quality.ema < 14) quality.fast++; else quality.fast = 0;
+        var ns = quality.scale;
+        if (quality.slow > 45 && ns > 0.45) { ns = Math.max(0.45, ns * 0.85); quality.slow = 0; }
+        if (quality.fast > 240 && ns < quality.max) { ns = Math.min(quality.max, ns * 1.1); quality.fast = 0; }
+        if (ns !== quality.scale) { quality.scale = ns; layers.forEach(function (L) { L.renderer.setPixelRatio(ns); }); resize(); }
+      }
+      quality.last = pn;
+      window.xxQuality = quality;
       var M = window.xxMotion, pos;
       if (M && typeof window.xxTime !== 'number') {
         // speed is a multiplier the timeline can ramp, so the flight is integrated, not t * v;

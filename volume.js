@@ -183,7 +183,23 @@
     mouseX = (e.clientX - window.innerWidth / 2) * 0.06; mouseY = (e.clientY - window.innerHeight / 2) * 0.04;
   });
 
+  // 01.10 speed: the frame time moves the render scale between 0.22 and the start value, and
+  // the step count with it; a slow machine gets softer clouds instead of a stutter
+  var Q = { max: cfg.scale, ema: 16.7, slow: 0, fast: 0, last: 0, steps: cfg.steps };
+  function adapt() {
+    var pn = performance.now();
+    if (Q.last) {
+      Q.ema += (Math.min(100, pn - Q.last) - Q.ema) * 0.05;
+      if (Q.ema > 22) Q.slow++; else Q.slow = 0;
+      if (Q.ema < 14) Q.fast++; else Q.fast = 0;
+      if (Q.slow > 45 && cfg.scale > 0.22) { cfg.scale = Math.max(0.22, cfg.scale * 0.85); Q.slow = 0; resize(); }
+      if (Q.fast > 240 && cfg.scale < Q.max) { cfg.scale = Math.min(Q.max, cfg.scale * 1.1); Q.fast = 0; resize(); }
+      cfg.steps = Math.round(Q.steps * (0.6 + 0.4 * cfg.scale / Q.max));
+    }
+    Q.last = pn; window.xxQuality = { scale: cfg.scale, steps: cfg.steps, ema: Q.ema };
+  }
   function frame() {
+    adapt();
     var t = (typeof window.xxTime === 'number') ? window.xxTime : (paused || reduce ? frozen : (Date.now() - start));
     var tempo = parseFloat(getComputedStyle(root).getPropertyValue('--xx-tempo')) || 1;
     camX += (mouseX - camX) * 0.01; camY += (-mouseY - camY) * 0.01;
