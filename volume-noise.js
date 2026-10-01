@@ -6,7 +6,7 @@
  * bit of vapour from the sun is marched too. Shadows between crowns, the dark belly, the
  * silver lining looking into the sun and the haze of distance all fall out of that one
  * calculation instead of being painted on. Written from scratch (no shadertoy code, so no
- * licence question), raw WebGL 2 (3D textures), no library. The value-noise version is volume-noise.js.
+ * licence question), raw WebGL 1, no library.
  *
  * Same composition as demo 4: flight forward at eye level, the sun up-right ahead where the
  * sky's warm glow is, two canvases so the near clouds cross the words. The back canvas marches
@@ -34,48 +34,60 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var start = Date.now(), paused = false, frozen = 0, mouseX = 0, mouseY = 0, camX = 0, camY = 0;
 
-  var VS = '#version 300 es\nin vec2 p; out vec2 vUv; void main(){ vUv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }';
+  var VS = 'attribute vec2 p; varying vec2 vUv; void main(){ vUv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }';
   var FS = [
-    '#version 300 es',
-    'precision highp float; precision highp sampler3D;',
-    'in vec2 vUv; out vec4 fragColor;',
+    'precision highp float;',
+    'varying vec2 vUv;',
     'uniform vec2 res; uniform vec3 cam; uniform float time; uniform float tanHalf; uniform float roll;',
     'uniform float tNear; uniform float tFar; uniform int steps; uniform float fadeA; uniform float fadeB; uniform float isFront;',
     'uniform float coverage; uniform float density; uniform float lining; uniform float shade;',
     'uniform vec3 sunDir; uniform vec3 skyHigh; uniform vec3 skyLow; uniform vec3 fogCol;',
-    'uniform sampler3D shapeTex; uniform sampler3D detailTex;',
     '',
-    // 01.10 «все ще жахлива структура хмар»: the value noise is gone. A cumulus is built the way
-    // game engines build theirs (Schneider, «Nubis»): a Perlin-Worley shape texture, cellular
-    // noise eroding it. Worley noise is round cells with sharp seams between them, which is
-    // exactly a cauliflower: billows with creases. Both textures are baked once at load (below).
-    'const float BASE = -440.0; const float TOP = 620.0;',
+    // value noise, hashed, no textures
+    'float hash(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }',
+    'float noise(vec3 x){',
+    '  vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);',
+    '  return mix(mix(mix(hash(i), hash(i + vec3(1,0,0)), f.x), mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),',
+    '             mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x), mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);',
+    '}',
+    'const mat3 ROT = mat3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);',
+    '',
+    // The layer: cumulus sit in a slab around eye level, flat bases, rounded tops.
+    // Shape = a low-frequency field thresholded by coverage (where the clouds are) times the
+    // height profile, then bitten by higher octaves (cauliflower crowns, ragged edges).
+    // The field drifts slowly on its own, so the clouds churn while you fly through them.
+    'const float BASE = -440.0; const float TOP = 560.0;',
     'float remap(float v, float a, float b){ return clamp((v - a) / (b - a), 0.0, 1.0); }',
     'float cloud(vec3 p, bool fine){',
     '  float h = (p.y - BASE) / (TOP - BASE);',
     '  if (h < 0.0 || h > 1.0) return 0.0;',
-    '  vec3 wind = vec3(time * 0.004, 0.0, time * 0.002);',
-    // where the clouds are: a slow coverage map from the shape texture, sampled flat
-    '  float map = texture(shapeTex, vec3(p.x * 0.00010, 0.31, p.z * 0.00010)).r;',
-    '  float cv = smoothstep(0.42, 0.82, map);',   // about a third of the sky can hold cloud
-    '  if (cv <= 0.0) return 0.0;',
-    // the cumulus profile: a sharp flat base, a rounded top, taller where the cloud is thicker
-    '  float top = 0.35 + 0.65 * cv;',
-    '  float prof = smoothstep(0.0, 0.05, h) * smoothstep(top, top * 0.55, h);',
-    '  vec4 n = texture(shapeTex, (p + wind) * 0.00034);',
-    '  float wf = n.g * 0.625 + n.b * 0.25 + n.a * 0.125;',
-    '  float base = n.r * 0.7 + wf * 0.3;',   // Perlin-Worley, a little more cellular
-    '  float c = cv * coverage;',
-    '  base = remap(base * prof, 1.0 - c, 1.0) * c;',
-    '  if (base <= 0.0) return 0.0;',
+    '  vec3 q = p * 0.0010 + vec3(0.0, 0.0, time * 0.000015);',
+    '  float n = noise(q) * 0.62 + noise(ROT * q * 2.03) * 0.25 + noise(ROT * ROT * q * 4.01) * 0.13;',
+    '  float c = remap(n, 1.0 - coverage, 1.0);',
+    '  float ht = h + (noise(q * 3.1 + 7.0) - 0.5) * 0.34;',   // a lumpy top, never a plateau: a flat top below eye level reads as a straight line
+    '  float prof = smoothstep(0.0, 0.06, h) * remap(ht, 0.25 + c * 0.75, 0.1 + c * 0.35);',
+    '  float d = remap(c * prof, 0.035, 1.0);',   // no thin haze: it glowed into pillars and blobs looking towards the sun
+    '  if (d <= 0.0) return 0.0;',
     '  if (fine) {',
-    // detail: high cellular octaves bite the surface: billows at the top, wisps underneath
-    '    vec3 dn = texture(detailTex, (p + wind * 2.0) * 0.0024).rgb;',
-    '    float df = dn.r * 0.625 + dn.g * 0.25 + dn.b * 0.125;',
-    '    float m = mix(1.0 - df, df, clamp(h * 5.0, 0.0, 1.0));',
-    '    base = remap(base, m * 0.38, 1.0);',
+    // Cauliflower: a cumulus is rounded heads with sharp creases between them. Ridged noise
+    // (1 - |2n - 1|) is high only along thin lines, so eroding by it bites narrow creases and
+    // leaves round heads between, at two sizes. The base is eroded by plain noise instead:
+    // ragged and wispy underneath, as in every reference photo.
+    '    vec3 r = p * 0.0058 + vec3(time * 0.00003, -time * 0.00002, 0.0);',
+    '    float r1 = 1.0 - abs(noise(r) * 2.0 - 1.0);',
+    '    float r2 = 1.0 - abs(noise(ROT * r * 2.7 + 3.0) * 2.0 - 1.0);',
+    '    float r0 = 1.0 - abs(noise(ROT * p * 0.0026 + 9.0) * 2.0 - 1.0);',   // the big towers a cloud is built of, a third of its size
+    '    float cauli = r0 * 0.42 + r1 * 0.36 + r2 * 0.22;',
+    '    float wisp = noise(r * 1.9) * 0.6 + noise(ROT * r * 4.3) * 0.4;',
+    '    float soft = noise(r * 1.3 + 11.0) * 0.5 + noise(ROT * r * 3.4 + 5.0) * 0.32 + noise(ROT * ROT * r * 8.1 + 2.0) * 0.18;',   // the finest octave is for clouds up close                             // round, crease-free lumps for the flanks and belly
+    '    float e = mix(wisp, soft, smoothstep(0.06, 0.2, h));',
+    '    e = mix(e, mix(soft, cauli * cauli, 0.7), smoothstep(0.2, 0.46, h));',            // creases only up in the crowns
+    '    d = remap(d, e * 0.52, 1.0);',
+    // a cumulus is dense right under its surface: no translucent veil over the crowns,
+    // and fewer half-transparent samples, which is what read as sand at the edges
+    '    d = smoothstep(0.0, mix(0.34, 0.08, smoothstep(0.1, 0.4, h)), d);',
     '  }',
-    '  return base * 3.2 * density;',
+    '  return d * 2.2 * density;',
     '}',
     '',
     'float hg(float c, float g){ float g2 = g * g; return (1.0 - g2) / pow(1.0 + g2 - 2.0 * g * c, 1.5) * 0.0796; }',
@@ -131,92 +143,25 @@
     '    }',
     '  }',
     '  float A = 1.0 - T;',
-    '  fragColor = vec4(min(col, vec3(1.0)), A);',                         // premultiplied already
+    '  gl_FragColor = vec4(min(col, vec3(1.0)), A);',                         // premultiplied already
     '}'].join('\n');
 
   var FS_RESOLVE = [
-    '#version 300 es',
     'precision highp float;',
-    'in vec2 vUv; out vec4 fragColor; uniform sampler2D src; uniform vec2 texel;',
+    'varying vec2 vUv; uniform sampler2D src; uniform vec2 texel;',
     'void main(){',
     // a 3x3 tent of bilinear taps, about four texels wide: soft enough to eat the dither,
     // narrow enough to keep the crowns
     '  vec4 c = vec4(0.0); float w = 0.0;',
     '  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {',
     '    float k = (2.0 - abs(float(i))) * (2.0 - abs(float(j)));',
-    '    c += texture(src, vUv + vec2(float(i), float(j)) * texel * 0.85) * k; w += k;',
+    '    c += texture2D(src, vUv + vec2(float(i), float(j)) * texel * 0.85) * k; w += k;',
     '  }',
-    '  fragColor = c / w;',
+    '  gl_FragColor = c / w;',
     '}'].join('\n');
 
-  // ── the noise volumes, baked once (≈0.3 s): tileable Perlin and Worley in 3D ──
-  // shape (64³ RGBA): R Perlin-Worley, G/B/A Worley fBm at 4, 8, 16 cells per tile;
-  // detail (32³): Worley fBm at 4, 8, 16 cells. Seeded, so every load is the same sky.
-  var NOISE = (function () {
-    var seed = 20261001;
-    function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
-    function worleyGrid(C) { var g = new Float32Array(C * C * C * 3); for (var i = 0; i < g.length; i++) g[i] = rnd(); return g; }
-    function worley(g, C, x, y, z) {   // x, y, z in [0, 1): 1 at a cell's point, 0 at its seams
-      var fx = x * C, fy = y * C, fz = z * C, ix = Math.floor(fx), iy = Math.floor(fy), iz = Math.floor(fz), best = 9;
-      for (var dz = -1; dz <= 1; dz++) for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) {
-        var cx = ix + dx, cy = iy + dy, cz = iz + dz;
-        var wx = ((cx % C) + C) % C, wy = ((cy % C) + C) % C, wz = ((cz % C) + C) % C, k = ((wz * C + wy) * C + wx) * 3;
-        var px = cx + g[k] - fx, py = cy + g[k + 1] - fy, pz = cz + g[k + 2] - fz, d = px * px + py * py + pz * pz;
-        if (d < best) best = d;
-      }
-      return 1 - Math.min(1, Math.sqrt(best));
-    }
-    var perm = []; for (var i = 0; i < 256; i++) perm[i] = i;
-    for (i = 255; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)), t = perm[i]; perm[i] = perm[j]; perm[j] = t; }
-    var G = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
-    function grad(P, x, y, z, fx, fy, fz) {
-      var h = perm[(perm[(perm[((x % P) + P) % P] + ((y % P) + P) % P) & 255] + ((z % P) + P) % P) & 255] % 12, g = G[h];
-      return g[0] * fx + g[1] * fy + g[2] * fz;
-    }
-    function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-    function perlin(P, x, y, z) {   // tileable with period P cells; x, y, z in [0, 1)
-      x *= P; y *= P; z *= P;
-      var X = Math.floor(x), Y = Math.floor(y), Z = Math.floor(z), u = x - X, v = y - Y, w = z - Z, a = fade(u), b = fade(v), c = fade(w);
-      function L(p, q, r) { return p + (q - p) * r; }
-      return L(L(L(grad(P, X, Y, Z, u, v, w), grad(P, X + 1, Y, Z, u - 1, v, w), a), L(grad(P, X, Y + 1, Z, u, v - 1, w), grad(P, X + 1, Y + 1, Z, u - 1, v - 1, w), a), b),
-               L(L(grad(P, X, Y, Z + 1, u, v, w - 1), grad(P, X + 1, Y, Z + 1, u - 1, v, w - 1), a), L(grad(P, X, Y + 1, Z + 1, u, v - 1, w - 1), grad(P, X + 1, Y + 1, Z + 1, u - 1, v - 1, w - 1), a), b), c);
-    }
-    function remap(v, a, b, c, d) { return c + (v - a) / (b - a) * (d - c); }
-    var SN = 64, shape = new Uint8Array(SN * SN * SN * 4);
-    var w4 = worleyGrid(4), w8 = worleyGrid(8), w16 = worleyGrid(16), w32 = worleyGrid(32);
-    for (var z = 0; z < SN; z++) for (var y = 0; y < SN; y++) for (var x = 0; x < SN; x++) {
-      var X = (x + 0.5) / SN, Y = (y + 0.5) / SN, Z = (z + 0.5) / SN;
-      var a4 = worley(w4, 4, X, Y, Z), a8 = worley(w8, 8, X, Y, Z), a16 = worley(w16, 16, X, Y, Z), a32 = worley(w32, 32, X, Y, Z);
-      var pf = 0.5 + 0.5 * (perlin(4, X, Y, Z) * 0.6 + perlin(8, X, Y, Z) * 0.3 + perlin(16, X, Y, Z) * 0.1);
-      var wf = a4 * 0.625 + a8 * 0.25 + a16 * 0.125;
-      var pw = Math.max(0, Math.min(1, remap(pf, wf - 1, 1, 0, 1)));   // Perlin, billowed by Worley
-      var o = ((z * SN + y) * SN + x) * 4;
-      shape[o] = pw * 255; shape[o + 1] = wf * 255; shape[o + 2] = (a8 * 0.625 + a16 * 0.25 + a32 * 0.125) * 255; shape[o + 3] = (a16 * 0.625 + a32 * 0.375) * 255;
-    }
-    var DN = 32, detail = new Uint8Array(DN * DN * DN * 4);
-    var d4 = worleyGrid(4), d8 = worleyGrid(8), d16 = worleyGrid(16);
-    for (z = 0; z < DN; z++) for (y = 0; y < DN; y++) for (x = 0; x < DN; x++) {
-      X = (x + 0.5) / DN; Y = (y + 0.5) / DN; Z = (z + 0.5) / DN;
-      var b4 = worley(d4, 4, X, Y, Z), b8 = worley(d8, 8, X, Y, Z), b16 = worley(d16, 16, X, Y, Z);
-      o = ((z * DN + y) * DN + x) * 4;
-      detail[o] = (b4 * 0.625 + b8 * 0.25 + b16 * 0.125) * 255; detail[o + 1] = (b8 * 0.625 + b16 * 0.375) * 255; detail[o + 2] = b16 * 255; detail[o + 3] = 255;
-    }
-    // stretch every channel to the full byte range (2nd to 98th percentile): the raw fBm sits in
-    // a narrow band, and every threshold in the shader then lands in the wrong place
-    function stretch(arr) {
-      for (var ch = 0; ch < 4; ch++) {
-        var v = []; for (var i = ch; i < arr.length; i += 4 * 5) v.push(arr[i]); v.sort(function (a, b) { return a - b; });
-        var lo = v[Math.floor(v.length * 0.02)], hi = v[Math.floor(v.length * 0.98)];
-        if (hi - lo < 2) continue;
-        for (i = ch; i < arr.length; i += 4) arr[i] = Math.max(0, Math.min(255, (arr[i] - lo) * 255 / (hi - lo)));
-      }
-    }
-    stretch(shape); stretch(detail);
-    return { shape: shape, shapeN: SN, detail: detail, detailN: DN };
-  })();
-
   function layer(canvas, near, far) {
-    var gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false });
+    var gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) return null;
     function sh(type, src) {
       var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
@@ -244,18 +189,6 @@
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     var fbo = gl.createFramebuffer();
     var R = { src: gl.getUniformLocation(prog2, 'src'), texel: gl.getUniformLocation(prog2, 'texel') };
-    // the baked noise volumes, on texture units 1 and 2
-    function vol(unit, N, data) {
-      var t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_3D, t);
-      gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA8, N, N, N, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
-      gl.generateMipmap(gl.TEXTURE_3D);
-      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R].forEach(function (w) { gl.texParameteri(gl.TEXTURE_3D, w, gl.REPEAT); });
-      gl.activeTexture(gl.TEXTURE0);
-    }
-    vol(1, NOISE.shapeN, NOISE.shape); vol(2, NOISE.detailN, NOISE.detail);
-    gl.useProgram(prog);
-    gl.uniform1i(gl.getUniformLocation(prog, 'shapeTex'), 1); gl.uniform1i(gl.getUniformLocation(prog, 'detailTex'), 2);
     return { gl: gl, U: U, R: R, prog: prog, prog2: prog2, loc: loc, loc2: loc2, tex: tex, fbo: fbo, fw: 2, fh: 2, canvas: canvas, near: near, far: far };
   }
 
@@ -324,7 +257,7 @@
       gl.uniform1f(U.tanHalf, Math.tan(58 / 2 * Math.PI / 180));
       gl.uniform1f(U.tNear, x.near); gl.uniform1f(U.tFar, x.far);
       gl.uniform1f(U.fadeA, cfg.split - 320); gl.uniform1f(U.fadeB, cfg.split + 120); gl.uniform1f(U.isFront, x.front ? 1 : 0);
-      gl.uniform1i(U.steps, x.near < 10 ? Math.round(cfg.steps * 0.75) : cfg.steps);
+      gl.uniform1i(U.steps, x.near < 10 ? Math.round(cfg.steps * 0.45) : cfg.steps);
       gl.uniform1f(U.coverage, cfg.coverage); gl.uniform1f(U.density, cfg.density);
       gl.uniform1f(U.lining, cfg.lining); gl.uniform1f(U.shade, cfg.shade);
       gl.uniform3fv(U.sunDir, sun);
