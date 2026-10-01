@@ -177,6 +177,16 @@
         n: Math.round(cfg.count * (R * R) / (cfg.clouds * 300 * 300))
       });
     }
+    // 01.10 «структура»: not every cloud is the same cumulus. A towering one (narrow, twice as
+    // tall), a flat wide one (stratocumulus), or the ordinary kind, with a little spread.
+    var rT = rng(cfg.seed + 23);
+    clouds.forEach(function (cl) {
+      var u = rT(), j = 0.9 + rT() * 0.25;
+      if (u < 0.18) { cl.w = 0.72 * j; cl.h = 2.1 * j; }
+      else if (u < 0.43) { cl.w = 1.5 * j; cl.h = 0.5 * j; }
+      else { cl.w = j; cl.h = 0.95 + rT() * 0.3; }
+      cl.n = Math.round(cl.n * Math.sqrt(cl.w * cl.h));
+    });
     var total = 0;
     clouds.forEach(function (cl) { total += cl.n; });
     var mesh = new THREE.InstancedMesh(geo, mat, total * 2);
@@ -209,6 +219,7 @@
           gy = gy < 0 ? gy * 0.28 : gy * 0.45;
         }
         var d = Math.sqrt(gx * gx + gy * gy + gz * gz);
+        gx *= cl.w; if (gy > 0) gy *= cl.h; gz *= 0.5 + 0.5 * cl.w;   // the cloud's type
         var sc = (0.7 + r() * 0.8) * (cl.R / 200) * (d < 0.8 ? 1.2 : 1.0);
         var rot = r() * Math.PI;
         P.push([gx, gy, gz, d, sc, rot]);
@@ -230,7 +241,7 @@
         tintC.copy(shade).lerp(lit, Math.min(1, Math.max(0, t)));
         mesh.setColorAt(i, tintC); mesh.setColorAt(total + i, tintC);
         // an edge puff: out on the silhouette as seen from behind the cloud, and in the sun
-        var ex = Math.sqrt(gx * gx / (0.62 * 0.62) + (gy > 0 ? gy * gy / 0.2 : gy * gy / 0.08));
+        var ex = Math.sqrt(gx * gx / (0.62 * 0.62 * cl.w * cl.w) + (gy > 0 ? gy * gy / (0.2 * cl.h * cl.h) : gy * gy / 0.08));
         var edge = Math.min(1, Math.max(0, (ex - 0.7) / 0.6)) * trans[k];
         var o = i * 4, o2 = (total + i) * 4;
         rnd[o] = rnd[o2] = r2() * 6.2832;                 // phase
@@ -247,7 +258,7 @@
   }
 
   // How much of the sun reaches each puff of one cloud, 0..1. Cloud units: radius 1.
-  var GX = 24, GY = 16, GZ = 18, X0 = -1.8, X1 = 1.8, Y0 = -0.9, Y1 = 1.5, Z0 = -1.3, Z1 = 1.3;
+  var GX = 30, GY = 24, GZ = 18, X0 = -2.7, X1 = 2.7, Y0 = -0.9, Y1 = 3.0, Z0 = -1.3, Z1 = 1.3;   // room for towers and flat decks
   var grid = new Float32Array(GX * GY * GZ), tmp = new Float32Array(GX * GY * GZ);
   function lightCloud(P, R, sun) {
     grid.fill(0);
@@ -421,8 +432,17 @@
         lastNow = now;
         pos = (((flight + (M.push || 0)) % cfg.length) + cfg.length) % cfg.length;
       } else {
-        pos = (t * cfg.speed / tempo) % cfg.length;
+        // 01.10 «мовшн»: not a straight rail. The speed breathes a little (a slow surge in and
+        // out), and the camera flies a lazy path below, banking into its turns
+        var tf = t / tempo;
+        pos = ((tf * cfg.speed + 140 * Math.sin(tf * 0.00006)) % cfg.length + cfg.length) % cfg.length;
       }
+      var tp = t / (tempo || 1), path = M ? null : {
+        x: 70 * Math.sin(tp * 0.000085) + 28 * Math.sin(tp * 0.00021 + 1.0),
+        y: 32 * Math.sin(tp * 0.00007 + 2.0) + 12 * Math.sin(tp * 0.00019),
+        // bank = against the sideways velocity, about a degree at most
+        roll: -1.7 * (70 * 0.000085 * Math.cos(tp * 0.000085) + 28 * 0.00021 * Math.cos(tp * 0.00021 + 1.0))
+      };
       if (paused && !rebuiltWhilePaused) { rebuiltWhilePaused = false; }
       layers.forEach(function (L) {
         L.mx = (L.mx || 0) + (mouseX - (L.mx || 0)) * 0.01;
@@ -431,9 +451,9 @@
         var sk = M && M.shake || 0, tt = Date.now() * 0.001;
         var bx = sk ? sk * 9 * (Math.sin(tt * 13.1) + 0.6 * Math.sin(tt * 29.7 + 1.3)) : 0;
         var by = sk ? sk * 7 * (Math.sin(tt * 11.3 + 0.7) + 0.5 * Math.sin(tt * 31.9)) : 0;
-        L.camera.position.x = L.mx + (M && M.camX || 0) + bx;
-        L.camera.position.y = L.my + (M && M.camY || 0) + by;
-        L.camera.rotation.z = (M && M.roll || 0) + (sk ? sk * 0.006 * Math.sin(tt * 17.3 + 2.1) : 0);
+        L.camera.position.x = L.mx + (M && M.camX || 0) + bx + (path ? path.x : 0);
+        L.camera.position.y = L.my + (M && M.camY || 0) + by + (path ? path.y : 0);
+        L.camera.rotation.z = (M && M.roll || 0) + (sk ? sk * 0.006 * Math.sin(tt * 17.3 + 2.1) : 0) + (path ? path.roll : 0);
         var fov = M && M.fov || cfg.fov;
         if (L.camera.fov !== fov) { L.camera.fov = fov; L.camera.updateProjectionMatrix(); }
         if (M && M.haze) L.mat.uniforms.fogFar.value = M.haze;

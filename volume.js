@@ -38,7 +38,7 @@
   var FS = [
     'precision highp float;',
     'varying vec2 vUv;',
-    'uniform vec2 res; uniform vec3 cam; uniform float time; uniform float tanHalf;',
+    'uniform vec2 res; uniform vec3 cam; uniform float time; uniform float tanHalf; uniform float roll;',
     'uniform float tNear; uniform float tFar; uniform int steps; uniform float fadeA; uniform float fadeB; uniform float isFront;',
     'uniform float coverage; uniform float density; uniform float lining; uniform float shade;',
     'uniform vec3 sunDir; uniform vec3 skyHigh; uniform vec3 skyLow; uniform vec3 fogCol;',
@@ -94,7 +94,8 @@
     '',
     'void main(){',
     '  vec2 uv = vUv * 2.0 - 1.0;',
-    '  vec3 rd = normalize(vec3(uv.x * tanHalf * res.x / res.y, uv.y * tanHalf, -1.0));',
+    '  uv = mat2(cos(roll), sin(roll), -sin(roll), cos(roll)) * vec2(uv.x * res.x / res.y, uv.y);',   // the bank
+    '  vec3 rd = normalize(vec3(uv.x * tanHalf, uv.y * tanHalf, -1.0));',
     '  vec3 ro = cam;',
     '  float cosT = dot(rd, sunDir);',
     '  float phase = mix(hg(cosT, 0.62), hg(cosT, -0.18), 0.3);',
@@ -158,7 +159,7 @@
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     var loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     var U = {};
-    ['res', 'cam', 'time', 'tanHalf', 'tNear', 'tFar', 'steps', 'fadeA', 'fadeB', 'isFront', 'coverage', 'density', 'lining', 'shade',
+    ['res', 'cam', 'time', 'tanHalf', 'roll', 'tNear', 'tFar', 'steps', 'fadeA', 'fadeB', 'isFront', 'coverage', 'density', 'lining', 'shade',
      'sunDir', 'skyHigh', 'skyLow', 'fogCol'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
     return { gl: gl, U: U, canvas: canvas, near: near, far: far };
   }
@@ -209,7 +210,12 @@
     L.forEach(function (x) {
       var gl = x.gl, U = x.U;
       gl.uniform2f(U.res, x.canvas.width, x.canvas.height);
-      gl.uniform3f(U.cam, camX, camY, -t * cfg.speed / tempo);
+      // the same lazy path as demo 4: a breathing speed, a drifting line, a bank into the turns
+      var tp = t / tempo;
+      var px = 70 * Math.sin(tp * 0.000085) + 28 * Math.sin(tp * 0.00021 + 1.0), py = 32 * Math.sin(tp * 0.00007 + 2.0) + 12 * Math.sin(tp * 0.00019);
+      var rl = -1.7 * (70 * 0.000085 * Math.cos(tp * 0.000085) + 28 * 0.00021 * Math.cos(tp * 0.00021 + 1.0));
+      gl.uniform3f(U.cam, camX + px, camY + py, -(tp * cfg.speed + 140 * Math.sin(tp * 0.00006)));
+      gl.uniform1f(U.roll, rl);
       gl.uniform1f(U.time, t % 3600000);
       gl.uniform1f(U.tanHalf, Math.tan(58 / 2 * Math.PI / 180));
       gl.uniform1f(U.tNear, x.near); gl.uniform1f(U.tFar, x.far);
