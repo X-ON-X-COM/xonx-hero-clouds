@@ -105,7 +105,7 @@
     // steps grow with distance: fine near the lens, coarse in the haze
     // interleaved gradient noise: an even, fine dither instead of white noise, which
     // upscaled from half resolution read as sand along every edge
-    '  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))) + floor(time / 16.7) * 0.618034);',   // moves every frame: in motion it is grain, not a grid
+    '  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));',   // still: the resolve pass below blurs it away; moving, it shimmered
     '  for (int i = 0; i < 96; i++) {',
     '    if (i >= steps || T < 0.02) break;',
     '    float f0 = (float(i) + jitter) / float(steps);',
@@ -144,6 +144,20 @@
     '  gl_FragColor = vec4(min(col, vec3(1.0)), A);',                         // premultiplied already
     '}'].join('\n');
 
+  var FS_RESOLVE = [
+    'precision highp float;',
+    'varying vec2 vUv; uniform sampler2D src; uniform vec2 texel;',
+    'void main(){',
+    // a 3x3 tent of bilinear taps, about four texels wide: soft enough to eat the dither,
+    // narrow enough to keep the crowns
+    '  vec4 c = vec4(0.0); float w = 0.0;',
+    '  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {',
+    '    float k = (2.0 - abs(float(i))) * (2.0 - abs(float(j)));',
+    '    c += texture2D(src, vUv + vec2(float(i), float(j)) * texel * 0.85) * k; w += k;',
+    '  }',
+    '  gl_FragColor = c / w;',
+    '}'].join('\n');
+
   function layer(canvas, near, far) {
     var gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
     if (!gl) return null;
@@ -161,7 +175,19 @@
     var U = {};
     ['res', 'cam', 'time', 'tanHalf', 'roll', 'tNear', 'tFar', 'steps', 'fadeA', 'fadeB', 'isFront', 'coverage', 'density', 'lining', 'shade',
      'sunDir', 'skyHigh', 'skyLow', 'fogCol'].forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
-    return { gl: gl, U: U, canvas: canvas, near: near, far: far };
+    // 01.10 «текстури хмар погані»: the march runs at low resolution into a texture, and a resolve
+    // pass blurs it softly while scaling it up to the canvas. Upscaled straight by CSS, the
+    // dither of the march showed as a pattern of dots and diamonds across every cloud.
+    var prog2 = gl.createProgram();
+    gl.attachShader(prog2, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog2, sh(gl.FRAGMENT_SHADER, FS_RESOLVE));
+    gl.linkProgram(prog2);
+    var loc2 = gl.getAttribLocation(prog2, 'p');
+    var tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    var fbo = gl.createFramebuffer();
+    var R = { src: gl.getUniformLocation(prog2, 'src'), texel: gl.getUniformLocation(prog2, 'texel') };
+    return { gl: gl, U: U, R: R, prog: prog, prog2: prog2, loc: loc, loc2: loc2, tex: tex, fbo: fbo, fw: 2, fh: 2, canvas: canvas, near: near, far: far };
   }
 
   function rgb(hex) { var n = parseInt(hex.replace('#', ''), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
@@ -174,9 +200,16 @@
 
   function resize() {
     L.forEach(function (x) {
-      x.canvas.width = Math.max(2, Math.round(window.innerWidth * cfg.scale));
-      x.canvas.height = Math.max(2, Math.round(window.innerHeight * cfg.scale));
-      x.gl.viewport(0, 0, x.canvas.width, x.canvas.height);
+      var gl = x.gl, out = Math.min(1, cfg.scale * 1.7);   // the canvas is finer than the march
+      x.canvas.width = Math.max(2, Math.round(window.innerWidth * out));
+      x.canvas.height = Math.max(2, Math.round(window.innerHeight * out));
+      x.fw = Math.max(2, Math.round(window.innerWidth * cfg.scale));
+      x.fh = Math.max(2, Math.round(window.innerHeight * cfg.scale));
+      gl.bindTexture(gl.TEXTURE_2D, x.tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, x.fw, x.fh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, x.fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, x.tex, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     });
   }
   resize(); window.addEventListener('resize', resize);
@@ -193,7 +226,7 @@
       Q.ema += (Math.min(100, pn - Q.last) - Q.ema) * 0.05;
       if (Q.ema > 22) Q.slow++; else Q.slow = 0;
       if (Q.ema < 14) Q.fast++; else Q.fast = 0;
-      if (Q.slow > 45 && cfg.scale > 0.22) { cfg.scale = Math.max(0.22, cfg.scale * 0.85); Q.slow = 0; resize(); }
+      if (Q.slow > 45 && cfg.scale > 0.3) { cfg.scale = Math.max(0.3, cfg.scale * 0.85); Q.slow = 0; resize(); }
       if (Q.fast > 240 && cfg.scale < Q.max) { cfg.scale = Math.min(Q.max, cfg.scale * 1.1); Q.fast = 0; resize(); }
       cfg.steps = Math.round(Q.steps * (0.6 + 0.4 * cfg.scale / Q.max));
     }
@@ -209,7 +242,9 @@
     var low = rgb(cs.getPropertyValue('--g-sky-warm').trim() || '#FAEFE0');
     L.forEach(function (x) {
       var gl = x.gl, U = x.U;
-      gl.uniform2f(U.res, x.canvas.width, x.canvas.height);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, x.fbo); gl.viewport(0, 0, x.fw, x.fh);
+      gl.useProgram(x.prog); gl.vertexAttribPointer(x.loc, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform2f(U.res, x.fw, x.fh);
       // the same lazy path as demo 4: a breathing speed, a drifting line, a bank into the turns
       var tp = t / tempo;
       var px = 70 * Math.sin(tp * 0.000085) + 28 * Math.sin(tp * 0.00021 + 1.0), py = 32 * Math.sin(tp * 0.00007 + 2.0) + 12 * Math.sin(tp * 0.00019);
@@ -227,6 +262,13 @@
       gl.uniform3fv(U.skyHigh, high); gl.uniform3fv(U.skyLow, low);
       gl.uniform3fv(U.fogCol, rgb('#ECE8E6'));
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      // resolve: blur up into the canvas
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, x.canvas.width, x.canvas.height);
+      gl.useProgram(x.prog2); gl.enableVertexAttribArray(x.loc2); gl.vertexAttribPointer(x.loc2, 2, gl.FLOAT, false, 0, 0);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, x.tex);
+      gl.uniform1i(x.R.src, 0); gl.uniform2f(x.R.texel, 1 / x.fw, 1 / x.fh);
+      gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     });
     if (!reduce) requestAnimationFrame(frame);
